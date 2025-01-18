@@ -1,0 +1,58 @@
+
+This relies on 
+
+Folder c:\code (it writes a file to this called eddif.txt)
+
+You've selected x64 build in the solutions platform box above!
+
+The DLL is a 64 bit UNICODE DLL
+
+The DLL writes entries to the eddif.txt file as it gets called
+
+Build it, it will autocopy in the DLL to your APPDATA/LOCAL/EDDISCOVERY/DLL folder (make sure folder is there first)
+
+The output file eddif.txt will contain stuff like this when you run EDD:
+
+Initialise
+Refresh:Robby--------------- Journal Entry Data
+2018-06-06T11:33:44Z: 20734:Shutdown :'Shutdown' '' '' : sys Guuguyni
+x130.843750 y-96.468750 z67.562500 | td113.877000 ts58017 | 0 0 | loc 'Guuguyni' st 'Viper Mk IV' gm Open grp  | 193487787 cr
+Aberrant Shield Pattern Analysis:57,Abnormal Compact Emissions Data:3,Adaptive Encryptors Capture:3,Anomalous Bulk Scan Data:12,Anomalous FSD Telemetry:4,Arsenic:2,Atypical Disrupted Wake Echoes:4,Atypical Encryption Archives:15,Basic Conductors:1,Biotech Conductors:1,Cadmium:9,Carbon:3,Chemical Distillery:3,Chemical Manipulators:3,Chromium:11,Classified Scan Databanks:7,Classified Scan Fragment:3,Compound Shielding:12,Conductive Ceramics:1,Conductive Components:1,Conductive Polymers:1,Cracked Industrial Firmware:2,Datamined Wake Exceptions:3,Decoded Emission Data:66,Distorted Shield Cycle Recordings:63,Divergent Scan Data:5,Eccentric Hyperspace Trajectories:3,Electrochemical Arrays:4,Exceptional Scrambled Emission Data:2,Exquisite Focus Crystals:3,Flawed Focus Crystals:6,Focus Crystals:5,Germanium:23,Grid Resistors:3,Heat Resistant Ceramics:4,Hybrid Capacitors:3,Inconsistent Shield Soak Analysis:30,Iron:15,Irregular Emission Data:17,Manganese:21,Mechanical Equipment:1,Mechanical Scrap:4,Mercury:1,Modified Consumer Firmware:13,Modified Embedded Firmware:2,Molybdenum:7,Nickel:32,Niobium:3,Open Symmetric Keys:3,Peculiar Shield Frequency Data:3,Phosphorus:44,Polonium:1,Precipitated Alloys:7,Proto Light Alloys:9,Refined Focus Crystals:8,Ruthenium:0,Security Firmware Patch:2,Selenium:0,Specialised Legacy Firmware:17,Strange Wake Solutions:5,Sulphur:69,Tagged Encryption Codes:6,Technetium:0,Tempered Alloys:6,Thermic Alloys:1,Tin:8,Tungsten:0,Unexpected Emission Data:56,Unidentified Scan Archives:18,Untypical Shield Scans:42,Vanadium:40,Yttrium:3,Zinc:18,Zirconium:5,
+Hydrogen Fuel:0,Biowaste:0,
+---------------
+Action Command: Docked:
+Journal Entry sent:--------------- Journal Entry Data
+2018-04-15T16:44:17Z: 17274:Docked :'At Ryle Ring' 'Type Orbis in system Menusha, Faction:Menusha Empire Consulate in state Boom' 'Allegiance:Empire, Economy:Industrial, Government:Patronage
+Station services:Dock, Autodock, Commodities, Contacts, Exploration, Missions, Outfitting, CrewLounge, Rearm, Refuel, Repair, Shipyard, Tuning, Workshop, MissionsGenerated, FlightController, StationOperations, Powerplay, SearchAndRescue
+Economies:Industrial 100%' : sys Menusha
+x127.531250 y-106.281250 z61.781250 | td84.056000 ts16132 | 0 1 | loc 'Ryle Ring' st 'Anaconda' gm Solo grp  | 191057226 cr
+Aberrant Shield Pattern Analysis:33,Abnormal Compact Emissions Data:3,Adaptive Encryptors Capture:3,Anomalous Bulk Scan Data:9,Anomalous FSD Telemetry:4,Arsenic:2,Atypical Disrupted Wake Echoes:4,Atypical Encryption Archives:15,Basic Conductors:1,Biotech Conductors:1,Cadmium:9,Carbon:3,Chemical Distillery:3,Chromium:11,Classified Scan Databanks:4,Classified Scan Fragment:3,Compound Shielding:9,Conductive Ceramics:1,Conductive Components:1,Conductive Polymers:1,Cracked Industrial Firmware:2,Datamined Wake Exceptions:3,Decoded Emission Data:51,Distorted Shield Cycle Recordings:48,Divergent Scan Data:5,Eccentric Hyperspace Trajectories:3,Electrochemical Arrays:4,Exceptional Scrambled Emission Data:2,Exquisite Focus Crystals:3,Flawed Focus Crystals:3,Focus Crystals:5,Germanium:23,Grid Resistors:3,Heat Resistant Ceramics:4,Hybrid Capacitors:3,Inconsistent Shield Soak Analysis:27,Iron:15,Irregular Emission Data:11,Manganese:21,Mechanical Equipment:1,Mechanical Scrap:4,Mercury:1,Modified Consumer Firmware:13,Modified Embedded Firmware:2,Molybdenum:7,Nickel:32,Niobium:3,Open Symmetric Keys:3,Peculiar Shield Frequency Data:3,Phosphorus:44,Polonium:1,Precipitated Alloys:7,Proto Light Alloys:6,Refined Focus Crystals:8,Ruthenium:0,Security Firmware Patch:2,Selenium:0,Specialised Legacy Firmware:17,Strange Wake Solutions:5,Sulphur:69,Tagged Encryption Codes:6,Technetium:0,Tempered Alloys:6,Thermic Alloys:1,Tin:8,Tungsten:0,Unexpected Emission Data:35,Unidentified Scan Archives:9,Untypical Shield Scans:33,Vanadium:40,Yttrium:3,Zinc:18,Zirconium:5,
+Synthetic Reagents:0,CMM Composite:0,Insulating Membrane:0,Neofabric Insulation:0,Articulation Motors:0,HN Shock Mount:0,Modular Terminals:0,Advanced Medicines:0,Performance Enhancers:0,Gallium:0,Gold:0,Indium:0,Lanthanum:0,Palladium:0,Thallium:0,Thorium:0,Bromellite:0,Resonating Separators:0,Conductive Fabrics:0,Military Grade Fabrics:0,
+---------------
+Terminate
+
+etc.
+
+See DLLPack.ACT for an example action script.  Put this into your Actions folder - it hooks up a few event
+
+Have the keypacks action file installed as well.
+
+click on a dock event in the travel history, hit F5.  This causes it to replay the action.  You should see the DLL get the call from the Action code:
+
+PROGRAM Docked
+
+Event FROM %(EventJID) INFO
+Print DLL docked
+pragma dumpvars EC_*
+DLLCall Win64DLL,Docked
+print DLL Returned %(DLLResult)
+
+DLLCall Win64DLL,JournalEntry,%(EventJID)
+
+END PROGRAM
+
+Two calls, one to just say "Docked", one to pass a journal entry to it..
+
+
+
+

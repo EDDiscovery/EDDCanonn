@@ -1,0 +1,76 @@
+The EDDInterface uses BSTR and SAFEARRY for communcating with you. They are certanly not types you use everyday (or do you?), so I will show you the basics of getting data.
+
+Your DLL might crash or not load, if you don't use _cdecl with your functions. So for example for EDDInitialise use:
+EDD_API BSTR __cdecl EDDInitialise(BSTR ver, BSTR folder, EDDCallBacks pCallbacks)
+instead of;
+EDD_API BSTR EDDInitialise(BSTR ver, BSTR folder, EDDCallBacks pCallbacks)
+_cdecl is a calling convention for Dynamic Link Libraries, just look it up if you are interested in what exactly it does.
+
+Every Action call looks like this:
+
+DLLCall DLLName, ActionName, [Arg1], [Arg2],...
+
+The parameters get put into a SAFEARRAY in form of a BSTR.
+
+Quick tip, if you #include <comdef.h> you can use _bstr_t, which supports features like 
+_bstr_t x = L"Hello World";
+x += L"Hi";
+
+The normal BSTR cannot be used with adding.
+
+So the types you can use here are coming down to:
+BSTR
+_bstr_t
+wchar_t
+wchar_t *
+wchar_t []
+L"Hey there"
+
+What will not work without doing casts, are
+std::stringh
+char
+char *
+char []
+"Hey there"
+
+You want to avoid casts, so please avoid these Types. You can do fine with these too.
+
+VERY IMPORTANT NOTE:
+Everytime you return something in your interface functions, DON'T RETURN VARIABLES YOU WANT TO USE LATER. They are getting passed back by reference, not by value. 
+By passing the variable back, you are essentially giving C# the power of doing whatever it wants to do. And when C# thinks, it doesn't need it anymore, 
+it will free up memory by deleting the variable, giving you strange memory access violation errors when trying to access it again
+
+instead of doing
+return x;
+Better use 
+return ::SysAllocString(x);
+
+An exception for this is, when you don't need the variable anymore (although I still wouldn't recommend to do this)
+EDD_API BSTR __cdecl EDDActionCommand(BSTR action, SAFEARRAY& args) {
+    const wchar_t * out = L"Hello World";
+	//Do something
+	return out;
+}
+
+So now to getting data out of the SAFEARRAY
+First, how we get our Strings. I recommend to use
+const wchar_t * name;
+And later use it to Init a _bstr_t or just use it as it is
+To access the SAFEARRAY data, you can use
+::SafeArrayGetElement(SAFEARRY, index, variable)
+As it makes use of pointers, it writes the SAFEARRAYs data directly into the variable you passed in. So if you want to get something out it, it looks like that:
+const wchar_t * variable;
+long index1 = 0;
+::SafeArrayGetElement(&args, &index1, &variable);
+Additionally I would recommend to impelent a error check:
+if (::SafeArrayGetElement(&args, &index1, &variable) != S_OK) {
+    return ::SysAllocString(L"!TOO_FEW_PARAM");
+}
+After you got all your data, you now can start doing things with it. Of course you want to use numbers, not only strings. so in order to get numbers out of the wchar_t *, use
+double x = wcstod(variable, NULL);
+long y = _wtol(variable);
+
+If you have multiple actions, you of course want to use the BSTR action. For that, simply use:
+if (0 == wcscmp(action, L"Your Action Name")) {
+    //execute your action
+}

@@ -1,0 +1,17 @@
+bin
+obj
+packages
+x64
+.vs
+*.csproj.user
+*.suo
+/logs
+*/*Secrets.config
+/EDDiscovery.v12.suo
+*.ncrunch*
+/test
+Thumbs.db
+*/Properties/ExtraVersion.cs
+*/appdata/*.dll
+
+

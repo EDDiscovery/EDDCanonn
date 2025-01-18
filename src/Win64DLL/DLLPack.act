@@ -1,0 +1,122 @@
+﻿ACTIONFILE V4
+
+ENABLED True
+
+INSTALL LongDescription="DLL Example pack"
+INSTALL ShortDescription="DLL Example pack"
+INSTALL Version=0.1.0.0
+INSTALL MinEDVersion=10.1.0.0
+INSTALL Location=Actions
+
+GROUP Events
+EVENT Docked, Docked, "", Condition AlwaysTrue
+EVENT FSDJump, FSDResponse, "", Condition AlwaysTrue
+EVENT MissionAccepted, MissionAccepted, "", Condition AlwaysTrue
+EVENT DLLEVENT, CallBack, "", Condition AlwaysTrue
+
+EVENT onStartup, onStartup, "", Condition AlwaysTrue
+EVENT onInstall, onInstall, "", Condition AlwaysTrue
+EVENT onRefreshEnd, onRefreshEnd, "", Condition AlwaysTrue
+EVENT onShutdown, onShutdown, "", Condition AlwaysTrue
+
+//*************************************************************
+// onStartup
+// Events: onStartup
+//*************************************************************
+PROGRAM onStartup
+
+Rem Print VP %(ActionPackName) %(ActionPackFilePath)
+
+Print DLL Example Pack installed, running on EDD Version %version(1).%version(2).%version(3).%version(4)
+
+Call Initialise
+
+END PROGRAM
+
+//*************************************************************
+// onInstall
+// Events: onInstall
+//*************************************************************
+PROGRAM onInstall
+
+If InstallList Contains DLLPack
+	Call Initialise
+
+END PROGRAM
+
+//*************************************************************
+// Initialise
+//*************************************************************
+PROGRAM Initialise
+
+Print Initialise DLL Pack
+
+END PROGRAM
+
+
+//*************************************************************
+// onShutdown
+// Events: onShutdown
+//*************************************************************
+PROGRAM onShutdown
+
+Print Shutdown
+
+END PROGRAM
+
+//*************************************************************
+// onRefreshEnd
+// Events: onRefreshEnd
+//*************************************************************
+PROGRAM onRefreshEnd
+
+Print Refresh for Commander %(Commander)
+
+END PROGRAM
+
+//*************************************************************
+// FSDResponse
+// Events: FSDJump
+//*************************************************************
+PROGRAM FSDResponse
+
+Print DLL FSD
+Event FROM %(EventJID) INFO
+pragma dumpvars EC_*
+
+END PROGRAM
+
+//*************************************************************
+// Docked
+// Events: FSDJump
+//*************************************************************
+PROGRAM Docked
+
+Event FROM %(EventJID) INFO
+Print DLL docked
+DLLCall Win64DLL,Docked
+pragma dumpvars DLL*
+print DLL Returned %(DLLResult[1])
+
+END PROGRAM
+
+//*************************************************************
+// Docked
+// Events: FSDJump
+//*************************************************************
+PROGRAM MissionAccepted
+// click on F5 on a MissionAccepted and you will get this call
+
+//DLLCall Win64DLL,JournalEntry,%(EventJID)
+//DLLCall Win64DLL,HISTORY
+
+DLLCall Win64DLL,PROGRAM,DLLEVENT,para=1		// make a DLLEVENT.. above will trap it
+
+END PROGRAM
+
+PROGRAM CallBack
+Print CALLBACK ACTIONED FROM DLL!
+pragma dumpvars P*
+END PROGRAM
+
+
