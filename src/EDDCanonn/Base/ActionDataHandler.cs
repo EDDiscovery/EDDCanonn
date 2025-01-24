@@ -4,9 +4,8 @@ using System.IO;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
-using System.Xml.Linq;
 
-namespace EDDCanonn
+namespace EDDCanonn.Base
 {
     public class ActionDataHandler
     {

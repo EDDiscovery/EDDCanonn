@@ -47,8 +47,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ActionDataHandler.cs" />
+    <Compile Include="Base\ActionDataHandler.cs" />
+    <Compile Include="Base\SystemData.cs" />
     <Compile Include="Base\TestData.cs" />
+    <Compile Include="Base\WhitelistData.cs" />
     <Compile Include="CanonnHelper.cs" />
     <Compile Include="EDDCanonn.cs" />
     <Compile Include="EDDCanonnUserControl.cs">

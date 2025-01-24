@@ -169,28 +169,6 @@ namespace EDDCanonn
 
         private WhitelistData _globalWhitelist = new WhitelistData();
 
-        public class WhitelistData
-        {
-            // Holds all events of various types
-            public List<WhitelistEvent> Events { get; set; }
-
-            public WhitelistData()
-            {
-                Events = new List<WhitelistEvent>();
-            }
-        }
-
-        public class WhitelistEvent
-        {
-            public string Type { get; set; }
-            public List<Dictionary<string, object>> DataBlocks { get; set; }
-
-            public WhitelistEvent()
-            {
-                DataBlocks = new List<Dictionary<string, object>>();
-            }
-        }
-
         private bool IsEventValid(string eventName, string jsonString)
         {
             JObject jsonObject = string.IsNullOrEmpty(jsonString) ? null : jsonString.JSONParse().Object();
