@@ -4,10 +4,8 @@ using System.Windows.Forms;
 using System.Drawing;
 using System.Collections.Generic;
 using QuickJSON;
-using System.Collections.Concurrent;
 using System.Linq;
 using EDDCanonn.Base;
-using System.Xml;
 
 namespace EDDCanonn
 {
@@ -252,28 +250,27 @@ namespace EDDCanonn
             for (int i = 0; i < _globalWhitelist.Events.Count; i++)
             {
                 WhitelistEvent we = _globalWhitelist.Events[i];
-                eventOutput.AppendText("Event Type: " + we.Type + "\r\n");
+                DebugLog.AppendText("Event Type: " + we.Type + "\r\n");
 
                 for (int j = 0; j < we.DataBlocks.Count; j++)
                 {
-                    eventOutput.AppendText("  Data Block:\r\n");
+                    DebugLog.AppendText("  Data Block:\r\n");
                     Dictionary<string, object> db = we.DataBlocks[j];
 
                     foreach (KeyValuePair<string, object> kvp in db)
                     {
-                        eventOutput.AppendText("    " + kvp.Key + ": " + kvp.Value + "\r\n");
+                        DebugLog.AppendText("    " + kvp.Key + ": " + kvp.Value + "\r\n");
                     }
                 }
-                eventOutput.AppendText("\r\n");
+                DebugLog.AppendText("\r\n");
             }
         }
 
         private void RunWhiteListTestCases()
         {
             foreach (var (eventName, jsonPayload, expectedResult) in TestData.WhiteListTestCases)
-                eventOutput.AppendText($"{eventName} - ExpectedResult: {expectedResult} - Result: {IsEventValid(eventName, jsonPayload)}" + Environment.NewLine);
+                DebugLog.AppendText($"{eventName} - ExpectedResult: {expectedResult} - Result: {IsEventValid(eventName, jsonPayload)}" + Environment.NewLine);
         }
-
         #endregion
 
         #region CanonnPayload
@@ -337,16 +334,71 @@ namespace EDDCanonn
         }
         #endregion
 
-        public void DataResult(object requesttag, string data)//wip
+        #region ProcessEvents
+
+        private void ProcessRefresh(JournalEntry je)
         {
-            eventOutput.AppendText(requesttag + Environment.NewLine);
-            eventOutput.AppendText(data + Environment.NewLine);
+            DLLCallBack.RequestScanData(RequestTag.System, this, je.systemname, true);
         }
 
-        private void TestButton_Click(object sender, EventArgs e)
+        private void ProcessFSSDiscoveryScan(JournalEntry je)
         {
-      
+
         }
+
+        private void ProcessScan(JournalEntry je)
+        {
+
+        }
+
+        #endregion
+
+        #region ProcessData
+
+        public enum RequestTag
+        {
+            System
+        }
+
+        public void DataResult(object requesttag, string data)
+        {
+            try
+            {
+                if (requesttag == null || data == null)
+                    throw new ArgumentNullException("requesttag or data cannot be null.");
+                if (!requesttag.GetType().IsEnum)
+                    throw new ArgumentException("requesttag must be of type enum.");
+
+                JObject o = data.JSONParse().Object();
+
+                if (!(requesttag is RequestTag))
+                    return;
+                else
+                {
+                    dataHandler.StartTaskAsync(
+                    () =>
+                    {
+                        if (requesttag.Equals(RequestTag.System))
+                        {
+
+                        }
+                    },
+                    ex =>
+                    {
+                        Console.Error.WriteLine($"EDDCanonn: Error processing Systemdata: {ex.Message}");
+                    },
+                    "DataResult"
+                    );
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"EDDCanonn: Unexpected error in DataResult: {ex.Message}");
+            }
+        }
+
+
+        #endregion
 
         #region IEDDPanelExtension
         public bool SupportTransparency => true;
@@ -377,11 +429,18 @@ namespace EDDCanonn
                 () =>
                 {
                     if (IsEventValid(je.eventid, je.json))
-                        eventOutput.Invoke((MethodInvoker)delegate
+                        DebugLog.Invoke((MethodInvoker)delegate
                         {
-                            eventOutput.AppendText(BuildPayload(je) + Environment.NewLine);
-                            eventOutput.AppendText("" + Environment.NewLine);
+                            DebugLog.AppendText(BuildPayload(je) + Environment.NewLine);
+                            DebugLog.AppendText("" + Environment.NewLine);
                         });
+
+                    if (je.eventid.Equals("StartJump") || je.eventid.Equals("Location"))
+                        ProcessRefresh(je);
+                    else if (je.eventid.Equals("FSSDiscoveryScan"))
+                        ProcessFSSDiscoveryScan(je);
+                    else if (je.eventid.Equals("Scan"))
+                        ProcessScan(je);
                 },
                 ex =>
                 {
@@ -396,18 +455,17 @@ namespace EDDCanonn
             }
         }
 
-
         private readonly object _lockStatusJson = new object();
         private JObject StatusJson;
         public void NewUIEvent(string jsonui)
-        {    
-                    JObject o = jsonui.JSONParse().Object();
-                    if (o == null)
-                        return;
+        {
+            JObject o = jsonui.JSONParse().Object();
+            if (o == null)
+                return;
 
-                    string type = o["EventTypeStr"].Str();
-                    if (string.IsNullOrEmpty(type))
-                        return;
+            string type = o["EventTypeStr"].Str();
+            if (string.IsNullOrEmpty(type))
+                return;
 
             lock (_lockStatusJson)
                 StatusJson = o;
@@ -482,11 +540,6 @@ namespace EDDCanonn
 
         #endregion
 
-        private void eventOutput_TextChanged(object sender, EventArgs e)
-        {
-
-        }
-
         private void label1_Click(object sender, EventArgs e)
         {
 
@@ -502,9 +555,59 @@ namespace EDDCanonn
 
         }
 
-        private void debug_Click(object sender, EventArgs e)
+        private void LogWhitelist_Click(object sender, EventArgs e)
+        {
+            PrintWhitelist();
+        }
+
+        private void TestWhitelist_Click(object sender, EventArgs e)
+        {
+            RunWhiteListTestCases();
+        }
+
+        private void ClearDebugLog_Click(object sender, EventArgs e)
+        {
+            DebugLog.Clear();
+        }
+
+        private void EDDCanonnUserControl_Load(object sender, EventArgs e)
         {
 
+        }
+
+        private void toolStripComboBox1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void menuStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        {
+
+        }
+
+        private void toolStripComboBox3_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label1_Click_2(object sender, EventArgs e)
+        {
+
+        }
+
+        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+
+        }
+
+        private void button3_Click(object sender, EventArgs e)//wip
+        {
+            DLLCallBack.RequestScanData(RequestTag.System, this, "Stuemeae HH-V b2-19", false);
         }
     }
 }
