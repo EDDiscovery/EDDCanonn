@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using QuickJSON;
 using System.Linq;
 using EDDCanonn.Base;
+using System.Collections;
 
 namespace EDDCanonn
 {
@@ -312,22 +313,265 @@ namespace EDDCanonn
         }
         #endregion
 
+        //This only affects the data structure for visual feedback.
+        #region SystemData
+        private readonly object _lockSystemData = new object();
+        private SystemData _systemData; //Do not use this.
+        private SystemData systemData //Encapsulation Enforcement | Is that what it's called?
+        {
+            get
+            {
+                if (_systemData == null)
+                {
+                    lock (_lockSystemData)
+                    {
+                        if (_systemData == null)
+                        {
+                            _systemData = new SystemData();
+                        }
+                    }
+                }
+                return _systemData;
+            }
+        }
+        #endregion
+
+        //This only affects the data structure for visual feedback.
         #region ProcessEvents
+        private void ProcessEvent(JournalEntry je)
+        {
+            JObject eventData = je.json.JSONParse().Object();
+
+            switch (je.eventid)
+            {
+                case "FSDJump":
+                    ProcessFSDJump(eventData);
+                    break;
+                case "Scan":
+                    ProcessScan(eventData);
+                    break;
+                case "FSSBodySignals":
+                    ProcessFSSBodySignals(eventData);
+                    break;
+                case "FSSDiscoveryScan":
+                    ProcessFSSDiscoveryScan(eventData);
+                    break;
+                case "FSSSignalDiscovered":
+                    ProcessFSSSignalDiscovered(eventData);
+                    break;
+                case "SAASignalsFound":
+                    ProcessSAASignalsFound(eventData);
+                    break;
+                default:
+                    // Unsupported event
+                    break;
+            }
+        }
+
+        private void ProcessFSDJump(JObject eventData)
+        {
+            lock (_lockSystemData)
+            {
+
+            }
+        }
+
+        private void ProcessScan(JObject eventData)
+        {
+            lock (_lockSystemData)
+            {
+
+            }
+        }
+
+        private void ProcessFSSBodySignals(JObject eventData)
+        {
+            lock (_lockSystemData)
+            {
+
+            }
+        }
+
+        private void ProcessFSSDiscoveryScan(JObject eventData)
+        {
+            lock (_lockSystemData)
+            {
+
+            }
+        }
+
+        private void ProcessFSSSignalDiscovered(JObject eventData)
+        {
+            lock (_lockSystemData)
+            {
+
+            }
+        }
+
+        private void ProcessSAASignalsFound(JObject eventData)
+        {
+            lock (_lockSystemData)
+            {
+
+            }
+        }
 
         private void ProcessRefresh(JournalEntry je)
         {
+            lock (_lockSystemData)
+                _systemData = null;
             DLLCallBack.RequestScanData(RequestTag.System, this, je.systemname, true);
         }
+        #endregion
 
-        private void ProcessFSSDiscoveryScan(JournalEntry je)
+        #region ProcessCallbackSystem
+        public void ProcessCallbackSystem(JObject root)
         {
+            lock (_lockSystemData)
+            {
+                try
+                {
+                    if (root == null)
+                        return;
 
+                    if (root["System"] != null)
+                    {
+                        JObject systemDataNode = root["System"]?.Object();
+                        if (systemDataNode != null)
+                        {
+                            ProcessCallbackSystemData(systemDataNode);
+                        }
+                    }
+
+                    if (root["StarNodes"] != null)
+                    {
+                        JObject starNodes = root["StarNodes"]?.Object();
+                        if (starNodes != null)
+                        {
+                            ProcessCallbackStarNodes(starNodes);
+                        }
+                    }
+
+                    if (root["FSSSignalList"] != null)
+                    {
+                        if (root["FSSSignalList"] is JArray signals)
+                        {
+                            if (systemData.FSSSignalList == null)
+                            {
+                                systemData.FSSSignalList = new List<JObject>();
+                            }
+                            systemData.FSSSignalList.AddRange(signals.OfType<JObject>());
+                        }
+                    }
+                    if (root["CodexEntryList"] != null)
+                    {
+                        if (root["CodexEntryList"] is JArray codexEntries)
+                        {
+                            if (systemData.CodexEntryList == null)
+                            {
+                                systemData.CodexEntryList = new List<JObject>();
+                            }
+                            systemData.CodexEntryList.AddRange(codexEntries.OfType<JObject>());
+                        }
+                    }
+
+                    systemData.FSSTotalBodies = root["FSSTotalBodies"]?.ToObject<int>() ?? 0;
+                    systemData.FSSTotalNonBodies = root["FSSTotalNonBodies"]?.ToObject<int>() ?? 0;
+
+                }
+                catch (Exception ex)
+                {
+                    Console.Error.WriteLine(ex.Message);
+                }
+
+            }
         }
 
-        private void ProcessScan(JournalEntry je)
+        private void ProcessCallbackSystemData(JObject system)
         {
-
+            // Extract and populate main system details
+            systemData.Name = system["Name"]?.ToString();
+            systemData.X = system["X"]?.ToObject<double>() ?? 0.0;
+            systemData.Y = system["Y"]?.ToObject<double>() ?? 0.0;
+            systemData.Z = system["Z"]?.ToObject<double>() ?? 0.0;
+            systemData.HasCoordinate = system["HasCoordinate"]?.ToObject<bool>() ?? false;
+            systemData.SystemAddress = system["SystemAddress"]?.ToObject<long>() ?? 0;
         }
+
+        private void ProcessCallbackStarNodes(JObject starNodes, int? parentBodyId = null) //wip
+        {
+            if (starNodes == null)
+                return;
+
+            foreach (KeyValuePair<string, JToken> property in starNodes)
+            {
+                string nodeKey = property.Key;
+                JObject starNode = property.Value as JObject;
+
+                if (starNode == null)
+                {
+                    continue;
+                }
+
+                // Extract BodyID; skip processing if invalid
+                int bodyId = starNode["BodyID"] != null ? starNode["BodyID"].ToObject<int>() : -1;
+                if (bodyId == -1)
+                {
+                    continue;
+                }
+
+                if (systemData.Bodys == null)
+                {
+                    systemData.Bodys = new Dictionary<string, Body>();
+                }
+
+
+                if (systemData.Bodys.ContainsKey(bodyId.ToString()))
+                {
+                    continue;
+                }
+
+                Body body = new Body
+                {
+                    BodyID = bodyId,
+                    NodeType = starNode["NodeType"]?.ToString(),
+                    BodyDesignator = starNode["BodyDesignator"]?.ToString(),
+                    OwnName = starNode["OwnName"]?.ToString(),
+                    SystemBodyName = starNode["SystemBodyName"]?.ToString(),
+                    Level = starNode["Level"] != null ? starNode["Level"].ToObject<int>() : 0
+                };
+
+                JObject scanDataNode = starNode["ScanData"] as JObject;
+                if (scanDataNode != null)
+                {
+                    body.ScanData = new ScanData //wip
+                    {
+                        IsPlanet = scanDataNode["IsPlanet"] != null ? scanDataNode["IsPlanet"].ToObject<bool>() : false,
+                        BodyDesignation = scanDataNode["BodyDesignation"]?.ToString(),
+                        BodyDesignationOrName = scanDataNode["BodyDesignationOrName"]?.ToString(),
+                        ScanType = scanDataNode["ScanType"]?.ToString(),
+                        BodyName = scanDataNode["BodyName"]?.ToString(),
+                        BodyID = scanDataNode["BodyID"] != null ? scanDataNode["BodyID"].ToObject<int>() : 0,
+                        HasRings = scanDataNode["HasRings"] != null ? scanDataNode["HasRings"].ToObject<bool>() : false,
+                        SurfaceFeatures = scanDataNode["SurfaceFeatures"] is JArray surfaceFeatures ? surfaceFeatures.OfType<JObject>().ToList() : new List<JObject>(),
+                        Rings = scanDataNode["Rings"] is JArray rings ? rings.OfType<JObject>().ToList() : new List<JObject>(),
+                        Signals = scanDataNode["Signals"] is JArray signals ? signals.OfType<JObject>().ToList() : new List<JObject>(),
+                        Organics = scanDataNode["Organics"] is JArray organics ? organics.OfType<JObject>().ToList() : new List<JObject>(),
+                        Genuses = scanDataNode["Genuses"] is JArray genuses ? genuses.OfType<JObject>().ToList() : new List<JObject>()
+                    };
+                }
+
+                systemData.Bodys[bodyId.ToString()] = body;
+
+                // Recursively process child nodes
+                JObject children = starNode["Children"] as JObject;
+                if (children != null)
+                {
+                    ProcessCallbackStarNodes(children, bodyId);
+                }
+            }
+        }
+
 
         #endregion
 
@@ -358,7 +602,11 @@ namespace EDDCanonn
                     {
                         if (requesttag.Equals(RequestTag.System))
                         {
-
+                            ProcessCallbackSystem(o);
+                            DebugLog.Invoke((MethodInvoker)delegate //wip
+                            {
+                               DebugLog.AppendText(systemData.ToString() + Environment.NewLine);
+                           });
                         }
                     },
                     ex =>
@@ -399,7 +647,7 @@ namespace EDDCanonn
             PanelCallBack = callbacks;
         }
 
-        public void NewFilteredJournal(JournalEntry je)
+        public void NewFilteredJournal(JournalEntry je) //wip
         {
             try
             {
@@ -415,10 +663,8 @@ namespace EDDCanonn
 
                     if (je.eventid.Equals("StartJump") || je.eventid.Equals("Location"))
                         ProcessRefresh(je);
-                    else if (je.eventid.Equals("FSSDiscoveryScan"))
-                        ProcessFSSDiscoveryScan(je);
-                    else if (je.eventid.Equals("Scan"))
-                        ProcessScan(je);
+                    else
+                        ProcessEvent(je);
                 },
                 ex =>
                 {
@@ -434,7 +680,7 @@ namespace EDDCanonn
         }
 
         private readonly object _lockStatusJson = new object();
-        private JObject StatusJson;
+        private JObject statusJson;
         public void NewUIEvent(string jsonui)
         {
             JObject o = jsonui.JSONParse().Object();
@@ -446,13 +692,13 @@ namespace EDDCanonn
                 return;
 
             lock (_lockStatusJson)
-                StatusJson = o;
+                statusJson = o;
         }
 
         private JObject getStatusJson()
         {
             lock (_lockStatusJson)
-                return new JObject(StatusJson);
+                return new JObject(statusJson);
         }
 
         public void NewTarget(Tuple<string, double, double, double> target)
@@ -585,7 +831,7 @@ namespace EDDCanonn
 
         private void button3_Click(object sender, EventArgs e)//wip
         {
-            DLLCallBack.RequestScanData(RequestTag.System, this, "Stuemeae HH-V b2-19", false);
+            DLLCallBack.RequestScanData(RequestTag.System, this, "Bloomee IR-W f1-344", true);
         }
     }
 }
