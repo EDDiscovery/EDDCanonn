@@ -448,19 +448,19 @@ namespace EDDCanonn
                             ProcessCallbackStarNodes(starNodes);
                     }
 
-                        if (root["FSSSignalList"] != null && root["FSSSignalList"] is JArray signals)
-                        {
-                            if (systemData.FSSSignalList == null)
-                                systemData.FSSSignalList = new List<JObject>();
-                            systemData.FSSSignalList.AddRange(signals.OfType<JObject>());
-                        }
+                    if (root["FSSSignalList"] != null && root["FSSSignalList"] is JArray signals)
+                    {
+                        if (systemData.FSSSignalList == null)
+                            systemData.FSSSignalList = new List<JObject>();
+                        systemData.FSSSignalList.AddRange(signals.OfType<JObject>());
+                    }
 
-                        if (root["CodexEntryList"] != null && root["CodexEntryList"] is JArray codexEntries)
-                        {
-                            if (systemData.CodexEntryList == null)
-                                systemData.CodexEntryList = new List<JObject>();
-                            systemData.CodexEntryList.AddRange(codexEntries.OfType<JObject>());
-                        }
+                    if (root["CodexEntryList"] != null && root["CodexEntryList"] is JArray codexEntries)
+                    {
+                        if (systemData.CodexEntryList == null)
+                            systemData.CodexEntryList = new List<JObject>();
+                        systemData.CodexEntryList.AddRange(codexEntries.OfType<JObject>());
+                    }
 
                     systemData.FSSTotalBodies = root["FSSTotalBodies"]?.ToObject<int>() ?? 0;
                     systemData.FSSTotalNonBodies = root["FSSTotalNonBodies"]?.ToObject<int>() ?? 0;
