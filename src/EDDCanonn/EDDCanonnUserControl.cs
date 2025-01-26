@@ -438,42 +438,29 @@ namespace EDDCanonn
                     {
                         JObject systemDataNode = root["System"]?.Object();
                         if (systemDataNode != null)
-                        {
                             ProcessCallbackSystemData(systemDataNode);
-                        }
                     }
 
                     if (root["StarNodes"] != null)
                     {
                         JObject starNodes = root["StarNodes"]?.Object();
                         if (starNodes != null)
-                        {
                             ProcessCallbackStarNodes(starNodes);
-                        }
                     }
 
-                    if (root["FSSSignalList"] != null)
-                    {
-                        if (root["FSSSignalList"] is JArray signals)
+                        if (root["FSSSignalList"] != null && root["FSSSignalList"] is JArray signals)
                         {
                             if (systemData.FSSSignalList == null)
-                            {
                                 systemData.FSSSignalList = new List<JObject>();
-                            }
                             systemData.FSSSignalList.AddRange(signals.OfType<JObject>());
                         }
-                    }
-                    if (root["CodexEntryList"] != null)
-                    {
-                        if (root["CodexEntryList"] is JArray codexEntries)
+
+                        if (root["CodexEntryList"] != null && root["CodexEntryList"] is JArray codexEntries)
                         {
                             if (systemData.CodexEntryList == null)
-                            {
                                 systemData.CodexEntryList = new List<JObject>();
-                            }
                             systemData.CodexEntryList.AddRange(codexEntries.OfType<JObject>());
                         }
-                    }
 
                     systemData.FSSTotalBodies = root["FSSTotalBodies"]?.ToObject<int>() ?? 0;
                     systemData.FSSTotalNonBodies = root["FSSTotalNonBodies"]?.ToObject<int>() ?? 0;
@@ -605,8 +592,8 @@ namespace EDDCanonn
                             ProcessCallbackSystem(o);
                             DebugLog.Invoke((MethodInvoker)delegate //wip
                             {
-                               DebugLog.AppendText(systemData.ToString() + Environment.NewLine);
-                           });
+                                DebugLog.AppendText(systemData.ToString() + Environment.NewLine);
+                            });
                         }
                     },
                     ex =>
