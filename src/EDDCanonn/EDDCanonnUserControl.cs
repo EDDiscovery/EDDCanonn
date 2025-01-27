@@ -520,6 +520,7 @@ namespace EDDCanonn
 
                 Body body = new Body
                 {
+                    //Primitives
                     BodyID = bodyId,
                     NodeType = starNode["NodeType"]?.ToString(),
                     BodyDesignator = starNode["BodyDesignator"]?.ToString(),
@@ -528,11 +529,13 @@ namespace EDDCanonn
                     Level = starNode["Level"] != null ? starNode["Level"].ToObject<int>() : 0
                 };
 
+
                 JObject scanDataNode = starNode["ScanData"] as JObject;
                 if (scanDataNode != null)
                 {
-                    body.ScanData = new ScanData //wip
+                    body.ScanData = new ScanData
                     {
+                        //Primitives
                         IsPlanet = scanDataNode["IsPlanet"] != null ? scanDataNode["IsPlanet"].ToObject<bool>() : false,
                         BodyDesignation = scanDataNode["BodyDesignation"]?.ToString(),
                         BodyDesignationOrName = scanDataNode["BodyDesignationOrName"]?.ToString(),
@@ -540,11 +543,13 @@ namespace EDDCanonn
                         BodyName = scanDataNode["BodyName"]?.ToString(),
                         BodyID = scanDataNode["BodyID"] != null ? scanDataNode["BodyID"].ToObject<int>() : 0,
                         HasRings = scanDataNode["HasRings"] != null ? scanDataNode["HasRings"].ToObject<bool>() : false,
+
+                        //List<JObject>    
+                        Signals = scanDataNode["Signals"] is JArray scanArray ? scanArray.OfType<JObject>().ToList() : new List<JObject>(),
                         SurfaceFeatures = scanDataNode["SurfaceFeatures"] is JArray surfaceFeatures ? surfaceFeatures.OfType<JObject>().ToList() : new List<JObject>(),
                         Rings = scanDataNode["Rings"] is JArray rings ? rings.OfType<JObject>().ToList() : new List<JObject>(),
-                        Signals = scanDataNode["Signals"] is JArray signals ? signals.OfType<JObject>().ToList() : new List<JObject>(),
                         Organics = scanDataNode["Organics"] is JArray organics ? organics.OfType<JObject>().ToList() : new List<JObject>(),
-                        Genuses = scanDataNode["Genuses"] is JArray genuses ? genuses.OfType<JObject>().ToList() : new List<JObject>()
+                        Genuses = scanDataNode["Genuses"] is JArray genuses ? genuses.OfType<JObject>().ToList() : new List<JObject>(),
                     };
                 }
 

@@ -1,0 +1,239 @@
+﻿        private void ProcessFSDJump(JObject eventData)
+        {
+            lock (_lockSystemData)
+            {
+                systemData.Name = eventData["StarSystem"]?.ToString();
+                systemData.SystemAddress = eventData["SystemAddress"] != null ? eventData["SystemAddress"].ToObject<long>() : 0;
+
+                if (eventData["StarPos"] != null)
+                {
+                    List<double> starPos = eventData["StarPos"].ToObject<List<double>>();
+                    if (starPos != null && starPos.Count == 3)
+                    {
+                        systemData.X = starPos[0];
+                        systemData.Y = starPos[1];
+                        systemData.Z = starPos[2];
+                        systemData.HasCoordinate = true;
+                    }
+                }
+            }
+        }
+
+        private void ProcessScan(JObject eventData)
+        {
+            lock (_lockSystemData)
+            {
+                if (systemData.Bodys == null)
+                {
+                    systemData.Bodys = new Dictionary<string, Body>();
+                }
+
+                int bodyId = eventData["BodyID"] != null ? eventData["BodyID"].ToObject<int>() : -1;
+                string bodyIdString = bodyId.ToString();
+
+                if (!systemData.Bodys.ContainsKey(bodyIdString))
+                {
+                    systemData.Bodys[bodyIdString] = new Body
+                    {
+                        BodyID = bodyId,
+                        BodyName = eventData["BodyName"]?.ToString(),
+                        SystemBodyName = systemData.Name
+                    };
+                }
+
+                Body body = systemData.Bodys[bodyIdString];
+                body.ScanData = new ScanData
+                {
+                    BodyID = bodyId,
+                    BodyName = eventData["BodyName"]?.ToString(),
+                    IsPlanet = eventData.Contains("PlanetClass"),
+                    ScanType = eventData["ScanType"]?.ToString(),
+                    Signals = eventData["Signals"]?.ToObject<List<JObject>>(),
+                    SurfaceFeatures = eventData["Materials"]?.ToObject<List<JObject>>()
+                };
+            }
+        }
+
+        private void ProcessFSSBodySignals(JObject eventData)
+        {
+            lock (_lockSystemData)
+            {
+                if (systemData.Bodys == null)
+                {
+                    systemData.Bodys = new Dictionary<string, Body>();
+                }
+
+                int bodyId = eventData["BodyID"] != null ? eventData["BodyID"].ToObject<int>() : -1;
+                string bodyIdString = bodyId.ToString();
+
+                if (!systemData.Bodys.ContainsKey(bodyIdString))
+                {
+                    systemData.Bodys[bodyIdString] = new Body
+                    {
+                        BodyID = bodyId,
+                        BodyName = eventData["BodyName"]?.ToString(),
+                        SystemBodyName = systemData.Name
+                    };
+                }
+
+                Body body = systemData.Bodys[bodyIdString];
+                if (body.ScanData == null)
+                {
+                    body.ScanData = new ScanData();
+                }
+
+                List<JObject> signals = eventData["Signals"]?.ToObject<List<JObject>>();
+                if (signals != null)
+                {
+                    if (body.ScanData.Signals == null)
+                    {
+                        body.ScanData.Signals = new List<JObject>();
+                    }
+                    body.ScanData.Signals.AddRange(signals);
+                }
+            }
+        }
+
+        private void ProcessFSSDiscoveryScan(JObject eventData)
+        {
+            lock (_lockSystemData)
+            {
+                systemData.FSSTotalBodies = eventData["BodyCount"] != null ? eventData["BodyCount"].ToObject<int>() : 0;
+                systemData.FSSTotalNonBodies = eventData["NonBodyCount"] != null ? eventData["NonBodyCount"].ToObject<int>() : 0;
+            }
+        }
+
+        private void ProcessFSSSignalDiscovered(JObject eventData)
+        {
+            lock (_lockSystemData)
+            {
+                if (systemData.FSSSignalList == null)
+                {
+                    systemData.FSSSignalList = new List<JObject>();
+                }
+
+                systemData.FSSSignalList.Add(eventData);
+            }
+        }
+
+        private void ProcessSAASignalsFound(JObject eventData)
+        {
+            lock (_lockSystemData)
+            {
+                if (systemData.Bodys == null)
+                {
+                    systemData.Bodys = new Dictionary<string, Body>();
+                }
+
+                int bodyId = eventData["BodyID"] != null ? eventData["BodyID"].ToObject<int>() : -1;
+                string bodyIdString = bodyId.ToString();
+
+                if (!systemData.Bodys.ContainsKey(bodyIdString))
+                {
+                    systemData.Bodys[bodyIdString] = new Body
+                    {
+                        BodyID = bodyId,
+                        BodyName = eventData["BodyName"]?.ToString(),
+                        SystemBodyName = systemData.Name
+                    };
+                }
+
+                Body body = systemData.Bodys[bodyIdString];
+                if (body.ScanData == null)
+                {
+                    body.ScanData = new ScanData();
+                }
+
+                List<JObject> signals = eventData["Signals"]?.ToObject<List<JObject>>();
+                if (signals != null)
+                {
+                    if (body.ScanData.Signals == null)
+                    {
+                        body.ScanData.Signals = new List<JObject>();
+                    }
+                    body.ScanData.Signals.AddRange(signals);
+                }
+
+                List<JObject> genuses = eventData["Genuses"]?.ToObject<List<JObject>>();
+                if (genuses != null)
+                {
+                    if (body.ScanData.Genuses == null)
+                    {
+                        body.ScanData.Genuses = new List<JObject>();
+                    }
+                    body.ScanData.Genuses.AddRange(genuses);
+                }
+            }
+        }
+
+        private void ProcessRefresh(JournalEntry je)
+        {
+            lock (_lockSystemData)
+                _systemData = null;
+            DLLCallBack.RequestScanData(RequestTag.System, this, je.systemname, true);
+        }
+        #endregion
+
+        #region ProcessCallbackSystem
+        public void ProcessCallbackSystem(JObject root)
+        {
+            lock (_lockSystemData)
+            {
+                try
+                {
+
+                    if (root == null)
+                        return;
+
+                    if (root["System"] != null)
+                    {
+                        JObject systemDataNode = root["System"]?.Object();
+                        if (systemDataNode != null)
+                        {
+                            ProcessCallbackSystemData(systemDataNode);
+                        }
+                    }
+
+                    if (root["StarNodes"] != null)
+                    {
+                        JObject starNodes = root["StarNodes"]?.Object();
+                        if (starNodes != null)
+                        {
+                            ProcessCallbackStarNodes(starNodes);
+                        }
+                    }
+
+                    if (root["FSSSignalList"] != null)
+                    {
+                        if (root["FSSSignalList"] is JArray signals)
+                        {
+                            if (systemData.FSSSignalList == null)
+                            {
+                                systemData.FSSSignalList = new List<JObject>();
+                            }
+                            systemData.FSSSignalList.AddRange(signals.OfType<JObject>());
+                        }
+                    }
+                    if (root["CodexEntryList"] != null)
+                    {
+                        if (root["CodexEntryList"] is JArray codexEntries)
+                        {
+                            if (systemData.CodexEntryList == null)
+                            {
+                                systemData.CodexEntryList = new List<JObject>();
+                            }
+                            systemData.CodexEntryList.AddRange(codexEntries.OfType<JObject>());
+                        }
+                    }
+
+                    systemData.FSSTotalBodies = root["FSSTotalBodies"]?.ToObject<int>() ?? 0;
+                    systemData.FSSTotalNonBodies = root["FSSTotalNonBodies"]?.ToObject<int>() ?? 0;
+
+                }
+                catch (Exception ex)
+                {
+                    Console.Error.WriteLine(ex.Message);
+                }
+
+            }
+        }
