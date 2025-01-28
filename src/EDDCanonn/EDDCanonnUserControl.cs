@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using QuickJSON;
 using System.Linq;
 using EDDCanonn.Base;
-using System.Collections;
 
 namespace EDDCanonn
 {
@@ -321,17 +320,22 @@ namespace EDDCanonn
         {
             get
             {
-                if (_systemData == null)
+                lock (_lockSystemData)
                 {
-                    lock (_lockSystemData)
-                    {
-                        if (_systemData == null)
-                        {
-                            _systemData = new SystemData();
-                        }
-                    }
+                    if (_systemData == null)
+                    return null;
+                
+                    return _systemData;
+                } 
+            }
+            set {
+                lock (_lockSystemData)
+                {
+                    if (_systemData != null)
+                    return;
+
+                    _systemData = new SystemData(); //Enforces encapsulation.
                 }
-                return _systemData;
             }
         }
         #endregion
@@ -342,10 +346,13 @@ namespace EDDCanonn
         {
             JObject eventData = je.json.JSONParse().Object();
 
+            if (systemData == null)
+                systemData = new SystemData(); //Enforces encapsulation and creates a new SystemData instance internally, disregarding any parameters.
+
             switch (je.eventid)
             {
                 case "FSDJump":
-                    ProcessFSDJump(eventData);
+                    ProcessNewSystem(eventData);
                     break;
                 case "Scan":
                     ProcessScan(eventData);
@@ -368,11 +375,19 @@ namespace EDDCanonn
             }
         }
 
-        private void ProcessFSDJump(JObject eventData)
+        private void ProcessNewSystem(JObject eventData)
         {
             lock (_lockSystemData)
             {
+                systemData.Name = eventData["StarSystem"]?.ToString();
+                systemData.SystemAddress = eventData["SystemAddress"] != null ? eventData["SystemAddress"].ToObject<long>() : 0;
 
+                if (eventData["StarPos"] != null)
+                {
+                    double[] coordinates = new[]{(double)eventData["StarPos"]["X"],(double)eventData["StarPos"]["Y"],(double)eventData["StarPos"]["Z"]};
+                    (systemData.X, systemData.Y, systemData.Z) = (coordinates[0], coordinates[1], coordinates[2]);
+                    systemData.HasCoordinate = true;
+                }
             }
         }
 
@@ -380,11 +395,88 @@ namespace EDDCanonn
         {
             lock (_lockSystemData)
             {
+                if (systemData.Bodys == null)
+                {
+                    systemData.Bodys = new Dictionary<int, Body>();
+                }
 
+                int bodyId = eventData["BodyID"] != null ? eventData["BodyID"].ToObject<int>() : -1;
+
+                if (!systemData.Bodys.ContainsKey(bodyId))
+                {
+                    systemData.Bodys[bodyId] = new Body
+                    {
+                        BodyID = bodyId,
+                        BodyName = eventData["BodyName"]?.ToString(),
+                    };
+                }
+
+                Body body = systemData.Bodys[bodyId];
+                if (body.ScanData == null)
+                {
+                    body.ScanData = new ScanData
+                    {
+                        //Primitives
+                        BodyID = bodyId,
+                        IsPlanet = eventData.Contains("PlanetClass"),
+                        ScanType = eventData["ScanType"]?.ToString(),
+
+                        //List<JObject>  
+                        Signals = CanonnHelper.GetJObjectList(eventData, "Signals"),
+                        SurfaceFeatures = CanonnHelper.GetJObjectList(eventData, "SurfaceFeatures"),
+                        Rings = CanonnHelper.GetJObjectList(eventData, "Rings"),
+                        Organics = CanonnHelper.GetJObjectList(eventData, "Organics"),
+                        Genuses = CanonnHelper.GetJObjectList(eventData, "Genuses"),
+                    };
+                }
+                else
+                {
+                    //Primitives
+                    body.ScanData.BodyID = bodyId;
+                    body.ScanData.IsPlanet = eventData.Contains("PlanetClass");
+                    body.ScanData.ScanType = eventData["ScanType"]?.ToString();
+
+                    //List<JObject> 
+                    if (eventData["Signals"] != null && eventData["Signals"] is JArray signals)
+                    {
+                        if (body.ScanData.Signals == null)
+                            body.ScanData.Signals = new List<JObject>();
+                        body.ScanData.Signals.AddRange(signals.OfType<JObject>());
+                    }
+
+                    if (eventData["Rings"] != null && eventData["Rings"] is JArray Rings)
+                    {
+                        if (body.ScanData.Rings == null)
+                            body.ScanData.Rings = new List<JObject>();
+                        body.ScanData.Rings.AddRange(Rings.OfType<JObject>());
+                    }
+
+                    if (eventData["Organics"] != null && eventData["Organics"] is JArray Organics)
+                    {
+                        if (body.ScanData.Organics == null)
+                            body.ScanData.Organics = new List<JObject>();
+                        body.ScanData.Organics.AddRange(Organics.OfType<JObject>());
+                    }
+
+                    if (eventData["Genuses"] != null && eventData["Genuses"] is JArray Genuses)
+                    {
+                        if (body.ScanData.Genuses == null)
+                            body.ScanData.Genuses = new List<JObject>();
+                        body.ScanData.Genuses.AddRange(Genuses.OfType<JObject>());
+                    }
+
+                    if (eventData["SurfaceFeatures"] != null && eventData["SurfaceFeatures"] is JArray SurfaceFeatures)
+                    {
+                        if (body.ScanData.SurfaceFeatures == null)
+                            body.ScanData.SurfaceFeatures = new List<JObject>();
+                        body.ScanData.SurfaceFeatures.AddRange(SurfaceFeatures.OfType<JObject>());
+                    }
+                }
             }
         }
 
-        private void ProcessFSSBodySignals(JObject eventData)
+
+        private void ProcessFSSBodySignals(JObject eventData)//wip
         {
             lock (_lockSystemData)
             {
@@ -392,7 +484,7 @@ namespace EDDCanonn
             }
         }
 
-        private void ProcessFSSDiscoveryScan(JObject eventData)
+        private void ProcessFSSDiscoveryScan(JObject eventData)//wip
         {
             lock (_lockSystemData)
             {
@@ -400,7 +492,7 @@ namespace EDDCanonn
             }
         }
 
-        private void ProcessFSSSignalDiscovered(JObject eventData)
+        private void ProcessFSSSignalDiscovered(JObject eventData)//wip
         {
             lock (_lockSystemData)
             {
@@ -408,30 +500,26 @@ namespace EDDCanonn
             }
         }
 
-        private void ProcessSAASignalsFound(JObject eventData)
+        private void ProcessSAASignalsFound(JObject eventData)//wip
         {
             lock (_lockSystemData)
             {
 
             }
-        }
-
-        private void ProcessRefresh(JournalEntry je)
-        {
-            lock (_lockSystemData)
-                _systemData = null;
-            DLLCallBack.RequestScanData(RequestTag.System, this, je.systemname, true);
         }
         #endregion
 
         #region ProcessCallbackSystem
         public void ProcessCallbackSystem(JObject root)
         {
+            if (systemData == null)
+                systemData = new SystemData(); //Enforces encapsulation and creates a new SystemData instance internally, disregarding any parameters.
+
             lock (_lockSystemData)
             {
                 try
                 {
-                    if (root == null)
+                    if (root == null || root.IsNull)
                         return;
 
                     if (root["System"] != null)
@@ -509,11 +597,11 @@ namespace EDDCanonn
 
                 if (systemData.Bodys == null)
                 {
-                    systemData.Bodys = new Dictionary<string, Body>();
+                    systemData.Bodys = new Dictionary<int, Body>();
                 }
 
 
-                if (systemData.Bodys.ContainsKey(bodyId.ToString()))
+                if (systemData.Bodys.ContainsKey(bodyId))
                 {
                     continue;
                 }
@@ -523,10 +611,7 @@ namespace EDDCanonn
                     //Primitives
                     BodyID = bodyId,
                     NodeType = starNode["NodeType"]?.ToString(),
-                    BodyDesignator = starNode["BodyDesignator"]?.ToString(),
-                    OwnName = starNode["OwnName"]?.ToString(),
-                    SystemBodyName = starNode["SystemBodyName"]?.ToString(),
-                    Level = starNode["Level"] != null ? starNode["Level"].ToObject<int>() : 0
+                    BodyName = starNode["BodyDesignator"]?.ToString(),
                 };
 
 
@@ -536,24 +621,21 @@ namespace EDDCanonn
                     body.ScanData = new ScanData
                     {
                         //Primitives
-                        IsPlanet = scanDataNode["IsPlanet"] != null ? scanDataNode["IsPlanet"].ToObject<bool>() : false,
-                        BodyDesignation = scanDataNode["BodyDesignation"]?.ToString(),
-                        BodyDesignationOrName = scanDataNode["BodyDesignationOrName"]?.ToString(),
                         ScanType = scanDataNode["ScanType"]?.ToString(),
-                        BodyName = scanDataNode["BodyName"]?.ToString(),
                         BodyID = scanDataNode["BodyID"] != null ? scanDataNode["BodyID"].ToObject<int>() : 0,
+                        IsPlanet = scanDataNode["IsPlanet"] != null ? scanDataNode["IsPlanet"].ToObject<bool>() : false,                      
                         HasRings = scanDataNode["HasRings"] != null ? scanDataNode["HasRings"].ToObject<bool>() : false,
 
                         //List<JObject>    
-                        Signals = scanDataNode["Signals"] is JArray scanArray ? scanArray.OfType<JObject>().ToList() : new List<JObject>(),
-                        SurfaceFeatures = scanDataNode["SurfaceFeatures"] is JArray surfaceFeatures ? surfaceFeatures.OfType<JObject>().ToList() : new List<JObject>(),
-                        Rings = scanDataNode["Rings"] is JArray rings ? rings.OfType<JObject>().ToList() : new List<JObject>(),
-                        Organics = scanDataNode["Organics"] is JArray organics ? organics.OfType<JObject>().ToList() : new List<JObject>(),
-                        Genuses = scanDataNode["Genuses"] is JArray genuses ? genuses.OfType<JObject>().ToList() : new List<JObject>(),
+                        Signals = CanonnHelper.GetJObjectList(scanDataNode,"Signals"),
+                        SurfaceFeatures = CanonnHelper.GetJObjectList(scanDataNode, "SurfaceFeatures"),
+                        Rings = CanonnHelper.GetJObjectList(scanDataNode, "Rings"),
+                        Organics = CanonnHelper.GetJObjectList(scanDataNode, "Organics"),
+                        Genuses = CanonnHelper.GetJObjectList(scanDataNode, "Genuses"),
                     };
                 }
 
-                systemData.Bodys[bodyId.ToString()] = body;
+                systemData.Bodys[bodyId] = body;
 
                 // Recursively process child nodes
                 JObject children = starNode["Children"] as JObject;
@@ -580,12 +662,10 @@ namespace EDDCanonn
             {
                 if (requesttag == null || data == null)
                     throw new ArgumentNullException("requesttag or data cannot be null.");
-                if (!requesttag.GetType().IsEnum)
-                    throw new ArgumentException("requesttag must be of type enum.");
 
                 JObject o = data.JSONParse().Object();
 
-                if (!(requesttag is RequestTag))
+                if (!(requesttag is RequestTag || requesttag is JObject))
                     return;
                 else
                 {
@@ -595,11 +675,20 @@ namespace EDDCanonn
                         if (requesttag.Equals(RequestTag.System))
                         {
                             ProcessCallbackSystem(o);
+
                             DebugLog.Invoke((MethodInvoker)delegate //wip
                             {
                                 DebugLog.AppendText(systemData.ToString() + Environment.NewLine);
                             });
                         }
+                        else if (requesttag is JObject jb && jb["event"]?.ToString() == "Location")
+                        {
+                            ProcessCallbackSystem(o);
+                            if (systemData == null) //If the game previously crashed during the jump and no system data was previously saved by EDD.
+                                ProcessNewSystem(jb);
+                        }
+                        else
+                            return;
                     },
                     ex =>
                     {
@@ -653,8 +742,18 @@ namespace EDDCanonn
                             DebugLog.AppendText("" + Environment.NewLine);
                         });
 
-                    if (je.eventid.Equals("StartJump") || je.eventid.Equals("Location"))
-                        ProcessRefresh(je);
+                    if (je.eventid.Equals("StartJump")) //Prepare data for the next system.
+                    {
+                        lock (_lockSystemData)
+                            _systemData = null;
+                        DLLCallBack.RequestScanData(RequestTag.System, this, je.systemname, true);
+                    }
+                    else if (je.eventid.Equals("Location")) //Prepare data for the next system. Include ‘Location’ event as requestTag in case of a crash. 
+                    {
+                        lock (_lockSystemData)
+                            _systemData = null;
+                        DLLCallBack.RequestScanData(je.json.JSONParse().Object(), this, je.systemname, true);
+                    }
                     else
                         ProcessEvent(je);
                 },
