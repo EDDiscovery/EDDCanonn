@@ -386,7 +386,7 @@ namespace EDDCanonn
             }
             catch (Exception e)
             {
-                resetSystemData();
+                
             }
         }
 
