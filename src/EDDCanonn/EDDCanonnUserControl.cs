@@ -316,6 +316,13 @@ namespace EDDCanonn
         #region SystemData
         private readonly object _lockSystemData = new object();
         private SystemData _systemData; //Do not use this.
+
+        private void resetSystemData()
+        {
+            lock (_lockSystemData)
+                _systemData = null;
+        }
+
         private SystemData systemData //Encapsulation Enforcement | Is that what it's called?
         {
             get
@@ -344,34 +351,42 @@ namespace EDDCanonn
         #region ProcessEvents
         private void ProcessEvent(JournalEntry je)
         {
-            JObject eventData = je.json.JSONParse().Object();
 
             if (systemData == null)
                 systemData = new SystemData(); //Enforces encapsulation and creates a new SystemData instance internally, disregarding any parameters.
 
-            switch (je.eventid)
+            try
             {
-                case "FSDJump":
-                    ProcessNewSystem(eventData);
-                    break;
-                case "Scan":
-                    ProcessScan(eventData);
-                    break;
-                case "FSSBodySignals":
-                    ProcessFSSBodySignals(eventData);
-                    break;
-                case "FSSDiscoveryScan":
-                    ProcessFSSDiscoveryScan(eventData);
-                    break;
-                case "FSSSignalDiscovered":
-                    ProcessFSSSignalDiscovered(eventData);
-                    break;
-                case "SAASignalsFound":
-                    ProcessSAASignalsFound(eventData);
-                    break;
-                default:
-                    // Unsupported event
-                    break;
+                JObject eventData = je.json.JSONParse().Object();
+
+                switch (je.eventid)
+                {
+                    case "FSDJump":
+                        ProcessNewSystem(eventData);
+                        break;
+                    case "Scan":
+                        ProcessScan(eventData);
+                        break;
+                    case "FSSBodySignals":
+                        ProcessFSSBodySignals(eventData);
+                        break;
+                    case "FSSDiscoveryScan":
+                        ProcessFSSDiscoveryScan(eventData);
+                        break;
+                    case "FSSSignalDiscovered":
+                        ProcessFSSSignalDiscovered(eventData);
+                        break;
+                    case "SAASignalsFound":
+                        ProcessSAASignalsFound(eventData);
+                        break;
+                    default:
+                        // Unsupported event
+                        break;
+                }
+            }
+            catch (Exception e)
+            {
+                resetSystemData();
             }
         }
 
@@ -512,6 +527,9 @@ namespace EDDCanonn
         #region ProcessCallbackSystem
         public void ProcessCallbackSystem(JObject root)
         {
+            if (root == null || root.IsNull)
+                return;
+
             if (systemData == null)
                 systemData = new SystemData(); //Enforces encapsulation and creates a new SystemData instance internally, disregarding any parameters.
 
@@ -519,9 +537,6 @@ namespace EDDCanonn
             {
                 try
                 {
-                    if (root == null || root.IsNull)
-                        return;
-
                     if (root["System"] != null)
                     {
                         JObject systemDataNode = root["System"]?.Object();
@@ -554,8 +569,9 @@ namespace EDDCanonn
                     systemData.FSSTotalNonBodies = root["FSSTotalNonBodies"]?.ToObject<int>() ?? 0;
 
                 }
-                catch (Exception ex)
+                catch (Exception ex)//wip
                 {
+                    resetSystemData();
                     Console.Error.WriteLine(ex.Message);
                 }
 
@@ -744,14 +760,12 @@ namespace EDDCanonn
 
                     if (je.eventid.Equals("StartJump")) //Prepare data for the next system.
                     {
-                        lock (_lockSystemData)
-                            _systemData = null;
+                        resetSystemData();
                         DLLCallBack.RequestScanData(RequestTag.System, this, je.systemname, true);
                     }
                     else if (je.eventid.Equals("Location")) //Prepare data for the next system. Include ‘Location’ event as requestTag in case of a crash. 
                     {
-                        lock (_lockSystemData)
-                            _systemData = null;
+                        resetSystemData();
                         DLLCallBack.RequestScanData(je.json.JSONParse().Object(), this, je.systemname, true);
                     }
                     else
