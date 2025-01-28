@@ -13,7 +13,7 @@ namespace EDDCanonn.Base
         public double Z { get; set; }
         public bool HasCoordinate { get; set; }
         public long SystemAddress { get; set; }
-        public Dictionary<string,Body> Bodys { get; set; }
+        public Dictionary<int,Body> Bodys { get; set; }
 
         //Global
         public int FSSTotalBodies { get; set; }
@@ -64,20 +64,13 @@ namespace EDDCanonn.Base
                     var body = bodyEntry.Value;
                     result += $"  Body ID: {body.BodyID}\n" +
                               $"    Node Type: {body.NodeType}\n" +
-                              $"    Body Designator: {body.BodyDesignator}\n" +
-                              $"    Own Name: {body.OwnName}\n" +
-                              $"    System Body Name: {body.SystemBodyName}\n" +
-                              $"    Body Name: {body.BodyName}\n" +
-                              $"    Level: {body.Level}\n";
+                              $"    Body Name: {body.BodyName}\n";
 
                     if (body.ScanData != null)
                     {
                         result += "    Scan Data:\n" +
                                   $"      Is Planet: {body.ScanData.IsPlanet}\n" +
-                                  $"      Body Designation: {body.ScanData.BodyDesignation}\n" +
-                                  $"      Body Designation or Name: {body.ScanData.BodyDesignationOrName}\n" +
                                   $"      Scan Type: {body.ScanData.ScanType}\n" +
-                                  $"      Body Name: {body.ScanData.BodyName}\n" +
                                   $"      Body ID: {body.ScanData.BodyID}\n" +
                                   $"      Has Rings: {body.ScanData.HasRings}\n";
 
@@ -120,21 +113,14 @@ namespace EDDCanonn.Base
     {
         public int BodyID { get; set; }
         public string NodeType { get; set; }
-        public string BodyDesignator { get; set; }
-        public string OwnName { get; set; }
-        public string SystemBodyName { get; set; }
         public string BodyName { get; set; }
-        public int Level { get; set; }
         public ScanData ScanData { get; set; }
     }
 
     public class ScanData
     {
         public bool IsPlanet { get; set; }
-        public string BodyDesignation { get; set; }
-        public string BodyDesignationOrName { get; set; }
         public string ScanType { get; set; }
-        public string BodyName { get; set; }
         public int BodyID { get; set; }
         public bool HasRings { get; set; }
         public List<JObject> Rings { get; set; }
