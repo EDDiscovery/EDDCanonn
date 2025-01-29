@@ -315,9 +315,9 @@ namespace EDDCanonn
         //This only affects the data structure for visual feedback.
         #region SystemData
         private readonly object _lockSystemData = new object();
-        private SystemData _systemData; //Do not use this.
+        private SystemData _systemData; //Do not use this. Otherwise it could get bad.
 
-        private void resetSystemData()
+        private void resetSystemData() //In the event of a jump/location or if web data is not available.
         {
             lock (_lockSystemData)
                 _systemData = null;
@@ -384,9 +384,9 @@ namespace EDDCanonn
                         break;
                 }
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                
+                Console.Error.WriteLine($"EDDCanonn: Error processing event for visual feedback: {je.eventid} : {ex.Message}");
             }
         }
 
@@ -406,6 +406,71 @@ namespace EDDCanonn
             }
         }
 
+        private void fetchScanData(JObject eventData, Body body) //Call this method only via a lock. Otherwise it could get bad.
+        {
+            if (body.ScanData == null)
+            {
+                body.ScanData = new ScanData
+                {
+                    //Primitives
+                    BodyID = body.BodyID,
+                    IsPlanet = eventData.Contains("PlanetClass"),
+                    ScanType = eventData["ScanType"]?.ToString(),
+
+                    //List<JObject>  
+                    Signals = CanonnHelper.GetJObjectList(eventData, "Signals"),
+                    SurfaceFeatures = CanonnHelper.GetJObjectList(eventData, "SurfaceFeatures"),
+                    Rings = CanonnHelper.GetJObjectList(eventData, "Rings"),
+                    Organics = CanonnHelper.GetJObjectList(eventData, "Organics"),
+                    Genuses = CanonnHelper.GetJObjectList(eventData, "Genuses"),
+                };
+            }
+            else
+            {
+                //Primitives
+                body.ScanData.BodyID = body.BodyID;
+                body.ScanData.IsPlanet = eventData.Contains("PlanetClass");
+                body.ScanData.ScanType = eventData["ScanType"]?.ToString();
+
+                //List<JObject> : AddRange(field.OfType<JObject>().Where(s => !body.ScanData.field.Any(existing => JToken.DeepEquals(existing, s)))) --> Should work?
+                if (eventData["Signals"] is JArray signals)
+                {
+                    if (body.ScanData.Signals == null)
+                        body.ScanData.Signals = new List<JObject>();
+                    body.ScanData.Signals.AddRange(signals.OfType<JObject>().Where(s => !body.ScanData.Signals.Any(existing => JToken.DeepEquals(existing, s))));
+                }
+
+                if (eventData["Rings"] is JArray rings)
+                {
+                    if (body.ScanData.Rings == null)
+                        body.ScanData.Rings = new List<JObject>();
+                    body.ScanData.Rings.AddRange(rings.OfType<JObject>().Where(r => !body.ScanData.Rings.Any(existing => JToken.DeepEquals(existing, r))));
+                }
+
+                if (eventData["Organics"] is JArray organics)
+                {
+                    if (body.ScanData.Organics == null)
+                        body.ScanData.Organics = new List<JObject>();
+                    body.ScanData.Organics.AddRange(organics.OfType<JObject>().Where(o => !body.ScanData.Organics.Any(existing => JToken.DeepEquals(existing, o))));
+                }
+
+                if (eventData["Genuses"] is JArray genuses)
+                {
+                    if (body.ScanData.Genuses == null)
+                        body.ScanData.Genuses = new List<JObject>();
+                    body.ScanData.Genuses.AddRange(genuses.OfType<JObject>().Where(g => !body.ScanData.Genuses.Any(existing => JToken.DeepEquals(existing, g))));
+                }
+
+                if (eventData["SurfaceFeatures"] is JArray surfaceFeatures)
+                {
+                    if (body.ScanData.SurfaceFeatures == null)
+                        body.ScanData.SurfaceFeatures = new List<JObject>();
+                    body.ScanData.SurfaceFeatures.AddRange(surfaceFeatures.OfType<JObject>().Where(sf => !body.ScanData.SurfaceFeatures.Any(existing => JToken.DeepEquals(existing, sf))));
+                }
+
+            }
+        }
+
         private void ProcessScan(JObject eventData)
         {
             lock (_lockSystemData)
@@ -417,76 +482,21 @@ namespace EDDCanonn
 
                 int bodyId = eventData["BodyID"] != null ? eventData["BodyID"].ToObject<int>() : -1;
 
+                Body body;
+
                 if (!systemData.Bodys.ContainsKey(bodyId))
                 {
-                    systemData.Bodys[bodyId] = new Body
+                    body = new Body
                     {
                         BodyID = bodyId,
                         BodyName = eventData["BodyName"]?.ToString(),
                     };
                 }
-
-                Body body = systemData.Bodys[bodyId];
-                if (body.ScanData == null)
-                {
-                    body.ScanData = new ScanData
-                    {
-                        //Primitives
-                        BodyID = bodyId,
-                        IsPlanet = eventData.Contains("PlanetClass"),
-                        ScanType = eventData["ScanType"]?.ToString(),
-
-                        //List<JObject>  
-                        Signals = CanonnHelper.GetJObjectList(eventData, "Signals"),
-                        SurfaceFeatures = CanonnHelper.GetJObjectList(eventData, "SurfaceFeatures"),
-                        Rings = CanonnHelper.GetJObjectList(eventData, "Rings"),
-                        Organics = CanonnHelper.GetJObjectList(eventData, "Organics"),
-                        Genuses = CanonnHelper.GetJObjectList(eventData, "Genuses"),
-                    };
-                }
                 else
-                {
-                    //Primitives
-                    body.ScanData.BodyID = bodyId;
-                    body.ScanData.IsPlanet = eventData.Contains("PlanetClass");
-                    body.ScanData.ScanType = eventData["ScanType"]?.ToString();
+                    body = systemData.Bodys[bodyId];
 
-                    //List<JObject> 
-                    if (eventData["Signals"] != null && eventData["Signals"] is JArray signals)
-                    {
-                        if (body.ScanData.Signals == null)
-                            body.ScanData.Signals = new List<JObject>();
-                        body.ScanData.Signals.AddRange(signals.OfType<JObject>());
-                    }
 
-                    if (eventData["Rings"] != null && eventData["Rings"] is JArray Rings)
-                    {
-                        if (body.ScanData.Rings == null)
-                            body.ScanData.Rings = new List<JObject>();
-                        body.ScanData.Rings.AddRange(Rings.OfType<JObject>());
-                    }
-
-                    if (eventData["Organics"] != null && eventData["Organics"] is JArray Organics)
-                    {
-                        if (body.ScanData.Organics == null)
-                            body.ScanData.Organics = new List<JObject>();
-                        body.ScanData.Organics.AddRange(Organics.OfType<JObject>());
-                    }
-
-                    if (eventData["Genuses"] != null && eventData["Genuses"] is JArray Genuses)
-                    {
-                        if (body.ScanData.Genuses == null)
-                            body.ScanData.Genuses = new List<JObject>();
-                        body.ScanData.Genuses.AddRange(Genuses.OfType<JObject>());
-                    }
-
-                    if (eventData["SurfaceFeatures"] != null && eventData["SurfaceFeatures"] is JArray SurfaceFeatures)
-                    {
-                        if (body.ScanData.SurfaceFeatures == null)
-                            body.ScanData.SurfaceFeatures = new List<JObject>();
-                        body.ScanData.SurfaceFeatures.AddRange(SurfaceFeatures.OfType<JObject>());
-                    }
-                }
+                fetchScanData(eventData,body);
             }
         }
 
@@ -527,7 +537,7 @@ namespace EDDCanonn
         #region ProcessCallbackSystem
         public void ProcessCallbackSystem(JObject root)
         {
-            if (root == null || root.IsNull)
+            if (root == null || root.IsNull) // If this is true after a ‘Location’ event, the system is later initialised via that event.
                 return;
 
             if (systemData == null)
@@ -551,28 +561,17 @@ namespace EDDCanonn
                             ProcessCallbackStarNodes(starNodes);
                     }
 
-                    if (root["FSSSignalList"] != null && root["FSSSignalList"] is JArray signals)
-                    {
-                        if (systemData.FSSSignalList == null)
-                            systemData.FSSSignalList = new List<JObject>();
-                        systemData.FSSSignalList.AddRange(signals.OfType<JObject>());
-                    }
-
-                    if (root["CodexEntryList"] != null && root["CodexEntryList"] is JArray codexEntries)
-                    {
-                        if (systemData.CodexEntryList == null)
-                            systemData.CodexEntryList = new List<JObject>();
-                        systemData.CodexEntryList.AddRange(codexEntries.OfType<JObject>());
-                    }
+                    systemData.FSSSignalList = CanonnHelper.GetJObjectList(root, "FSSSignalList");
+                    systemData.CodexEntryList = CanonnHelper.GetJObjectList(root, "CodexEntryList");
 
                     systemData.FSSTotalBodies = root["FSSTotalBodies"]?.ToObject<int>() ?? 0;
                     systemData.FSSTotalNonBodies = root["FSSTotalNonBodies"]?.ToObject<int>() ?? 0;
 
                 }
-                catch (Exception ex)//wip
+                catch (Exception ex)
                 {
-                    resetSystemData();
-                    Console.Error.WriteLine(ex.Message);
+                    resetSystemData(); //If something goes wrong here, we assume that no data is available. If this happens after a ‘Location’ event, the system is initialised via that event.
+                    Console.Error.WriteLine($"EDDCanonn: Error processing CallbackSystem for visual feedback: {ex.Message}");
                 }
 
             }
