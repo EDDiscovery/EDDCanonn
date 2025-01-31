@@ -145,7 +145,8 @@ namespace EDDCanonn.Base
             NodeType = body.NodeType;
             BodyName = body.BodyName;
 
-            ScanData = new ScanData(body.ScanData);
+            if(body.ScanData != null) 
+                ScanData = new ScanData(body.ScanData);
         }
 
         public int BodyID { get; set; }
