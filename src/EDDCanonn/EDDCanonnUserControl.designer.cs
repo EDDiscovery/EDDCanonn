@@ -24,19 +24,18 @@ namespace EDDCanonn
             this.labelSystemCount = new System.Windows.Forms.Label();
             this.textBoxBodyCount = new System.Windows.Forms.TextBox();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
-            this.tabControl1 = new System.Windows.Forms.TabControl();
+            this.gridData = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.gridAuto = new System.Windows.Forms.DataGridView();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.dataGridView2 = new System.Windows.Forms.DataGridView();
             this.tabPage3 = new System.Windows.Forms.TabPage();
-            this.dataGridView3 = new System.Windows.Forms.DataGridView();
-            this.tabPage4 = new System.Windows.Forms.TabPage();
-            this.dataGridView4 = new System.Windows.Forms.DataGridView();
             this.tabPage5 = new System.Windows.Forms.TabPage();
-            this.tabPage6 = new System.Windows.Forms.TabPage();
+            this.button3 = new System.Windows.Forms.Button();
             this.ClearDebugLog = new System.Windows.Forms.Button();
             this.TestWhitelist = new System.Windows.Forms.Button();
             this.LogWhitelist = new System.Windows.Forms.Button();
+            this.tabPage4 = new System.Windows.Forms.TabPage();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
             this.Column1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Column2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -52,16 +51,13 @@ namespace EDDCanonn
             this.button2 = new System.Windows.Forms.Button();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.button1 = new System.Windows.Forms.Button();
-            this.button3 = new System.Windows.Forms.Button();
             this.tableLayoutPanel1.SuspendLayout();
-            this.tabControl1.SuspendLayout();
+            this.gridData.SuspendLayout();
+            this.tabPage1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.gridAuto)).BeginInit();
             this.tabPage2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView2)).BeginInit();
-            this.tabPage3.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView3)).BeginInit();
-            this.tabPage4.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView4)).BeginInit();
-            this.tabPage6.SuspendLayout();
+            this.tabPage5.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.tableLayoutPanel2.SuspendLayout();
             this.menuStrip2.SuspendLayout();
@@ -74,6 +70,7 @@ namespace EDDCanonn
             this.textBoxSystem.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.textBoxSystem.Location = new System.Drawing.Point(66, 8);
             this.textBoxSystem.Name = "textBoxSystem";
+            this.textBoxSystem.ReadOnly = true;
             this.textBoxSystem.Size = new System.Drawing.Size(163, 20);
             this.textBoxSystem.TabIndex = 3;
             // 
@@ -86,7 +83,6 @@ namespace EDDCanonn
             this.labelSysName.Size = new System.Drawing.Size(41, 13);
             this.labelSysName.TabIndex = 4;
             this.labelSysName.Text = "System";
-            this.labelSysName.Click += new System.EventHandler(this.label1_Click);
             // 
             // DebugLog
             // 
@@ -107,16 +103,15 @@ namespace EDDCanonn
             this.labelSystemCount.Size = new System.Drawing.Size(35, 26);
             this.labelSystemCount.TabIndex = 6;
             this.labelSystemCount.Text = "Body Count";
-            this.labelSystemCount.Click += new System.EventHandler(this.label1_Click_1);
             // 
             // textBoxBodyCount
             // 
             this.textBoxBodyCount.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.textBoxBodyCount.Location = new System.Drawing.Point(279, 8);
             this.textBoxBodyCount.Name = "textBoxBodyCount";
+            this.textBoxBodyCount.ReadOnly = true;
             this.textBoxBodyCount.Size = new System.Drawing.Size(82, 20);
             this.textBoxBodyCount.TabIndex = 7;
-            this.textBoxBodyCount.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
             // 
             // tableLayoutPanel1
             // 
@@ -136,23 +131,23 @@ namespace EDDCanonn
             this.tableLayoutPanel1.Size = new System.Drawing.Size(364, 37);
             this.tableLayoutPanel1.TabIndex = 8;
             // 
-            // tabControl1
+            // gridData
             // 
-            this.tabControl1.Controls.Add(this.tabPage1);
-            this.tabControl1.Controls.Add(this.tabPage2);
-            this.tabControl1.Controls.Add(this.tabPage3);
-            this.tabControl1.Controls.Add(this.tabPage4);
-            this.tabControl1.Controls.Add(this.tabPage5);
-            this.tabControl1.Controls.Add(this.tabPage6);
-            this.tabControl1.Location = new System.Drawing.Point(20, 46);
-            this.tabControl1.Multiline = true;
-            this.tabControl1.Name = "tabControl1";
-            this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(364, 159);
-            this.tabControl1.TabIndex = 11;
+            this.gridData.Controls.Add(this.tabPage1);
+            this.gridData.Controls.Add(this.tabPage2);
+            this.gridData.Controls.Add(this.tabPage3);
+            this.gridData.Controls.Add(this.tabPage4);
+            this.gridData.Controls.Add(this.tabPage5);
+            this.gridData.Location = new System.Drawing.Point(20, 46);
+            this.gridData.Multiline = true;
+            this.gridData.Name = "gridData";
+            this.gridData.SelectedIndex = 0;
+            this.gridData.Size = new System.Drawing.Size(364, 159);
+            this.gridData.TabIndex = 11;
             // 
             // tabPage1
             // 
+            this.tabPage1.Controls.Add(this.gridAuto);
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
@@ -160,6 +155,17 @@ namespace EDDCanonn
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Automatic";
             this.tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // gridAuto
+            // 
+            this.gridAuto.AllowUserToAddRows = false;
+            this.gridAuto.AllowUserToDeleteRows = false;
+            this.gridAuto.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.gridAuto.Location = new System.Drawing.Point(0, 0);
+            this.gridAuto.Name = "gridAuto";
+            this.gridAuto.ReadOnly = true;
+            this.gridAuto.Size = new System.Drawing.Size(356, 133);
+            this.gridAuto.TabIndex = 15;
             // 
             // tabPage2
             // 
@@ -185,72 +191,38 @@ namespace EDDCanonn
             // 
             // tabPage3
             // 
-            this.tabPage3.Controls.Add(this.dataGridView3);
             this.tabPage3.Location = new System.Drawing.Point(4, 22);
             this.tabPage3.Name = "tabPage3";
             this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
             this.tabPage3.Size = new System.Drawing.Size(356, 133);
-            this.tabPage3.TabIndex = 2;
-            this.tabPage3.Text = "Biology";
+            this.tabPage3.TabIndex = 4;
+            this.tabPage3.Text = "RingSurvey";
             this.tabPage3.UseVisualStyleBackColor = true;
-            // 
-            // dataGridView3
-            // 
-            this.dataGridView3.AllowUserToAddRows = false;
-            this.dataGridView3.AllowUserToDeleteRows = false;
-            this.dataGridView3.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridView3.Location = new System.Drawing.Point(0, 0);
-            this.dataGridView3.Name = "dataGridView3";
-            this.dataGridView3.ReadOnly = true;
-            this.dataGridView3.Size = new System.Drawing.Size(356, 133);
-            this.dataGridView3.TabIndex = 14;
-            // 
-            // tabPage4
-            // 
-            this.tabPage4.Controls.Add(this.dataGridView4);
-            this.tabPage4.Location = new System.Drawing.Point(4, 22);
-            this.tabPage4.Name = "tabPage4";
-            this.tabPage4.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage4.Size = new System.Drawing.Size(356, 133);
-            this.tabPage4.TabIndex = 3;
-            this.tabPage4.Text = "Geology";
-            this.tabPage4.UseVisualStyleBackColor = true;
-            // 
-            // dataGridView4
-            // 
-            this.dataGridView4.AllowUserToAddRows = false;
-            this.dataGridView4.AllowUserToDeleteRows = false;
-            this.dataGridView4.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridView4.Location = new System.Drawing.Point(0, 0);
-            this.dataGridView4.Name = "dataGridView4";
-            this.dataGridView4.ReadOnly = true;
-            this.dataGridView4.Size = new System.Drawing.Size(356, 133);
-            this.dataGridView4.TabIndex = 15;
             // 
             // tabPage5
             // 
+            this.tabPage5.Controls.Add(this.button3);
+            this.tabPage5.Controls.Add(this.ClearDebugLog);
+            this.tabPage5.Controls.Add(this.TestWhitelist);
+            this.tabPage5.Controls.Add(this.LogWhitelist);
+            this.tabPage5.Controls.Add(this.DebugLog);
             this.tabPage5.Location = new System.Drawing.Point(4, 22);
             this.tabPage5.Name = "tabPage5";
             this.tabPage5.Padding = new System.Windows.Forms.Padding(3);
             this.tabPage5.Size = new System.Drawing.Size(356, 133);
-            this.tabPage5.TabIndex = 4;
-            this.tabPage5.Text = "RingSurvey";
+            this.tabPage5.TabIndex = 5;
+            this.tabPage5.Text = "Debug";
             this.tabPage5.UseVisualStyleBackColor = true;
             // 
-            // tabPage6
+            // button3
             // 
-            this.tabPage6.Controls.Add(this.button3);
-            this.tabPage6.Controls.Add(this.ClearDebugLog);
-            this.tabPage6.Controls.Add(this.TestWhitelist);
-            this.tabPage6.Controls.Add(this.LogWhitelist);
-            this.tabPage6.Controls.Add(this.DebugLog);
-            this.tabPage6.Location = new System.Drawing.Point(4, 22);
-            this.tabPage6.Name = "tabPage6";
-            this.tabPage6.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage6.Size = new System.Drawing.Size(356, 133);
-            this.tabPage6.TabIndex = 5;
-            this.tabPage6.Text = "Debug";
-            this.tabPage6.UseVisualStyleBackColor = true;
+            this.button3.Location = new System.Drawing.Point(168, 0);
+            this.button3.Name = "button3";
+            this.button3.Size = new System.Drawing.Size(75, 23);
+            this.button3.TabIndex = 9;
+            this.button3.Text = "Test";
+            this.button3.UseVisualStyleBackColor = true;
+            this.button3.Click += new System.EventHandler(this.button3_Click);
             // 
             // ClearDebugLog
             // 
@@ -281,6 +253,16 @@ namespace EDDCanonn
             this.LogWhitelist.Text = "PWhitelist";
             this.LogWhitelist.UseVisualStyleBackColor = true;
             this.LogWhitelist.Click += new System.EventHandler(this.LogWhitelist_Click);
+            // 
+            // tabPage4
+            // 
+            this.tabPage4.Location = new System.Drawing.Point(4, 22);
+            this.tabPage4.Name = "tabPage4";
+            this.tabPage4.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage4.Size = new System.Drawing.Size(356, 133);
+            this.tabPage4.TabIndex = 6;
+            this.tabPage4.Text = "GMO";
+            this.tabPage4.UseVisualStyleBackColor = true;
             // 
             // dataGridView1
             // 
@@ -440,16 +422,6 @@ namespace EDDCanonn
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
-            // button3
-            // 
-            this.button3.Location = new System.Drawing.Point(168, 0);
-            this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(75, 23);
-            this.button3.TabIndex = 9;
-            this.button3.Text = "Test";
-            this.button3.UseVisualStyleBackColor = true;
-            this.button3.Click += new System.EventHandler(this.button3_Click);
-            // 
             // EDDCanonnUserControl
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Inherit;
@@ -457,22 +429,20 @@ namespace EDDCanonn
             this.Controls.Add(this.tableLayoutPanel3);
             this.Controls.Add(this.tableLayoutPanel2);
             this.Controls.Add(this.dataGridView1);
-            this.Controls.Add(this.tabControl1);
+            this.Controls.Add(this.gridData);
             this.Controls.Add(this.tableLayoutPanel1);
             this.Name = "EDDCanonnUserControl";
             this.Size = new System.Drawing.Size(407, 512);
             this.Load += new System.EventHandler(this.EDDCanonnUserControl_Load);
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel1.PerformLayout();
-            this.tabControl1.ResumeLayout(false);
+            this.gridData.ResumeLayout(false);
+            this.tabPage1.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.gridAuto)).EndInit();
             this.tabPage2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView2)).EndInit();
-            this.tabPage3.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView3)).EndInit();
-            this.tabPage4.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView4)).EndInit();
-            this.tabPage6.ResumeLayout(false);
-            this.tabPage6.PerformLayout();
+            this.tabPage5.ResumeLayout(false);
+            this.tabPage5.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
             this.tableLayoutPanel2.ResumeLayout(false);
             this.tableLayoutPanel2.PerformLayout();
@@ -491,13 +461,11 @@ namespace EDDCanonn
         private Label labelSystemCount;
         private TextBox textBoxBodyCount;
         private TableLayoutPanel tableLayoutPanel1;
-        private TabControl tabControl1;
+        private TabControl gridData;
         private TabPage tabPage1;
         private TabPage tabPage2;
         private TabPage tabPage3;
-        private TabPage tabPage4;
         private TabPage tabPage5;
-        private TabPage tabPage6;
         private Button TestWhitelist;
         private Button LogWhitelist;
         private Button ClearDebugLog;
@@ -514,11 +482,11 @@ namespace EDDCanonn
         private Label label1;
         private TextBox textBox1;
         private DataGridView dataGridView2;
-        private DataGridView dataGridView3;
-        private DataGridView dataGridView4;
         private DataGridViewTextBoxColumn Column1;
         private DataGridViewTextBoxColumn Column2;
         private DataGridViewTextBoxColumn Column3;
         private Button button3;
+        private DataGridView gridAuto;
+        private TabPage tabPage4;
     }
 }
