@@ -35,19 +35,19 @@ namespace EDDCanonn.Base
         }
 
         // System
-        public string Name { get; set; }
-        public double X { get; set; }
-        public double Y { get; set; }
-        public double Z { get; set; }
-        public bool HasCoordinate { get; set; }
-        public long SystemAddress { get; set; }
-        public Dictionary<int,Body> Bodys { get; set; }
+        public string Name { get; set; } = null;
+        public double X { get; set; } = 0.0;
+        public double Y { get; set; } = 0.0;
+        public double Z { get; set; } = 0.0;
+        public bool HasCoordinate { get; set; } = false;
+        public long SystemAddress { get; set; } = 0;
+        public Dictionary<int,Body> Bodys { get; set; } = null;
 
         //Global
-        public int FSSTotalBodies { get; set; }
-        public int FSSTotalNonBodies { get; set; }
-        public List<JObject> FSSSignalList { get; set; }
-        public List<JObject> CodexEntryList { get; set; }
+        public int FSSTotalBodies { get; set; } = -1;
+        public int FSSTotalNonBodies { get; set; } = -1;
+        public List<JObject> FSSSignalList { get; set; } = null;
+        public List<JObject> CodexEntryList { get; set; } = null;
 
         public override string ToString()
         {
@@ -149,10 +149,10 @@ namespace EDDCanonn.Base
                 ScanData = new ScanData(body.ScanData);
         }
 
-        public int BodyID { get; set; }
-        public string NodeType { get; set; }
-        public string BodyName { get; set; }
-        public ScanData ScanData { get; set; }
+        public int BodyID { get; set; } = 0;
+        public string NodeType { get; set; } = null;
+        public string BodyName { get; set; } = null;
+        public ScanData ScanData { get; set; } = null;
     }
 
     public class ScanData
@@ -174,15 +174,15 @@ namespace EDDCanonn.Base
             Genuses = scanData.Genuses?.Select(j => new JObject(j)).ToList() ?? new List<JObject>();
         }
 
-        public bool IsPlanet { get; set; }
-        public string ScanType { get; set; }
-        public int BodyID { get; set; }
-        public bool HasRings { get; set; }
-        public List<JObject> Rings { get; set; }
-        public List<JObject> Signals { get; set; }
-        public List<JObject> Organics { get; set; }
-        public List<JObject> SurfaceFeatures { get; set; }
-        public List<JObject> Genuses { get; set; }
+        public bool IsPlanet { get; set; } = false;
+        public string ScanType { get; set; } = null;
+        public int BodyID { get; set; } = 0;
+        public bool HasRings { get; set; } = false;
+        public List<JObject> Rings { get; set; } = null;
+        public List<JObject> Signals { get; set; } = null;
+        public List<JObject> Organics { get; set; } = null;
+        public List<JObject> SurfaceFeatures { get; set; } = null;
+        public List<JObject> Genuses { get; set; } = null;
     }
 
 }
