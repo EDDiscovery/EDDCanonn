@@ -269,13 +269,13 @@ namespace EDDCanonn
             gameState["systemAddress"] = je.systemaddress;
             gameState["systemCoordinates"] = JArray.FromObject(new double[] { je.x, je.y, je.z });
 
-            string bodyName = rawEvent["BodyName"]?.ToString();
+            string bodyName = rawEvent["BodyName"].Value?.ToString();
             if (!string.IsNullOrEmpty(bodyName))
                 gameState["bodyName"] = bodyName;
             else if (!string.IsNullOrEmpty(je.bodyname) && je.bodyname != "Unknown")
                 gameState["bodyName"] = je.bodyname;
 
-            string stationName = rawEvent["StationName"]?.ToString();
+            string stationName = rawEvent["StationName"].Value?.ToString();
             if (!string.IsNullOrEmpty(stationName))
                 gameState["station"] = stationName;
             else if (!string.IsNullOrEmpty(je.stationname) && je.stationname != "Unknown")
@@ -360,19 +360,12 @@ namespace EDDCanonn
         #region ProcessEvents
         private void ProcessEvent(JournalEntry je)
         {
-
-            if (systemData == null)
-                systemData = new SystemData(); //Enforces encapsulation and creates a new SystemData instance internally, disregarding any parameters.
-
             try
             {
                 JObject eventData = je.json.JSONParse().Object();
 
                 switch (je.eventid)
                 {
-                    case "FSDJump":
-                        ProcessNewSystem(eventData);
-                        break;
                     case "Scan":
                         ProcessScan(eventData);
                         break;
@@ -406,7 +399,7 @@ namespace EDDCanonn
 
             lock (_lockSystemData)
             {
-                systemData.Name = eventData["StarSystem"]?.ToString();
+                systemData.Name = eventData["StarSystem"].Value?.ToString();
                 systemData.SystemAddress = eventData["SystemAddress"]?.ToObject<long>() ?? 0;
 
                 if (eventData["StarPos"] != null)
@@ -428,7 +421,7 @@ namespace EDDCanonn
                     //Primitives
                     BodyID = body.BodyID,
                     IsPlanet = eventData.Contains("PlanetClass"),
-                    ScanType = eventData["ScanType"]?.ToString(),
+                    ScanType = eventData["ScanType"].Value?.ToString(),
 
                     //List<JObject>  
                     Signals = CanonnHelper.GetJObjectList(eventData, "Signals"),
@@ -443,7 +436,7 @@ namespace EDDCanonn
                 //Primitives
                 body.ScanData.BodyID = body.BodyID;
                 body.ScanData.IsPlanet = eventData.Contains("PlanetClass");
-                body.ScanData.ScanType = eventData["ScanType"]?.ToString();
+                body.ScanData.ScanType = eventData["ScanType"].Value?.ToString();
 
                 //List<JObject> : AddRange(field.OfType<JObject>().Where(s => !body.ScanData.field.Any(existing => JToken.DeepEquals(existing, s)))) --> Should work?
                 if (eventData["Signals"] is JArray signals)
@@ -486,12 +479,18 @@ namespace EDDCanonn
 
         private void ProcessScan(JObject eventData)
         {
+            if (systemData == null)
+                systemData = new SystemData(); //Enforces encapsulation and creates a new SystemData instance internally, disregarding any parameters.
+
             lock (_lockSystemData)
             {
                 if (systemData.Bodys == null)
                 {
                     systemData.Bodys = new Dictionary<int, Body>();
                 }
+
+                if (eventData["BodyID"]?.Value?.ToString()?.Contains("Belt") == true)
+                    return;
 
                 int bodyId = eventData["BodyID"]?.ToObject<int>() ?? -1;
 
@@ -505,8 +504,9 @@ namespace EDDCanonn
                     body = new Body
                     {
                         BodyID = bodyId,
-                        BodyName = eventData["BodyName"]?.ToString(),
+                        BodyName = eventData["BodyName"].Value?.ToString(),
                     };
+                    systemData.Bodys[bodyId] = body;
                 }
                 else
                     body = systemData.Bodys[bodyId];
@@ -518,6 +518,9 @@ namespace EDDCanonn
 
         private void ProcessFSSDiscoveryScan(JObject eventData)
         {
+            if (systemData == null)
+                systemData = new SystemData(); //Enforces encapsulation and creates a new SystemData instance internally, disregarding any parameters.
+
             lock (_lockSystemData)
             {
                 systemData.FSSTotalBodies = eventData["BodyCount"]?.ToObject<int>() ?? 0;
@@ -553,7 +556,7 @@ namespace EDDCanonn
         #region ProcessCallbackSystem
         public void ProcessCallbackSystem(JObject root)
         {
-            if (root == null || root.IsNull || root.Count == 0) // If this is true after a ‘Location’ event, the system is later initialised via that event.
+            if (root == null || root.Count == 0) // If this is true after a ‘Location’ event, the system is later initialised via that event.
                 return;
 
             if (systemData == null)
@@ -596,7 +599,7 @@ namespace EDDCanonn
         private void ProcessCallbackSystemData(JObject system)
         {
             // Extract and populate main system details
-            systemData.Name = system["Name"]?.ToString();
+            systemData.Name = system["Name"].Value?.ToString();
             systemData.X = system["X"]?.ToObject<double>() ?? 0.0;
             systemData.Y = system["Y"]?.ToObject<double>() ?? 0.0;
             systemData.Z = system["Z"]?.ToObject<double>() ?? 0.0;
@@ -614,7 +617,16 @@ namespace EDDCanonn
                 string nodeKey = property.Key;
                 JObject starNode = property.Value as JObject;
 
-                if (starNode == null)
+                if (starNode == null || starNode.Count == 0)
+                {
+                    continue;
+                }
+
+                //  if (!(starNode["NodeType"].Value?.ToString() == "star" || starNode["NodeType"].Value?.ToString() == "body")){
+                //       continue;
+                //   }
+
+                if (starNode["NodeType"].Value?.ToString() == "belt")
                 {
                     continue;
                 }
@@ -641,8 +653,8 @@ namespace EDDCanonn
                 {
                     //Primitives
                     BodyID = bodyId,
-                    NodeType = starNode["NodeType"]?.ToString(),
-                    BodyName = starNode["BodyDesignator"]?.ToString(),
+                    NodeType = starNode["NodeType"].Value?.ToString(),
+                    BodyName = starNode["BodyDesignator"].Value?.ToString(),
                 };
 
 
@@ -652,7 +664,7 @@ namespace EDDCanonn
                     body.ScanData = new ScanData
                     {
                         //Primitives
-                        ScanType = scanDataNode["ScanType"]?.ToString(),
+                        ScanType = scanDataNode["ScanType"].Value?.ToString(),
                         BodyID = scanDataNode["BodyID"]?.ToObject<int>() ?? 0,
                         IsPlanet = scanDataNode["IsPlanet"]?.ToObject<bool>() ?? false,                      
                         HasRings = scanDataNode["HasRings"]?.ToObject<bool>() ?? false,
@@ -684,7 +696,7 @@ namespace EDDCanonn
 
         public enum RequestTag
         {
-            System
+            OnStart
         }
 
         public void DataResult(object requesttag, string data)
@@ -695,6 +707,7 @@ namespace EDDCanonn
                     throw new ArgumentNullException("requesttag or data cannot be null.");
 
                 JObject o = data.JSONParse().Object();
+
                 if (!(requesttag is RequestTag || requesttag is JObject))
                 {
                     return;
@@ -704,20 +717,43 @@ namespace EDDCanonn
                     dataHandler.StartTaskAsync(
                     () =>
                     {
-                        if (requesttag.Equals(RequestTag.System))
+                        if (requesttag is RequestTag rt)
                         {
-                            ProcessCallbackSystem(o);
-                        }
-                        else if (requesttag is JObject jb && jb["event"].Value?.ToString() == "Location")
-                        {
-                            ProcessCallbackSystem(o);
-                            if (systemData == null) //If the game previously crashed during the jump and no system data was previously saved by EDD.
-                                ProcessNewSystem(jb);
-
-                            draw();
+                            if (rt.Equals(RequestTag.OnStart))
+                            {
+                                lock (_lockSystemData)
+                                    ProcessCallbackSystem(o);
+                                draw();
+                            }
                         }
                         else
-                            return;
+                        {
+                            if (requesttag is JObject jb)
+                            {
+                                if (jb["event"].Value?.ToString() == "Location")
+                                {
+                                    lock (_lockSystemData)
+                                    {
+                                        ProcessCallbackSystem(o);
+                                        if (systemData == null) //If the game previously crashed during the jump and no system data was previously saved by EDD.
+                                            ProcessNewSystem(jb);
+                                    }
+                                    draw();
+                                }
+                                else if (jb["event"].Value?.ToString() == "FSDJump")
+                                {
+                                    lock (_lockSystemData)
+                                    {
+                                        ProcessCallbackSystem(o);
+                                        if (systemData == null) 
+                                            ProcessNewSystem(jb);
+                                    }
+                                    draw();
+                                }
+                                else
+                                    return;
+                            }
+                        }
                     },
                     ex =>
                     {
@@ -755,6 +791,7 @@ namespace EDDCanonn
         {
             DLLCallBack = EDDCanonnEDDClass.DLLCallBack;
             PanelCallBack = callbacks;
+            DLLCallBack.RequestScanData(RequestTag.OnStart, this, "", true);
         }
 
         public void NewFilteredJournal(JournalEntry je) //wip
@@ -769,12 +806,12 @@ namespace EDDCanonn
 
                     }
                         
-                    if (je.eventid.Equals("StartJump")) //Prepare data for the next system.
+                    if (je.eventid.Equals("FSDJump")) //Prepare data for the next system.
                     {
                         resetSystemData();
                         Invoke((MethodInvoker)delegate
                         {
-                            DLLCallBack.RequestScanData(RequestTag.System, this, je.systemname, true);
+                            DLLCallBack.RequestScanData(je.json.JSONParseObject(), this, je.systemname, true);
                         });
                     }
                     else if (je.eventid.Equals("Location")) //Prepare data for the next system. Include ‘Location’ event as requestTag in case of a crash. 
@@ -787,6 +824,7 @@ namespace EDDCanonn
                     }
                     else
                         ProcessEvent(je);
+                    draw();
                 },
                 ex =>
                 {
@@ -799,7 +837,6 @@ namespace EDDCanonn
             {
                 Console.Error.WriteLine($"EDDCanonn: Unexpected error in NewFilteredJournal: {ex.Message}");
             }
-         //   draw();
         }
 
         private readonly object _lockStatusJson = new object();
@@ -939,22 +976,24 @@ namespace EDDCanonn
 
         private void button3_Click(object sender, EventArgs e)//wip
         {
-            string j = "{\"timestamp\":\"2025-01-30T23:26:25Z\",\"event\":\"Location\",\"Docked\":false,\"Taxi\":false,\"Multicrew\":false,\"StarSystem\":\"Bloomeau JR-W f1-604\",\"SystemAddress\":324420474069,\"StarPos\":[-4194.15625,-2202.65625,25199.71875],\"SystemAllegiance\":\"\",\"SystemEconomy\":\"$economy_None;\",\"SystemEconomy_Localised\":\"None\",\"SystemSecondEconomy\":\"$economy_None;\",\"SystemSecondEconomy_Localised\":\"None\",\"SystemGovernment\":\"$government_None;\",\"SystemGovernment_Localised\":\"None\",\"SystemSecurity\":\"$GAlAXY_MAP_INFO_state_anarchy;\",\"SystemSecurity_Localised\":\"Anarchy\",\"Population\":0,\"Body\":\"Bloomeau JR-W f1-604\",\"BodyID\":0,\"BodyType\":\"Star\"}";
-            JObject o = j.JSONParse().Object();
-
-            DLLCallBack.RequestScanData(o, this, "Bloomeau JR-W f1-60422", true);
+            DebugLog.AppendText(systemData?.ToString() + "\n");
         }
+
 
         private void draw()
         {
             SystemData system = deepCopySystemData();
+            
             if (system == null)
                 return;
 
 
             Invoke((MethodInvoker)delegate
             {
+                textBoxSystem.Clear();
                 textBoxSystem.AppendText(system.Name);
+                textBoxBodyCount.Clear();
+                textBoxBodyCount.AppendText(system.Bodys.Count + " / " + system.FSSTotalBodies);
             }); 
         }
     }
