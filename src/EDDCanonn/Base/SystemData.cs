@@ -1,11 +1,39 @@
 ﻿
 using System.Collections.Generic;
+using System.Linq;
 using QuickJSON;
 
 namespace EDDCanonn.Base
 {
     public class SystemData
     {
+       
+        public SystemData() { }
+        public SystemData(SystemData data)
+        { //deep copy
+            Name = data.Name;
+            X = data.X;
+            Y = data.Y;
+            Z = data.Z;
+            HasCoordinate = data.HasCoordinate;
+            SystemAddress = data.SystemAddress;
+
+            FSSTotalBodies = data.FSSTotalBodies;
+            FSSTotalNonBodies = data.FSSTotalNonBodies;
+
+            if (data.Bodys != null)
+            {
+                Bodys = new Dictionary<int, Body>();
+                foreach (KeyValuePair<int,Body> kvp in data.Bodys)
+                {
+                    Bodys[kvp.Key] = new Body(kvp.Value);
+                }
+            }
+
+            FSSSignalList = data.FSSSignalList?.Select(j => new JObject(j)).ToList() ?? new List<JObject>();
+            CodexEntryList = data.CodexEntryList?.Select(j => new JObject(j)).ToList() ?? new List<JObject>();
+        }
+
         // System
         public string Name { get; set; }
         public double X { get; set; }
@@ -111,6 +139,15 @@ namespace EDDCanonn.Base
 
     public class Body
     {
+        public Body() { }
+        public Body(Body body) { 
+            BodyID = body.BodyID;
+            NodeType = body.NodeType;
+            BodyName = body.BodyName;
+
+            ScanData = new ScanData(body.ScanData);
+        }
+
         public int BodyID { get; set; }
         public string NodeType { get; set; }
         public string BodyName { get; set; }
@@ -119,6 +156,23 @@ namespace EDDCanonn.Base
 
     public class ScanData
     {
+
+        public ScanData() { }
+
+        public ScanData(ScanData scanData)
+        { //deep copy
+            IsPlanet = scanData.IsPlanet;
+            ScanType = scanData.ScanType;
+            BodyID = scanData.BodyID;
+            HasRings = scanData.HasRings;
+
+            Rings = scanData.Rings?.Select(j => new JObject(j)).ToList() ?? new List<JObject>();
+            Signals = scanData.Signals?.Select(j => new JObject(j)).ToList() ?? new List<JObject>();
+            Organics = scanData.Organics?.Select(j => new JObject(j)).ToList() ?? new List<JObject>();
+            SurfaceFeatures = scanData.SurfaceFeatures?.Select(j => new JObject(j)).ToList() ?? new List<JObject>();
+            Genuses = scanData.Genuses?.Select(j => new JObject(j)).ToList() ?? new List<JObject>();
+        }
+
         public bool IsPlanet { get; set; }
         public string ScanType { get; set; }
         public int BodyID { get; set; }
