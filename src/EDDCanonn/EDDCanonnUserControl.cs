@@ -8,7 +8,7 @@ using System.Linq;
 using EDDCanonn.Base;
 using KdTree;
 using KdTree.Math;
-using static EDDCanonn.EDDCanonnUserControl;
+using System.Threading.Tasks;
 
 namespace EDDCanonn
 {
@@ -37,54 +37,78 @@ namespace EDDCanonn
         {
             try
             {
-                List<Dictionary<string, string>> records = CanonnHelper.ParseTsv(dataHandler.FetchData(CanonnHelper.PatrolUrl));
+                dataHandler.StartTaskAsync(
+                () =>
+                {                              
+                    List<Dictionary<string, string>> records = CanonnHelper.ParseTsv(dataHandler.FetchData(CanonnHelper.PatrolUrl));
+                    List<Task> _tasks = new List<Task>();
 
-                foreach (Dictionary<string, string> record in records)
+                    foreach (Dictionary<string, string> record in records)
+                    {
+                        try
+                        {
+                            string description = record.TryGetValue("Description", out string descriptionValue) 
+                                ? descriptionValue 
+                                : "uncategorized";
+
+                            bool enabled = record.TryGetValue("Enabled", out string enabledValue) 
+                                && enabledValue == "Y";
+
+                            string type = record.TryGetValue("Type", out string typeValue) 
+                                ? typeValue 
+                                : string.Empty;
+
+                            string url = record.TryGetValue("Url", out string urlValue) 
+                                ? urlValue 
+                                : string.Empty;
+
+                            if (!enabled)
+                                continue;                       
+
+                            if (type.Equals("tsv"))
+                            {
+                                _tasks.Add(dataHandler.StartTaskAsync(
+                                    () =>
+                                    {
+                                        CreateFromTSV(url, description);
+                                    },
+                                    ex =>
+                                    {
+                                        Console.Error.WriteLine($"EDDCanonn: Error Initialize Patrols -> {description}: {ex.Message}");
+                                    },
+                                    "InitializePatrol: " + description
+                                    ));
+                            }
+                            else if (type.Equals("json"))
+                            {
+                                _tasks.Add(dataHandler.StartTaskAsync(
+                                    () =>
+                                    {
+                                        CreateFromJson(url, description);
+                                    },
+                                    ex =>
+                                    {
+                                        Console.Error.WriteLine($"EDDCanonn: Error Initialize Patrols -> {description}: {ex.Message}");
+                                    },
+                                    "InitializePatrol: " + description
+                                    ));
+                            }
+
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.Error.WriteLine($"EDDCanonn: Error processing patrol record: {ex.Message}");
+                        }
+                    }
+
+                    Task.WaitAll(_tasks.ToArray()); // wip
+                },
+                ex =>
                 {
-                    try
-                    {
-                        string description = record.TryGetValue("Description", out string descriptionValue) ? descriptionValue : "uncategorized";
-                        bool enabled = record.TryGetValue("Enabled", out string enabledValue) && enabledValue == "Y";
-                        string type = record.TryGetValue("Type", out string typeValue) ? typeValue : string.Empty;
-                        string url = record.TryGetValue("Url", out string urlValue) ? urlValue : string.Empty;
-
-                        if (!enabled)
-                            continue;                       
-
-                        if (type.Equals("tsv"))
-                        {
-                            dataHandler.StartTaskAsync(
-                            () =>
-                            {
-                                CreateFromTSV(url, description);
-                            },
-                            ex =>
-                            {
-                                Console.Error.WriteLine($"EDDCanonn: Error Initialize Patrols -> {description}: {ex.Message}");
-                            },
-                            "InitializePatrol: " + description
-                            );
-                        }
-                        else if (type.Equals("json"))
-                        {
-                            dataHandler.StartTaskAsync(
-                            () =>
-                            {
-                                CreateFromJson(url, description);
-                            },
-                            ex =>
-                            {
-                                Console.Error.WriteLine($"EDDCanonn: Error Initialize Patrols -> {description}: {ex.Message}");
-                            },
-                            "InitializePatrol: " + description
-                            );
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.Error.WriteLine($"EDDCanonn: Error processing patrol record: {ex.Message}");
-                    }
-                }
+                    Console.Error.WriteLine($"EDDCanonn: Error Initialize Patrols HeadThread: {ex.Message}");
+                },
+                "InitializePatrol - HeadThread"
+                );
             }
             catch (Exception ex)
             {
@@ -899,8 +923,7 @@ namespace EDDCanonn
         public void Initialise(EDDPanelCallbacks callbacks, int displayid, string themeasjson, string configuration)
         {
             DLLCallBack = EDDCanonnEDDClass.DLLCallBack;
-            PanelCallBack = callbacks;
-            DLLCallBack.RequestScanData(RequestTag.OnStart, this, "", true);
+            PanelCallBack = callbacks;           
         }
 
         public void NewFilteredJournal(JournalEntry je) //wip
@@ -987,7 +1010,7 @@ namespace EDDCanonn
 
         public void InitialDisplay()
         {
-            //wip
+            DLLCallBack.RequestScanData(RequestTag.OnStart, this, "", true);
         }
 
         public void LoadLayout()
