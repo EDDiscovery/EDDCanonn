@@ -17,20 +17,24 @@ namespace EDDCanonn.Base
             CategoryTrees["all"] = new KdTree<float, Patrol>(3, new FloatMath());
         }
 
+        private readonly object _addLock = new object();
         public void Add(string category, KdTree<float, Patrol> tree)
         {
-            if (CategoryTrees.ContainsKey(category))
-                return;
-            CategoryTrees[category] = tree;
+            lock (_addLock)
+            {
+                if (CategoryTrees.ContainsKey(category))
+                    return;
+                CategoryTrees[category] = tree;
+
+                foreach (KdTreeNode<float, Patrol> node in tree)
+                    CategoryTrees["all"].Add(node.Point, node.Value);
+            }
         }
 
         public List<(string category, Patrol patrol, double distance)> FindPatrolsInRange(string category, double x, double y, double z, int rangeIndex)
         {
             List<(string category, Patrol patrol, double distance)> result = new List<(string category, Patrol patrol, double distance)>();
 
-            if (category.ToLower() == "all")
-                SearchCategory("all", x, y, z, maxRanges[rangeIndex], result);
-            else
                 SearchCategory(category, x, y, z, maxRanges[rangeIndex], result);
 
             return result.OrderBy(t => t.distance).Take(500).ToList();
@@ -63,7 +67,7 @@ namespace EDDCanonn.Base
 
     public class Patrol
     {
-        public Patrol(double x, double y, double z, string instructions, string url, long id64 = -1, string patrolType = null)
+        public Patrol(float x, float y, float z, string instructions, string url, long id64 = -1, string patrolType = null)
         {
             X = x;
             Y = y;
@@ -76,9 +80,9 @@ namespace EDDCanonn.Base
 
         public string PatrolType { get; set; }
         public long Id64 { get; set; }
-        public double X { get; set; }
-        public double Y { get; set; }
-        public double Z { get; set; }
+        public float X { get; set; }
+        public float Y { get; set; }
+        public float Z { get; set; }
         public string Instructions { get; set; }
         public string Url { get; set; }
     }
