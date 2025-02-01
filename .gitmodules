@@ -1,0 +1,3 @@
+[submodule "src/KdTree"]
+	path = src/KdTree
+	url = https://github.com/codeandcats/KdTree.git
