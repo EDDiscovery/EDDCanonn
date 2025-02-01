@@ -6,6 +6,9 @@ using System.Collections.Generic;
 using QuickJSON;
 using System.Linq;
 using EDDCanonn.Base;
+using KdTree;
+using KdTree.Math;
+using static EDDCanonn.EDDCanonnUserControl;
 
 namespace EDDCanonn
 {
@@ -36,35 +39,98 @@ namespace EDDCanonn
             {
                 List<Dictionary<string, string>> records = CanonnHelper.ParseTsv(dataHandler.FetchData(CanonnHelper.PatrolUrl));
 
-
-
                 foreach (Dictionary<string, string> record in records)
                 {
-                    string id = record["Id"];
-                    string enabled = record["Enabled"];
-                    string description = record["Description"];
-                    string type = record["Type"];
-                    string url = record["Url"];
+                    try
+                    {
+                        string description = record.TryGetValue("Description", out string descriptionValue) ? descriptionValue : "uncategorized";
+                        bool enabled = record.TryGetValue("Enabled", out string enabledValue) && enabledValue == "Y";
+                        string type = record.TryGetValue("Type", out string typeValue) ? typeValue : string.Empty;
+                        string url = record.TryGetValue("Url", out string urlValue) ? urlValue : string.Empty;
 
-                    if (enabled.Equals("N"))
-                        continue;
+                        if (!enabled)
+                            continue;                       
 
-                    if (type.Equals("tsv"))
-                        CreateFromTSV(url);
+                        if (type.Equals("tsv"))
+                        {
+                            dataHandler.StartTaskAsync(
+                            () =>
+                            {
+                                CreateFromTSV(url, description);
+                            },
+                            ex =>
+                            {
+                                Console.Error.WriteLine($"EDDCanonn: Error Initialize Patrols -> {description}: {ex.Message}");
+                            },
+                            "InitializePatrol: " + description
+                            );
+                        }
+                        else if (type.Equals("json"))
+                        {
+                            dataHandler.StartTaskAsync(
+                            () =>
+                            {
+                                CreateFromJson(url, description);
+                            },
+                            ex =>
+                            {
+                                Console.Error.WriteLine($"EDDCanonn: Error Initialize Patrols -> {description}: {ex.Message}");
+                            },
+                            "InitializePatrol: " + description
+                            );
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.Error.WriteLine($"EDDCanonn: Error processing patrol record: {ex.Message}");
+                    }
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"EDDCanonn: Error in InitializePatrols: {ex.Message}");
+            }
         }
 
-        private void CreateFromTSV(string url)
-        {
-            List<Dictionary<string, string>> records = CanonnHelper.ParseTsv(dataHandler.FetchData(url));
 
-            foreach (Dictionary<string, string> record in records)
+        private void CreateFromTSV(string url, string category)
+        {
+            try
             {
-                string PatrolType = record["Patrol"] ?? record["Type"];
-                Console.WriteLine($"EDDCanonn: " + PatrolType);
+                KdTree<float, Patrol> kdT = new KdTree<float, Patrol>(3, new FloatMath());
+                List<Dictionary<string, string>> records = CanonnHelper.ParseTsv(dataHandler.FetchData(url));
+                foreach (Dictionary<string, string> record in records)
+                {
+                    try
+                    {
+                        string patrolType = record.TryGetValue("Patrol", out string patrolValue) ? patrolValue :
+                                            record.TryGetValue("Type", out string typeValue) ? typeValue : string.Empty;
+                        long id64 = long.TryParse(record.TryGetValue("Id64", out string id64Value) ? id64Value : string.Empty, out long parsedId64) ? parsedId64 : -1;
+                        float x = float.TryParse(record.TryGetValue("X", out string xValue) ? xValue : string.Empty, out float parsedX) ? parsedX : 0.0f;
+                        float y = float.TryParse(record.TryGetValue("Y", out string yValue) ? yValue : string.Empty, out float parsedY) ? parsedY : 0.0f;
+                        float z = float.TryParse(record.TryGetValue("Z", out string zValue) ? zValue : string.Empty, out float parsedZ) ? parsedZ : 0.0f;
+                        string instructions = record.TryGetValue("Instructions", out string instructionsValue) ? instructionsValue : "none";
+                        string urlp = record.TryGetValue("Url", out string urlValue) ? urlValue : string.Empty;
+                        Patrol patrol = new Patrol(x, y, z, instructions, urlp, id64, patrolType);
+                        kdT.Add(new float[] { patrol.X, patrol.Y, patrol.Z }, patrol);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.Error.WriteLine($"EDDCanonn: Error processing patrol record: {ex.Message}");
+                    }
+                }
+                patrols.Add(category, kdT);
             }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"EDDCanonn: Error in CreateFromTSV for category {category}: {ex.Message}");
+            }
+        }
+
+
+        private void CreateFromJson(string url, string category)
+        {
+
         }
 
         #endregion
@@ -366,7 +432,8 @@ namespace EDDCanonn
 
         private SystemData deepCopySystemData()
         {
-            lock (_lockSystemData){
+            lock (_lockSystemData)
+            {
                 if (_systemData != null)
                     return new SystemData(_systemData);
                 else return null;
@@ -380,16 +447,17 @@ namespace EDDCanonn
                 lock (_lockSystemData)
                 {
                     if (_systemData == null)
-                    return null;
-                
+                        return null;
+
                     return _systemData;
-                } 
+                }
             }
-            set {
+            set
+            {
                 lock (_lockSystemData)
                 {
                     if (_systemData != null)
-                    return;
+                        return;
 
                     _systemData = new SystemData(); //Enforces encapsulation.
                 }
@@ -553,7 +621,7 @@ namespace EDDCanonn
                     body = systemData.Bodys[bodyId];
 
 
-                fetchScanData(eventData,body);
+                fetchScanData(eventData, body);
             }
         }
 
@@ -707,11 +775,11 @@ namespace EDDCanonn
                         //Primitives
                         ScanType = scanDataNode["ScanType"].Value?.ToString(),
                         BodyID = scanDataNode["BodyID"]?.ToObject<int>() ?? 0,
-                        IsPlanet = scanDataNode["IsPlanet"]?.ToObject<bool>() ?? false,                      
+                        IsPlanet = scanDataNode["IsPlanet"]?.ToObject<bool>() ?? false,
                         HasRings = scanDataNode["HasRings"]?.ToObject<bool>() ?? false,
 
                         //List<JObject>    
-                        Signals = CanonnHelper.GetJObjectList(scanDataNode,"Signals"),
+                        Signals = CanonnHelper.GetJObjectList(scanDataNode, "Signals"),
                         SurfaceFeatures = CanonnHelper.GetJObjectList(scanDataNode, "SurfaceFeatures"),
                         Rings = CanonnHelper.GetJObjectList(scanDataNode, "Rings"),
                         Organics = CanonnHelper.GetJObjectList(scanDataNode, "Organics"),
@@ -786,7 +854,7 @@ namespace EDDCanonn
                                     lock (_lockSystemData)
                                     {
                                         ProcessCallbackSystem(o);
-                                        if (systemData == null) 
+                                        if (systemData == null)
                                             ProcessNewSystem(jb);
                                     }
                                     draw();
@@ -846,7 +914,7 @@ namespace EDDCanonn
                     {
 
                     }
-                        
+
                     if (je.eventid.Equals("FSDJump")) //Prepare data for the next system.
                     {
                         resetSystemData();
@@ -1024,7 +1092,7 @@ namespace EDDCanonn
         private void draw()
         {
             SystemData system = deepCopySystemData();
-            
+
             if (system == null)
                 return;
 
@@ -1035,7 +1103,7 @@ namespace EDDCanonn
                 textBoxSystem.AppendText(system.Name);
                 textBoxBodyCount.Clear();
                 textBoxBodyCount.AppendText(system.Bodys?.Count + " / " + system.FSSTotalBodies);
-            }); 
+            });
         }
     }
 }
