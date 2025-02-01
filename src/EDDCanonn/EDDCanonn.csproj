@@ -34,10 +34,14 @@
     <Reference Include="EDDDLLInterfaces">
       <HintPath>..\EDDDLLInterfaces\EDDDLLInterfaces.dll</HintPath>
     </Reference>
+    <Reference Include="KdTreeLib, Version=1.4.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\KdTree\KdTreeLib\bin\Debug\net45\KdTreeLib.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
-    <Reference Include="System.Memory, Version=4.0.1.2, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL" />
+    <Reference Include="System.Numerics" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -48,6 +52,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Base\ActionDataHandler.cs" />
+    <Compile Include="Base\Patrols.cs" />
     <Compile Include="Base\SystemData.cs" />
     <Compile Include="Base\TestData.cs" />
     <Compile Include="Base\WhitelistData.cs" />
@@ -84,12 +89,14 @@
     <Content Include="Resources\canonn.png" />
     <Content Include="Resources\Test.txt" />
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>echo Copying DLL to ..\..\..\appdata and c:\users\%25USERNAME%25\appdata\local\eddiscovery\dll
+    <PostBuildEvent>
 copy EDDCanonn*.dll ..\..\..\appdata
+copy EDDCanonn*.* c:\users\%25USERNAME%25\appdata\local\eddiscovery\dll
 
-copy EDDCanonn*.* c:\users\%25USERNAME%25\appdata\local\eddiscovery\dll</PostBuildEvent>
+copy KdTreeLib*.dll ..\..\..\appdata
+copy KdTreeLib*.* c:\users\%25USERNAME%25\appdata\local\eddiscovery\dll
+	</PostBuildEvent>
   </PropertyGroup>
 </Project>

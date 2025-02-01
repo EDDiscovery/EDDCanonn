@@ -25,8 +25,49 @@ namespace EDDCanonn
         {
             dataHandler = new ActionDataHandler();
             InitializeWhitelist();
+            InitializePatrols();
         }
 
+        #region Patrol
+        private Patrols patrols = new Patrols();
+        private void InitializePatrols()
+        {
+            try
+            {
+                List<Dictionary<string, string>> records = CanonnHelper.ParseTsv(dataHandler.FetchData(CanonnHelper.PatrolUrl));
+
+
+
+                foreach (Dictionary<string, string> record in records)
+                {
+                    string id = record["Id"];
+                    string enabled = record["Enabled"];
+                    string description = record["Description"];
+                    string type = record["Type"];
+                    string url = record["Url"];
+
+                    if (enabled.Equals("N"))
+                        continue;
+
+                    if (type.Equals("tsv"))
+                        CreateFromTSV(url);
+                }
+            }
+            catch { }
+        }
+
+        private void CreateFromTSV(string url)
+        {
+            List<Dictionary<string, string>> records = CanonnHelper.ParseTsv(dataHandler.FetchData(url));
+
+            foreach (Dictionary<string, string> record in records)
+            {
+                string PatrolType = record["Patrol"] ?? record["Type"];
+                Console.WriteLine($"EDDCanonn: " + PatrolType);
+            }
+        }
+
+        #endregion
         #region WhiteList
 
         //this generates a data structure like this:
@@ -489,7 +530,7 @@ namespace EDDCanonn
                     systemData.Bodys = new Dictionary<int, Body>();
                 }
 
-                if (eventData["BodyID"]?.Value?.ToString()?.Contains("Belt") == true)
+                if (eventData["BodyName"]?.Value?.ToString()?.Contains("Belt") == true)
                     return;
 
                 int bodyId = eventData["BodyID"]?.ToObject<int>() ?? -1;
@@ -824,7 +865,7 @@ namespace EDDCanonn
                     }
                     else
                         ProcessEvent(je);
-                    draw();
+                    draw(); //wip
                 },
                 ex =>
                 {
@@ -993,7 +1034,7 @@ namespace EDDCanonn
                 textBoxSystem.Clear();
                 textBoxSystem.AppendText(system.Name);
                 textBoxBodyCount.Clear();
-                textBoxBodyCount.AppendText(system.Bodys.Count + " / " + system.FSSTotalBodies);
+                textBoxBodyCount.AppendText(system.Bodys?.Count + " / " + system.FSSTotalBodies);
             }); 
         }
     }

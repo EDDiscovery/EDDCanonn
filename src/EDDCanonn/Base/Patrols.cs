@@ -4,6 +4,7 @@ using System.Linq;
 using KdTree;
 using KdTree.Math;
 
+
 namespace EDDCanonn.Base
 {
     public class Patrols
@@ -62,9 +63,19 @@ namespace EDDCanonn.Base
 
     public class Patrol
     {
+        public Patrol(double x, double y, double z, string instructions, string url, long id64 = -1, string patrolType = null)
+        {
+            X = x;
+            Y = y;
+            Z = z;
+            Instructions = instructions;
+            Url = url;
+            Id64 = id64;
+            PatrolType = patrolType;
+        }
+
         public string PatrolType { get; set; }
-        public string Type { get; set; }
-        public long Id64 { get; set; } = -1;
+        public long Id64 { get; set; }
         public double X { get; set; }
         public double Y { get; set; }
         public double Z { get; set; }
