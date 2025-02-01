@@ -10,52 +10,58 @@ namespace EDDCanonn.Base
     public class ActionDataHandler
     {
         #region Threading
-        public void StartTaskAsync(Action job, Action<Exception> errorCallback = null, string name = "default")
+        public Task StartTaskAsync(Action job, Action<Exception> errorCallback = null, string name = "default")
         {
-            StartTask(() =>
+            return StartTask(() =>
             {
                 try
-                {                 
+                {
                     job?.Invoke();
                 }
                 catch (Exception ex)
                 {
                     errorCallback?.Invoke(ex);
                 }
-            },name);
+            }, name);
         }
 
         private readonly List<Task> _tasks = new List<Task>();
         private readonly object _lock = new object();
 
-        private void StartTask(Action job,string name)
+        private Task StartTask(Action job, string name)
         {
             lock (_lock)
             {
                 if (_isClosing)
-                    return;
+                    return Task.CompletedTask;
 
                 Task task = Task.Run(() =>
-            {
-                try
-                {          
-                    job.Invoke();
-                }
-                catch (Exception ex)
                 {
-                    Console.Error.WriteLine($"EDDCanonn: Error in job execution: {ex.Message}");
-                    throw;
-                }
-            });
+                    try
+                    {
+                        job.Invoke();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.Error.WriteLine($"EDDCanonn: Error in job execution: {ex.Message}");
+                        throw;
+                    }
+                });
+
                 _tasks.Add(task);
 
                 Console.WriteLine($"EDDCanonn: Task registered. [ID: {task.Id}, Name: {name}, Status: {task.Status}]");
 
                 task.ContinueWith(t =>
                 {
-                    _tasks.Remove(t);
-                    Console.WriteLine($"EDDCanonn: Task finished. [ID: {t.Id}, Name: {name}, Final Status: {t.Status}]");
+                    lock (_lock)
+                    {
+                        _tasks.Remove(t);
+                        Console.WriteLine($"EDDCanonn: Task finished. [ID: {t.Id}, Name: {name}, Final Status: {t.Status}]");
+                    }
                 });
+
+                return task;
             }
         }
 
@@ -68,6 +74,7 @@ namespace EDDCanonn.Base
             Task.WaitAll(_tasks.ToArray());
         }
         #endregion
+
 
         #region Networking 
         public void FetchDataAsync(string fullUrl, Action<string> callback, Action<Exception> errorCallback = null, string name = "default")
@@ -136,7 +143,7 @@ namespace EDDCanonn.Base
                 HttpWebRequest request = (HttpWebRequest)WebRequest.Create(fullUrl);
                 request.Method = "GET";
                 request.Accept = "application/json";
-                request.Timeout = 10000;
+                request.Timeout = 20000;
 
                 using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
                 {
@@ -168,7 +175,7 @@ namespace EDDCanonn.Base
                 request.Method = "POST";
                 request.ContentType = contentType;
                 request.ContentLength = Encoding.UTF8.GetByteCount(postData);
-                request.Timeout = 10000;
+                request.Timeout = 20000;
 
                 using (StreamWriter writer = new StreamWriter(request.GetRequestStream()))
                 {
