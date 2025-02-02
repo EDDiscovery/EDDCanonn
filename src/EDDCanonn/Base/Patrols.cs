@@ -9,7 +9,6 @@ namespace EDDCanonn.Base
 {
     public class Patrols
     {
-        private readonly int[] maxRanges = { 6, 24, 120, 720, 5040, 40320 };
         public Dictionary<string, KdTree<float, Patrol>> CategoryTrees { get; set; } = new Dictionary<string, KdTree<float, Patrol>>();
 
         public Patrols()
@@ -31,11 +30,11 @@ namespace EDDCanonn.Base
             }
         }
 
-        public List<(string category, Patrol patrol, double distance)> FindPatrolsInRange(string category, double x, double y, double z, int rangeIndex)
+        public List<(string category, Patrol patrol, double distance)> FindPatrolsInRange(string category, double x, double y, double z, double maxDistance)
         {
             List<(string category, Patrol patrol, double distance)> result = new List<(string category, Patrol patrol, double distance)>();
 
-                SearchCategory(category, x, y, z, maxRanges[rangeIndex], result);
+                SearchCategory(category, x, y, z, maxDistance, result);
 
             return result.OrderBy(t => t.distance).Take(500).ToList();
         }

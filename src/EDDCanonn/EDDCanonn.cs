@@ -14,6 +14,7 @@ namespace EDDCanonn
 
         public string EDDInitialise(string vstr, string dllfolder, EDDDLLInterfaces.EDDDLLIF.EDDCallBacks cb)
         {
+            
             DLLCallBack = cb;
             Debug.WriteLine("EDDCanonn Init func " + vstr + " " + dllfolder);
 
