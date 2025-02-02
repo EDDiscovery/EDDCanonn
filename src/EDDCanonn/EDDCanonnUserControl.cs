@@ -399,64 +399,97 @@ namespace EDDCanonn
         #endregion
 
         #region CanonnPayload
-        public JObject BuildPayload(JournalEntry je)//wip
+        public JObject BuildPayload(JournalEntry je)
         {
+            //Root objects
             JObject gameState = new JObject();
             JObject rawEvent = je.json.JSONParse().Object();
             JObject status = getStatusJson();
 
+            //Constants and other fields
             string clientVersion = "EDDCanonnClient v0.1";
             string platform = "PC";
 
-            JObject payload = new JObject();
+            //Prepare payload
+            JObject payload = new JObject
+            {
+                ["gameState"] = gameState
+            };
 
-            payload["gameState"] = gameState;
-
+            //System information
             gameState["systemName"] = je.systemname;
             gameState["systemAddress"] = je.systemaddress;
             gameState["systemCoordinates"] = JArray.FromObject(new double[] { je.x, je.y, je.z });
 
+            //Body name
             string bodyName = rawEvent["BodyName"].Value?.ToString();
             if (!string.IsNullOrEmpty(bodyName))
+            {
                 gameState["bodyName"] = bodyName;
+            }
             else if (!string.IsNullOrEmpty(je.bodyname) && je.bodyname != "Unknown")
+            {
                 gameState["bodyName"] = je.bodyname;
+            }
 
+            //Station name
             string stationName = rawEvent["StationName"].Value?.ToString();
             if (!string.IsNullOrEmpty(stationName))
+            {
                 gameState["station"] = stationName;
+            }
             else if (!string.IsNullOrEmpty(je.stationname) && je.stationname != "Unknown")
+            {
                 gameState["station"] = je.stationname;
+            }
 
-            if (status != null && status.Contains("Pos") && status["Pos"]["ValidPosition"]?.ToObject<bool>() == true)
+            //Data from status
+            if (status != null &&
+                status.Contains("Pos") &&
+                status["Pos"]["ValidPosition"]?.ToObject<bool>() == true)
             {
                 if (status["Pos"]["Latitude"] != null)
+                {
                     gameState["latitude"] = status["Pos"]["Latitude"].ToObject<double>();
-
+                }
                 if (status["Pos"]["Longitude"] != null)
+                {
                     gameState["longitude"] = status["Pos"]["Longitude"].ToObject<double>();
+                }
             }
 
+            //More data from status
             if (status != null)
             {
-                if (status.Contains("Temperature") && status["Temperature"] != null && status["Temperature"].ToObject<double>() >= 0)
+                if (status.Contains("Temperature") &&
+                    status["Temperature"] != null &&
+                    status["Temperature"].ToObject<double>() >= 0)
+                {
                     gameState["temperature"] = status["Temperature"].ToObject<double>();
+                }
 
-                if (status.Contains("Gravity") && status["Gravity"] != null && status["Gravity"].ToObject<double>() >= 0)
+                if (status.Contains("Gravity") &&
+                    status["Gravity"] != null &&
+                    status["Gravity"].ToObject<double>() >= 0)
+                {
                     gameState["gravity"] = status["Gravity"].ToObject<double>();
+                }
             }
 
+            //Additionals
             gameState["clientVersion"] = clientVersion;
             gameState["isBeta"] = je.beta;
             gameState["platform"] = platform;
             gameState["odyssey"] = je.odyssey;
 
+            //Finalize
             payload["rawEvent"] = rawEvent;
             payload["eventType"] = je.eventid;
             payload["cmdrName"] = je.cmdrname;
 
             return payload;
         }
+
         #endregion
 
         //This only affects the data structure for visual feedback.
@@ -848,69 +881,40 @@ namespace EDDCanonn
             OnStart
         }
 
-        public void DataResult(object requesttag, string data)
+        public void DataResult(object requestTag, string data)
         {
             try
             {
-                if (requesttag == null || data == null)
-                    throw new ArgumentNullException("requesttag or data cannot be null.");
+                if (requestTag == null || data == null)
+                    throw new ArgumentNullException("requestTag or data cannot be null.");
 
                 JObject o = data.JSONParse().Object();
-
-                if (!(requesttag is RequestTag || requesttag is JObject))
-                {
+                if (!(requestTag is RequestTag && requestTag is JObject))
                     return;
-                }
-                else
+
+                dataHandler.StartTaskAsync(() =>
                 {
-                    dataHandler.StartTaskAsync(
-                    () =>
+                    if (requestTag is RequestTag rt && rt.Equals(RequestTag.OnStart))
                     {
-                        if (requesttag is RequestTag rt)
-                        {
-                            if (rt.Equals(RequestTag.OnStart))
-                            {
-                                lock (_lockSystemData)
-                                    ProcessCallbackSystem(o);
-                                draw();
-                            }
-                        }
-                        else
-                        {
-                            if (requesttag is JObject jb)
-                            {
-                                if (jb["event"].Value?.ToString() == "Location")
-                                {
-                                    lock (_lockSystemData)
-                                    {
-                                        ProcessCallbackSystem(o);
-                                        if (systemData == null) //If the game previously crashed during the jump and no system data was previously saved by EDD.
-                                            ProcessNewSystem(jb);
-                                    }
-                                    draw();
-                                }
-                                else if (jb["event"].Value?.ToString() == "FSDJump")
-                                {
-                                    lock (_lockSystemData)
-                                    {
-                                        ProcessCallbackSystem(o);
-                                        if (systemData == null)
-                                            ProcessNewSystem(jb);
-                                    }
-                                    draw();
-                                }
-                                else
-                                    return;
-                            }
-                        }
-                    },
-                    ex =>
+                        lock (_lockSystemData) ProcessCallbackSystem(o);
+                        draw();
+                    }
+                    else if (requestTag is JObject jb)
                     {
-                        Console.Error.WriteLine($"EDDCanonn: Error processing Systemdata: {ex.Message}");
-                    },
-                    "DataResult"
-                    );
-                }
+                        string evt = jb["event"]?.Value?.ToString();
+                        if (evt == "Location" || evt == "FSDJump")
+                        {
+                            lock (_lockSystemData)
+                            {
+                                ProcessCallbackSystem(o);
+                                if (systemData == null) ProcessNewSystem(jb);
+                            }
+                            draw();
+                        }
+                    }
+                },
+                ex => Console.Error.WriteLine($"EDDCanonn: Error processing Systemdata: {ex.Message}"),
+                "DataResult");
             }
             catch (Exception ex)
             {
