@@ -9,6 +9,7 @@ using EDDCanonn.Base;
 using KdTree;
 using KdTree.Math;
 using System.Threading.Tasks;
+using System.Security.Policy;
 
 namespace EDDCanonn
 {
@@ -18,9 +19,11 @@ namespace EDDCanonn
         private EDDPanelCallbacks PanelCallBack;
         private EDDCallBacks DLLCallBack;
 
+
         public EDDCanonnUserControl()
         {
             InitializeComponent();
+            AutoScaleMode = AutoScaleMode.Inherit;
             Init();
         }
 
@@ -33,13 +36,16 @@ namespace EDDCanonn
 
         #region Patrol
         private Patrols patrols = new Patrols();
+        private readonly int[] maxRanges = { 6, 24, 120, 720, 5040, 40320 };
         private void InitializePatrols()
         {
             try
             {
+                toolStripPatrol.Items.Add("all");
+                toolStripRange.Items.AddRange(maxRanges.Cast<object>().ToArray());
                 dataHandler.StartTaskAsync(
                 () =>
-                {                              
+                {
                     List<Dictionary<string, string>> records = CanonnHelper.ParseTsv(dataHandler.FetchData(CanonnHelper.PatrolUrl));
                     List<Task> _tasks = new List<Task>();
 
@@ -47,23 +53,23 @@ namespace EDDCanonn
                     {
                         try
                         {
-                            string description = record.TryGetValue("Description", out string descriptionValue) 
-                                ? descriptionValue 
+                            string description = record.TryGetValue("Description", out string descriptionValue)
+                                ? descriptionValue
                                 : "uncategorized";
 
-                            bool enabled = record.TryGetValue("Enabled", out string enabledValue) 
+                            bool enabled = record.TryGetValue("Enabled", out string enabledValue)
                                 && enabledValue == "Y";
 
-                            string type = record.TryGetValue("Type", out string typeValue) 
-                                ? typeValue 
+                            string type = record.TryGetValue("Type", out string typeValue)
+                                ? typeValue
                                 : string.Empty;
 
-                            string url = record.TryGetValue("Url", out string urlValue) 
-                                ? urlValue 
+                            string url = record.TryGetValue("Url", out string urlValue)
+                                ? urlValue
                                 : string.Empty;
 
                             if (!enabled)
-                                continue;                       
+                                continue;
 
                             if (type.Equals("tsv"))
                             {
@@ -97,15 +103,22 @@ namespace EDDCanonn
                         }
                         catch (Exception ex)
                         {
-                            Console.Error.WriteLine($"EDDCanonn: Error processing patrol record: {ex.Message}");
+                            Console.Error.WriteLine($"EDDCanonn: Error processing patrol category: {ex.Message}");
                         }
                     }
+                    Task.WaitAll(_tasks.ToArray());
+                    Invoke((MethodInvoker)delegate
+                    {
+                        toolStripPatrol.Enabled = true;
+                        toolStripRange.Enabled = true;
 
-                    Task.WaitAll(_tasks.ToArray()); // wip
+                        toolStripPatrol.SelectedIndex = 0;
+                        toolStripRange.SelectedIndex = 0;
+                    });
                 },
                 ex =>
                 {
-                    Console.Error.WriteLine($"EDDCanonn: Error Initialize Patrols HeadThread: {ex.Message}");
+                    Console.Error.WriteLine($"EDDCanonn: Error In Patrols HeadThread: {ex.Message}");
                 },
                 "InitializePatrol - HeadThread"
                 );
@@ -115,7 +128,6 @@ namespace EDDCanonn
                 Console.Error.WriteLine($"EDDCanonn: Error in InitializePatrols: {ex.Message}");
             }
         }
-
 
         private void CreateFromTSV(string url, string category)
         {
@@ -144,6 +156,10 @@ namespace EDDCanonn
                     }
                 }
                 patrols.Add(category, kdT);
+                Invoke((MethodInvoker)delegate
+                {
+                    toolStripPatrol.Items.Add(category);
+                });  
             }
             catch (Exception ex)
             {
@@ -156,8 +172,8 @@ namespace EDDCanonn
         {
 
         }
-
         #endregion
+
         #region WhiteList
 
         //this generates a data structure like this:
@@ -922,9 +938,50 @@ namespace EDDCanonn
 
         public void Initialise(EDDPanelCallbacks callbacks, int displayid, string themeasjson, string configuration)
         {
-            DLLCallBack = EDDCanonnEDDClass.DLLCallBack;
-            PanelCallBack = callbacks;           
+            try
+            {
+                DLLCallBack = EDDCanonnEDDClass.DLLCallBack;
+                PanelCallBack = callbacks;
+
+                JournalEntry je = new EDDDLLInterfaces.EDDDLLIF.JournalEntry();
+
+                if (DLLCallBack.RequestHistory(1, false, out je) == true)
+                {
+                    DLLCallBack.RequestScanData(RequestTag.OnStart, this, "", true);
+                }
+                else
+                {
+                    dataHandler.StartTaskAsync(
+                    () =>
+                    {
+                        while (!historyset)
+                        {
+                            Task.Delay(250).Wait();
+                        }
+                        Invoke((MethodInvoker)delegate
+                        {
+                            DLLCallBack.RequestScanData(RequestTag.OnStart, this, "", true);
+                        });
+                    },
+                    ex =>
+                    {
+                        Console.Error.WriteLine($"EDDCanonn: Unexpected error in \"Wait for History\" Thread: {ex.Message}");
+                    },
+                    "InitialiseSystem"
+                    );
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"EDDCanonn: Error during Initialise: {ex.Message}");
+            }
         }
+
+        public void DLLLoad()
+        {
+            DLLCallBack.RequestScanData(RequestTag.OnStart, this, "", true);
+        }
+
 
         public void NewFilteredJournal(JournalEntry je) //wip
         {
@@ -1002,15 +1059,16 @@ namespace EDDCanonn
         {
             //wip
         }
-
+        private bool historyset = false;
         public void HistoryChange(int count, string commander, bool beta, bool legacy)
         {
-            //wip
+            if (!historyset)
+                historyset = true;
         }
 
         public void InitialDisplay()
         {
-            DLLCallBack.RequestScanData(RequestTag.OnStart, this, "", true);
+            //wip
         }
 
         public void LoadLayout()
@@ -1071,44 +1129,10 @@ namespace EDDCanonn
             DebugLog.Clear();
         }
 
-        private void EDDCanonnUserControl_Load(object sender, EventArgs e)
-        {
-
-        }
-
-        private void toolStripComboBox1_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void menuStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
-        {
-
-        }
-
-        private void toolStripComboBox3_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void label1_Click_2(object sender, EventArgs e)
-        {
-
-        }
-
-        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
-        {
-
-        }
-
         private void button3_Click(object sender, EventArgs e)//wip
         {
             DebugLog.AppendText(systemData?.ToString() + "\n");
+
         }
 
 
@@ -1127,6 +1151,16 @@ namespace EDDCanonn
                 textBoxBodyCount.Clear();
                 textBoxBodyCount.AppendText(system.Bodys?.Count + " / " + system.FSSTotalBodies);
             });
+        }
+
+        private void toolStripPatrol_Click(object sender, EventArgs e)
+        {
+            
+        }
+
+        private void initialize_Click(object sender, EventArgs e)
+        {
+            DLLCallBack.RequestScanData(RequestTag.OnStart, this, "", true);
         }
     }
 }
