@@ -513,100 +513,6 @@ namespace EDDCanonn
         }
         #endregion
 
-        #region CanonnPayload
-        public JObject BuildPayload(JournalEntry je)
-        {
-            //Root objects
-            JObject gameState = new JObject();
-            JObject rawEvent = je.json.JSONParse().Object();
-            JObject status = getStatusJson();
-
-            //Constants and other fields
-            string clientVersion = "EDDCanonnClient v0.1";
-            string platform = "PC";
-
-            //Prepare payload
-            JObject payload = new JObject
-            {
-                ["gameState"] = gameState
-            };
-
-            //System information
-            gameState["systemName"] = je.systemname;
-            gameState["systemAddress"] = je.systemaddress;
-            gameState["systemCoordinates"] = JArray.FromObject(new double[] { je.x, je.y, je.z });
-
-            //Body name
-            string bodyName = rawEvent["BodyName"].Value?.ToString();
-            if (!string.IsNullOrEmpty(bodyName))
-            {
-                gameState["bodyName"] = bodyName;
-            }
-            else if (!string.IsNullOrEmpty(je.bodyname) && je.bodyname != "Unknown")
-            {
-                gameState["bodyName"] = je.bodyname;
-            }
-
-            //Station name
-            string stationName = rawEvent["StationName"].Value?.ToString();
-            if (!string.IsNullOrEmpty(stationName))
-            {
-                gameState["station"] = stationName;
-            }
-            else if (!string.IsNullOrEmpty(je.stationname) && je.stationname != "Unknown")
-            {
-                gameState["station"] = je.stationname;
-            }
-
-            //Data from status
-            if (status != null &&
-                status.Contains("Pos") &&
-                status["Pos"]["ValidPosition"]?.ToObject<bool>() == true)
-            {
-                if (status["Pos"]["Latitude"] != null)
-                {
-                    gameState["latitude"] = status["Pos"]["Latitude"].ToObject<double>();
-                }
-                if (status["Pos"]["Longitude"] != null)
-                {
-                    gameState["longitude"] = status["Pos"]["Longitude"].ToObject<double>();
-                }
-            }
-
-            //More data from status
-            if (status != null)
-            {
-                if (status.Contains("Temperature") &&
-                    status["Temperature"] != null &&
-                    status["Temperature"].ToObject<double>() >= 0)
-                {
-                    gameState["temperature"] = status["Temperature"].ToObject<double>();
-                }
-
-                if (status.Contains("Gravity") &&
-                    status["Gravity"] != null &&
-                    status["Gravity"].ToObject<double>() >= 0)
-                {
-                    gameState["gravity"] = status["Gravity"].ToObject<double>();
-                }
-            }
-
-            //Additionals
-            gameState["clientVersion"] = clientVersion;
-            gameState["isBeta"] = je.beta;
-            gameState["platform"] = platform;
-            gameState["odyssey"] = je.odyssey;
-
-            //Finalize
-            payload["rawEvent"] = rawEvent;
-            payload["eventType"] = je.eventid;
-            payload["cmdrName"] = je.cmdrname;
-
-            return payload;
-        }
-
-        #endregion
-
         //This only affects the data structure for visual feedback.
         #region SystemData
         private readonly object _lockSystemData = new object();
@@ -981,11 +887,9 @@ namespace EDDCanonn
                 }
             }
         }
-
         #endregion
 
         #region ProcessData
-
         public enum RequestTag
         {
             OnStart
@@ -1119,10 +1023,10 @@ namespace EDDCanonn
                 {
                     if (IsEventValid(je.eventid, je.json))
                     {
-
+                        //Payload.BuildPayload(je, getStatusJson());
                     }
 
-                    if (je.eventid.Equals("FSDJump")) //Prepare data for the next system.
+                    if (je.eventid.Equals("FSDJump")) //Prepare data for the next system. Include ‘FSDJump’ event as requestTag in case the System is unknown.
                     {
                         resetSystemData();
                         Invoke((MethodInvoker)delegate
@@ -1156,7 +1060,7 @@ namespace EDDCanonn
         }
 
         private readonly object _lockStatusJson = new object();
-        private JObject statusJson;
+        private JObject _statusJson;
         public void NewUIEvent(string jsonui)
         {
             if (CanonnHelper.InstanceCount > 1)
@@ -1171,13 +1075,13 @@ namespace EDDCanonn
                 return;
 
             lock (_lockStatusJson)
-                statusJson = o;
+                _statusJson = o;
         }
 
         private JObject getStatusJson()
         {
             lock (_lockStatusJson)
-                return new JObject(statusJson);
+                return new JObject(_statusJson);
         }
 
         public void NewTarget(Tuple<string, double, double, double> target)
@@ -1271,7 +1175,6 @@ namespace EDDCanonn
         #endregion
 
         #region Debug
-
         private void LogWhitelist_Click(object sender, EventArgs e)
         {
             PrintWhitelist();
@@ -1300,7 +1203,6 @@ namespace EDDCanonn
 
             if (system == null)
                 return;
-
 
             Invoke((MethodInvoker)delegate
             {

@@ -53,6 +53,7 @@
   <ItemGroup>
     <Compile Include="Base\ActionDataHandler.cs" />
     <Compile Include="Base\Patrols.cs" />
+    <Compile Include="Base\Payload.cs" />
     <Compile Include="Base\SystemData.cs" />
     <Compile Include="Base\TestData.cs" />
     <Compile Include="Base\WhitelistData.cs" />
