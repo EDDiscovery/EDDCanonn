@@ -1,4 +1,18 @@
-﻿using System;
+﻿/*
+ * Copyright © 2022-2022 EDDiscovery development team
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software distributed under
+ * the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+ * ANY KIND, either express or implied. See the License for the specific language
+ * governing permissions and limitations under the License.
+ */
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
@@ -10,7 +24,7 @@ namespace EDDCanonn.Base
     public class ActionDataHandler
     {
         #region Threading
-        public Task StartTaskAsync(Action job, Action<Exception> errorCallback = null, string name = "default")
+        public Task StartTaskAsync(Action job, Action<Exception> errorCallback = null, string name = "default", Action finalAction = null)
         {
             return StartTask(() =>
             {
@@ -22,13 +36,15 @@ namespace EDDCanonn.Base
                 {
                     errorCallback?.Invoke(ex);
                 }
-            }, name);
+            }, name, finalAction);
         }
+
+
 
         private readonly List<Task> _tasks = new List<Task>();
         private readonly object _lock = new object();
 
-        private Task StartTask(Action job, string name)
+        private Task StartTask(Action job, string name, Action finalAction = null)
         {
             lock (_lock)
             {
@@ -54,16 +70,20 @@ namespace EDDCanonn.Base
 
                 task.ContinueWith(t =>
                 {
+                    finalAction?.Invoke();
+
                     lock (_lock)
                     {
                         _tasks.Remove(t);
                         Console.WriteLine($"EDDCanonn: Task finished. [ID: {t.Id}, Name: {name}, Final Status: {t.Status}]");
                     }
-                });
+
+                }, TaskContinuationOptions.ExecuteSynchronously);
 
                 return task;
             }
         }
+
 
         private bool _isClosing = false;
         public void Closing()
