@@ -1,4 +1,18 @@
-﻿using System.Windows.Forms;
+﻿/*
+ * Copyright © 2022-2022 EDDiscovery development team
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software distributed under
+ * the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+ * ANY KIND, either express or implied. See the License for the specific language
+ * governing permissions and limitations under the License.
+ */
+
+using System.Windows.Forms;
 
 namespace EDDCanonn
 {
@@ -18,6 +32,8 @@ namespace EDDCanonn
 
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             this.textBoxSystem = new System.Windows.Forms.TextBox();
             this.labelSysName = new System.Windows.Forms.Label();
             this.DebugLog = new System.Windows.Forms.TextBox();
@@ -32,13 +48,17 @@ namespace EDDCanonn
             this.tabPage3 = new System.Windows.Forms.TabPage();
             this.tabPage4 = new System.Windows.Forms.TabPage();
             this.tabPage5 = new System.Windows.Forms.TabPage();
-            this.button3 = new System.Windows.Forms.Button();
+            this.LogSystem = new System.Windows.Forms.Button();
             this.ClearDebugLog = new System.Windows.Forms.Button();
             this.TestWhitelist = new System.Windows.Forms.Button();
             this.LogWhitelist = new System.Windows.Forms.Button();
             this.dataGridPatrol = new System.Windows.Forms.DataGridView();
-            this.Column1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Instructions = new System.Windows.Forms.DataGridViewLinkColumn();
+            this.Patrol = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Instructions = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Distance = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
             this.tableLayoutPanel2 = new System.Windows.Forms.TableLayoutPanel();
             this.menuStrip2 = new System.Windows.Forms.MenuStrip();
             this.toolStripRange = new System.Windows.Forms.ToolStripComboBox();
@@ -59,6 +79,7 @@ namespace EDDCanonn
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView2)).BeginInit();
             this.tabPage5.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridPatrol)).BeginInit();
+            this.contextMenuStrip1.SuspendLayout();
             this.tableLayoutPanel2.SuspendLayout();
             this.menuStrip2.SuspendLayout();
             this.menuStrip1.SuspendLayout();
@@ -138,7 +159,6 @@ namespace EDDCanonn
             this.gridData.Controls.Add(this.tabPage3);
             this.gridData.Controls.Add(this.tabPage4);
             this.gridData.Controls.Add(this.tabPage5);
-            this.gridData.Enabled = false;
             this.gridData.Location = new System.Drawing.Point(20, 37);
             this.gridData.Multiline = true;
             this.gridData.Name = "gridData";
@@ -212,7 +232,7 @@ namespace EDDCanonn
             // 
             // tabPage5
             // 
-            this.tabPage5.Controls.Add(this.button3);
+            this.tabPage5.Controls.Add(this.LogSystem);
             this.tabPage5.Controls.Add(this.ClearDebugLog);
             this.tabPage5.Controls.Add(this.TestWhitelist);
             this.tabPage5.Controls.Add(this.LogWhitelist);
@@ -225,15 +245,15 @@ namespace EDDCanonn
             this.tabPage5.Text = "Debug";
             this.tabPage5.UseVisualStyleBackColor = true;
             // 
-            // button3
+            // LogSystem
             // 
-            this.button3.Location = new System.Drawing.Point(168, 0);
-            this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(75, 23);
-            this.button3.TabIndex = 9;
-            this.button3.Text = "Test";
-            this.button3.UseVisualStyleBackColor = true;
-            this.button3.Click += new System.EventHandler(this.button3_Click);
+            this.LogSystem.Location = new System.Drawing.Point(168, 0);
+            this.LogSystem.Name = "LogSystem";
+            this.LogSystem.Size = new System.Drawing.Size(75, 23);
+            this.LogSystem.TabIndex = 9;
+            this.LogSystem.Text = "LSystem";
+            this.LogSystem.UseVisualStyleBackColor = true;
+            this.LogSystem.Click += new System.EventHandler(this.LogSystem_Click);
             // 
             // ClearDebugLog
             // 
@@ -261,7 +281,7 @@ namespace EDDCanonn
             this.LogWhitelist.Name = "LogWhitelist";
             this.LogWhitelist.Size = new System.Drawing.Size(75, 23);
             this.LogWhitelist.TabIndex = 6;
-            this.LogWhitelist.Text = "PWhitelist";
+            this.LogWhitelist.Text = "LWhitelist";
             this.LogWhitelist.UseVisualStyleBackColor = true;
             this.LogWhitelist.Click += new System.EventHandler(this.LogWhitelist_Click);
             // 
@@ -269,30 +289,79 @@ namespace EDDCanonn
             // 
             this.dataGridPatrol.AllowUserToAddRows = false;
             this.dataGridPatrol.AllowUserToDeleteRows = false;
+            this.dataGridPatrol.AllowUserToResizeColumns = false;
+            this.dataGridPatrol.AllowUserToResizeRows = false;
             this.dataGridPatrol.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            this.dataGridPatrol.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.AllCells;
             this.dataGridPatrol.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dataGridPatrol.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.Column1,
-            this.Instructions});
+            this.Patrol,
+            this.Instructions,
+            this.Distance});
+            this.dataGridPatrol.ContextMenuStrip = this.contextMenuStrip1;
             this.dataGridPatrol.Location = new System.Drawing.Point(20, 313);
             this.dataGridPatrol.Name = "dataGridPatrol";
             this.dataGridPatrol.ReadOnly = true;
+            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.dataGridPatrol.RowsDefaultCellStyle = dataGridViewCellStyle2;
+            this.dataGridPatrol.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.dataGridPatrol.ShowCellErrors = false;
+            this.dataGridPatrol.ShowCellToolTips = false;
+            this.dataGridPatrol.ShowEditingIcon = false;
+            this.dataGridPatrol.ShowRowErrors = false;
             this.dataGridPatrol.Size = new System.Drawing.Size(364, 179);
             this.dataGridPatrol.TabIndex = 12;
+            this.dataGridPatrol.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dataGridPatrol_CellContentClick);
             // 
-            // Column1
+            // Patrol
             // 
-            this.Column1.HeaderText = "Patrol";
-            this.Column1.Name = "Column1";
-            this.Column1.ReadOnly = true;
-            this.Column1.Resizable = System.Windows.Forms.DataGridViewTriState.False;
-            this.Column1.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.Patrol.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
+            this.Patrol.HeaderText = "Patrol";
+            this.Patrol.Name = "Patrol";
+            this.Patrol.ReadOnly = true;
+            this.Patrol.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+            this.Patrol.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.Patrol.Width = 40;
             // 
             // Instructions
             // 
+            this.Instructions.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
             this.Instructions.HeaderText = "Instructions";
             this.Instructions.Name = "Instructions";
             this.Instructions.ReadOnly = true;
+            this.Instructions.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+            this.Instructions.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            // 
+            // Distance
+            // 
+            this.Distance.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
+            this.Distance.HeaderText = "Distance";
+            this.Distance.Name = "Distance";
+            this.Distance.ReadOnly = true;
+            this.Distance.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+            this.Distance.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.Distance.Width = 55;
+            // 
+            // contextMenuStrip1
+            // 
+            this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripMenuItem1,
+            this.toolStripMenuItem2});
+            this.contextMenuStrip1.Name = "contextMenuStrip1";
+            this.contextMenuStrip1.Size = new System.Drawing.Size(144, 48);
+            // 
+            // toolStripMenuItem1
+            // 
+            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(143, 22);
+            this.toolStripMenuItem1.Text = "Copy System";
+            // 
+            // toolStripMenuItem2
+            // 
+            this.toolStripMenuItem2.Name = "toolStripMenuItem2";
+            this.toolStripMenuItem2.Size = new System.Drawing.Size(143, 22);
+            this.toolStripMenuItem2.Text = "Open Link";
             // 
             // tableLayoutPanel2
             // 
@@ -327,7 +396,8 @@ namespace EDDCanonn
             this.toolStripRange.Enabled = false;
             this.toolStripRange.Name = "toolStripRange";
             this.toolStripRange.Size = new System.Drawing.Size(121, 23);
-            this.toolStripRange.Text = "Range: 250LY";
+            this.toolStripRange.Text = "Range";
+            this.toolStripRange.SelectedIndexChanged += new System.EventHandler(this.toolStripRange_IndexChanged);
             // 
             // menuStrip1
             // 
@@ -347,8 +417,8 @@ namespace EDDCanonn
             this.toolStripPatrol.Enabled = false;
             this.toolStripPatrol.Name = "toolStripPatrol";
             this.toolStripPatrol.Size = new System.Drawing.Size(121, 23);
-            this.toolStripPatrol.Text = "Show All Pois";
-            this.toolStripPatrol.Click += new System.EventHandler(this.toolStripPatrol_Click);
+            this.toolStripPatrol.Text = "Category";
+            this.toolStripPatrol.SelectedIndexChanged += new System.EventHandler(this.toolStripPatrol_IndexChanged);
             // 
             // toolStripComboBox2
             // 
@@ -415,6 +485,7 @@ namespace EDDCanonn
             this.textBox1.ReadOnly = true;
             this.textBox1.Size = new System.Drawing.Size(262, 44);
             this.textBox1.TabIndex = 4;
+            this.textBox1.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // button1
             // 
@@ -448,6 +519,7 @@ namespace EDDCanonn
             this.tabPage5.ResumeLayout(false);
             this.tabPage5.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridPatrol)).EndInit();
+            this.contextMenuStrip1.ResumeLayout(false);
             this.tableLayoutPanel2.ResumeLayout(false);
             this.tableLayoutPanel2.PerformLayout();
             this.menuStrip2.ResumeLayout(false);
@@ -476,8 +548,6 @@ namespace EDDCanonn
         private DataGridView dataGridPatrol;
         private TableLayoutPanel tableLayoutPanel2;
         private MenuStrip menuStrip1;
-        private MenuStrip menuStrip2;
-        private ToolStripComboBox toolStripRange;
         private ToolStripComboBox toolStripPatrol;
         private ToolStripComboBox toolStripComboBox2;
         private TableLayoutPanel tableLayoutPanel3;
@@ -486,11 +556,17 @@ namespace EDDCanonn
         private Label label1;
         private TextBox textBox1;
         private DataGridView dataGridView2;
-        private Button button3;
+        private Button LogSystem;
         private DataGridView gridAuto;
         private TabPage tabPage4;
-        private DataGridViewTextBoxColumn Column1;
-        private DataGridViewLinkColumn Instructions;
         private Button create;
+        private MenuStrip menuStrip2;
+        private ToolStripComboBox toolStripRange;
+        private ContextMenuStrip contextMenuStrip1;
+        private DataGridViewTextBoxColumn Patrol;
+        private DataGridViewTextBoxColumn Instructions;
+        private DataGridViewTextBoxColumn Distance;
+        private ToolStripMenuItem toolStripMenuItem1;
+        private ToolStripMenuItem toolStripMenuItem2;
     }
 }
