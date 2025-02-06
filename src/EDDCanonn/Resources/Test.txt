@@ -450,3 +450,122 @@
                 }
             }
         }
+
+
+
+        system["Z"]?.ToObject<double>() ?? 0.0;
+
+                                long id64 = CanonnHelper.GetValueOrDefault(new JToken(record["ID64"]), long(0));
+                        double x = CanonnHelper.GetValueOrDefault(new JToken(record["X"]), 0.0);
+                        double y = CanonnHelper.GetValueOrDefault(new JToken(record["Y"]), 0.0);
+                        double z = CanonnHelper.GetValueOrDefault(new JToken(record["Z"]), 0.0);
+
+
+                        "\"4660.56250\""
+
+
+
+                                private void InitializePatrols()
+        {
+            try
+            {
+                toolStripPatrol.Items.Add("all"); //The 'all' KdTree-Dictionary has already been set in “Patrols.cs”.
+                toolStripRange.Items.AddRange(CanonnHelper.PatrolRanges.Cast<object>().ToArray());
+
+                //Start a 'head worker' to avoid blocking the UI thread.
+                dataHandler.StartTaskAsync(
+                () =>
+                {
+                    List<Task> _tasks = new List<Task>(); //We have to make sure that all workers are finished before we draw the patrols.
+                    try
+                    {
+                        //Fetch information about available patrols.
+                        List<Dictionary<string, string>> records = CanonnHelper.ParseTsv(dataHandler.FetchData(CanonnHelper.PatrolUrl));
+                        foreach (Dictionary<string, string> record in records)
+                        {
+                            try
+                            {
+                                string description = record.TryGetValue("Description", out string descriptionValue)
+                                    ? descriptionValue
+                                    : "uncategorized";
+                                bool enabled = record.TryGetValue("Enabled", out string enabledValue)
+                                    && enabledValue == "Y";
+                                string type = record.TryGetValue("Type", out string typeValue)
+                                    ? typeValue
+                                    : string.Empty;
+                                string url = record.TryGetValue("Url", out string urlValue)
+                                    ? urlValue
+                                    : string.Empty;
+
+                                if (!enabled)
+                                    continue;
+                                if (description.Equals("Landscape Signals"))
+                                    continue;
+
+                                if (type.Equals("tsv")) //Worker for tsv files.
+                                {
+                                    _tasks.Add(dataHandler.StartTaskAsync(
+                                        () =>
+                                        {
+                                            CreateFromTSV(url, description);
+                                        },
+                                        ex =>
+                                        {
+                                            Console.Error.WriteLine($"EDDCanonn: Error Initialize Patrols -> {description}: {ex.Message}");
+                                        },
+                                        "InitializePatrol -> SubThread: " + description
+                                        ));
+                                }
+                                else if (type.Equals("json")) //Worker for json files.
+                                {
+                                    _tasks.Add(dataHandler.StartTaskAsync(
+                                        () =>
+                                        {
+                                            CreateFromJson(url, description);
+                                        },
+                                        ex =>
+                                        {
+                                            Console.Error.WriteLine($"EDDCanonn: Error Initialize Patrols -> {description}: {ex.Message}");
+                                        },
+                                        "InitializePatrol -> SubThread: " + description
+                                        ));
+                                }
+                                else
+                                {
+                                    //wip
+                                }
+
+                            }
+                            catch (Exception ex)
+                            {
+                                Console.Error.WriteLine($"EDDCanonn: Error processing record category: {ex.Message}");
+                            }
+                        }
+                    }
+                    finally
+                    {
+                        Task.WaitAll(_tasks.ToArray());
+                        Invoke((MethodInvoker)delegate
+                        {
+                            toolStripPatrol.Enabled = true;
+                            toolStripRange.Enabled = true;
+
+                            toolStripPatrol.SelectedIndex = 0;
+                            toolStripRange.SelectedIndex = 3;
+
+                            UpdatePatrol();
+                        });
+                    }
+                },
+                ex =>
+                {
+                    Console.Error.WriteLine($"EDDCanonn: Error In Patrols HeadThread: {ex.Message}");
+                },
+                "InitializePatrol -> HeadThread"
+                );
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"EDDCanonn: Error in InitializePatrols: {ex.Message}");
+            }
+        }

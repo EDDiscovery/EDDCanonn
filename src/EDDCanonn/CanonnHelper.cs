@@ -24,7 +24,7 @@ namespace EDDCanonn
     public static class CanonnHelper
     {
         public static int InstanceCount = 0;
-        public static readonly int[] PatrolRanges = { 6, 24, 120, 720, 5040, 40320 };
+        public static readonly int[] PatrolRanges = { 6, 24, 120, 720, 5040 };
 
         public static readonly string WhitelistUrl = "https://us-central1-canonn-api-236217.cloudfunctions.net/postEventWhitelist";
         public static readonly string EventPushUrl = "https://us-central1-canonn-api-236217.cloudfunctions.net/postEvent";
@@ -128,9 +128,7 @@ namespace EDDCanonn
         public static void OpenUrl(string url)
         {
             if (string.IsNullOrWhiteSpace(url))
-            {
-                throw new ArgumentException($"EDDCanonn: URL cannot be empty.", nameof(url));
-            }
+                return;
 
             try
             {
