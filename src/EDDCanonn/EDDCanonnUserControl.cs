@@ -25,6 +25,7 @@ using KdTree.Math;
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
 
+
 namespace EDDCanonn
 {
     partial class EDDCanonnUserControl : UserControl, IEDDPanelExtension
@@ -51,7 +52,7 @@ namespace EDDCanonn
                 toolStripPatrol.Items.Add("all"); //The 'all' KdTree-Dictionary has already been set in “Patrols.cs”.
                 toolStripRange.Items.AddRange(CanonnHelper.PatrolRanges.Cast<object>().ToArray());
 
-                ConcurrentBag<Task> _tasks = new ConcurrentBag<Task>(); //We have to make sure that all workers are finished before we draw the patrols.
+                ConcurrentBag<Task> _tasks = new ConcurrentBag<Task>(); //We have to make sure that all workers are finished before we update the patrols.
 
                 //Start a 'head worker' to avoid blocking the UI thread.
                 dataHandler.StartTaskAsync(
@@ -120,9 +121,10 @@ namespace EDDCanonn
                         Invoke((MethodInvoker)delegate
                         {
                             toolStripPatrol.Enabled = true; toolStripPatrol.SelectedIndex = 0;
-                            toolStripRange.Enabled = true; toolStripRange.SelectedIndex = 3;
-                            UpdatePatrol();
+                            toolStripRange.Enabled = true; toolStripRange.SelectedIndex = 2;
+                            _patrolLock = false;
                         });
+                        UpdatePatrol();
                     })
                 );
             }
@@ -144,6 +146,7 @@ namespace EDDCanonn
                     {
                         string patrolType = record.TryGetValue("Patrol", out string patrolValue) ? patrolValue :
                                             record.TryGetValue("Type", out string typeValue) ? typeValue : string.Empty;
+                        string system = record.TryGetValue("System", out string systemValue) ? systemValue : string.Empty;
 
                         double x = CanonnHelper.GetValueOrDefault(new JToken(record["X"]?? null), 0.0);
                         double y = CanonnHelper.GetValueOrDefault(new JToken(record["Y"]?? null), 0.0);
@@ -152,8 +155,8 @@ namespace EDDCanonn
                         string instructions = record.TryGetValue("Instructions", out string instructionsValue) ? instructionsValue : "none";
                         string urlp = record.TryGetValue("Url", out string urlValue) ? urlValue : string.Empty;
 
-                        Patrol patrol = new Patrol(patrolType,category, x, y, z, instructions, urlp);
-                        kdT.Add(new double[] { patrol.X, patrol.Y, patrol.Z }, patrol);
+                        Patrol patrol = new Patrol(patrolType, category, system, x, y, z, instructions, urlp);
+                        kdT.Add(new double[] { patrol.x, patrol.y, patrol.z }, patrol);
                     }
                     catch (Exception ex)
                     {
@@ -161,7 +164,7 @@ namespace EDDCanonn
                     }
                 }
                 patrols.Add(category, kdT);
-                Invoke((MethodInvoker)delegate
+                BeginInvoke((MethodInvoker)delegate
                 {
                     toolStripPatrol.Items.Add(category);
                 });  
@@ -190,6 +193,8 @@ namespace EDDCanonn
                         if (record == null || record.Count == 0)
                             continue;
 
+                        string system = record["system"]?.Value?.ToString() ?? string.Empty;
+
                         double x = CanonnHelper.GetValueOrDefault(record["x"]?? null, 0.0);
                         double y = CanonnHelper.GetValueOrDefault(record["y"]?? null, 0.0);
                         double z = CanonnHelper.GetValueOrDefault(record["z"]?? null, 0.0);
@@ -197,8 +202,8 @@ namespace EDDCanonn
                         string instructions = record["instructions"]?.Value?.ToString() ?? "none";
                         string urlp = record["url"]?.Value?.ToString() ?? string.Empty;
 
-                        Patrol patrol = new Patrol(category, x, y, z, instructions, urlp);
-                        kdT.Add(new double[] { patrol.X, patrol.Y, patrol.Z }, patrol);
+                        Patrol patrol = new Patrol(category, system, x, y, z, instructions, urlp);
+                        kdT.Add(new double[] { patrol.x, patrol.y, patrol.z }, patrol);
                     }
                     catch (Exception ex)
                     {
@@ -207,7 +212,7 @@ namespace EDDCanonn
                 }
 
                 patrols.Add(category, kdT);
-                Invoke((MethodInvoker)delegate
+                BeginInvoke((MethodInvoker)delegate
                 {
                     toolStripPatrol.Items.Add(category);
                 });
@@ -218,49 +223,60 @@ namespace EDDCanonn
             }
         }
 
-        private bool _patrolLock = false;
+        private bool _patrolLock = true;
         private void UpdatePatrol()
         {
-            dataHandler.StartTaskAsync(
-                () =>
-                {
+             dataHandler.StartTaskAsync(
+                 () =>
+                 {
                     try
                     {
                         while (systemData == null)
                         {
-                            Task.Delay(250).Wait();
+                            Task.Delay(1000).Wait();
                         }
 
+                        string type = "";
+                        double range = 0.0;
                         SystemData system = deepCopySystemData();
+
                         Invoke((MethodInvoker)delegate
                         {
+                            type = toolStripPatrol.SelectedItem?.ToString() ?? "";
+                            range = double.TryParse(toolStripRange.SelectedItem?.ToString(), out double r) ? r : 0.0;
+                        });
+
+                         List<(string category, Patrol patrol, double distance)> patrolList = patrols.FindPatrolsInRange(type, system.X, system.Y, system.Z, range);
+
+                        List<DataGridViewRow> result = new List<DataGridViewRow>();
+                        foreach (var (category, patrol, distance) in patrolList)
+                        {
+                            var row = new DataGridViewRow();
+                            row.Cells.Add(new DataGridViewTextBoxCell { Value = patrol.category });
+                            row.Cells.Add(new DataGridViewTextBoxCell { Value = patrol.instructions });
+                            row.Cells.Add(new DataGridViewTextBoxCell { Value = distance.ToString() });
+                            row.Cells.Add(new DataGridViewTextBoxCell { Value = patrol.system });
+                            row.Cells.Add(new DataGridViewTextBoxCell { Value = patrol.url });                         
+
+                            result.Add(row);
+                        }
+
+                        BeginInvoke((MethodInvoker)delegate
+                        {
                             dataGridPatrol.Rows.Clear();
-
-                            List<(string category, Patrol patrol, double distance)> result = patrols.FindPatrolsInRange(
-                                toolStripPatrol.SelectedItem.ToString(),
-                                0, 0, 0,
-                                double.Parse(toolStripRange.SelectedItem.ToString())
-                            );
-
-                            foreach (var (category, patrol, distance) in result)
-                            {
-                                dataGridPatrol.Rows.Add(new string[] {patrol.category, patrol.Instructions, distance.ToString() });
-                            }
+                            dataGridPatrol.Rows.AddRange(result.ToArray());
                         });
                     }
                     catch (Exception ex)
                     {
-                        Console.Error.WriteLine($"EDDCanonn: Unexpected error in \"Wait for UpdatePatrol\" Thread: {ex.Message}");
+                        Console.Error.WriteLine($"EDDCanonn: Unexpected error in UpdatePatrol Task: {ex.Message}");
                     }
                     finally
                     {
                         _patrolLock = false;
                     }
                 },
-                ex =>
-                {
-                    Console.Error.WriteLine($"EDDCanonn: Error during UpdatePatrol: {ex.Message}");
-                },
+                ex => Console.Error.WriteLine($"EDDCanonn: Error during UpdatePatrol: {ex.Message}"),
                 "UpdatePatrol"
             );
         }
@@ -282,9 +298,25 @@ namespace EDDCanonn
             UpdatePatrol();
         }
 
-        private void dataGridPatrol_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        private void CopySystem_Click(object sender, EventArgs e)
         {
+            if (dataGridPatrol.SelectedCells.Count == 0) return;
+            DataGridViewRow selectedRow = dataGridPatrol.Rows[dataGridPatrol.SelectedCells[0].RowIndex];
 
+            if (dataGridPatrol.Columns["SysName"] == null) return;
+            object cellValue = selectedRow.Cells["SysName"].Value;
+            if (cellValue == null) return;
+            Clipboard.SetText(cellValue.ToString());
+        }
+        private void OpenUrl_Click(object sender, EventArgs e)
+        {
+            if (dataGridPatrol.SelectedCells.Count == 0) return;
+            DataGridViewRow selectedRow = dataGridPatrol.Rows[dataGridPatrol.SelectedCells[0].RowIndex];
+
+            if (dataGridPatrol.Columns["PatrolUrl"] == null) return;
+            object cellValue = selectedRow.Cells["PatrolUrl"].Value;
+            if (cellValue == null) return;
+            CanonnHelper.OpenUrl(cellValue.ToString());
         }
 
         #endregion
@@ -573,7 +605,13 @@ namespace EDDCanonn
                         ProcessScan(eventData);
                         break;
                     case "FSSBodySignals":
-                        ProcessFSSBodySignals(eventData);
+                        ProcessScan(eventData);
+                        break;
+                    case "SAASignalsFound":
+                        ProcessScan(eventData);
+                        break;
+                    case "ScanOrganic":
+                        ProcessOrganic(eventData); 
                         break;
                     case "FSSDiscoveryScan":
                         ProcessFSSDiscoveryScan(eventData);
@@ -581,8 +619,8 @@ namespace EDDCanonn
                     case "FSSSignalDiscovered":
                         ProcessFSSSignalDiscovered(eventData);
                         break;
-                    case "SAASignalsFound":
-                        ProcessSAASignalsFound(eventData);
+                    case "CodexEntry":
+                        ProcessCodex(eventData);
                         break;
                     default:
                         // Unsupported event
@@ -617,6 +655,9 @@ namespace EDDCanonn
 
         private void fetchScanData(JObject eventData, Body body) //Call this method only via a lock. Otherwise it could get bad.
         {
+            if (body.BodyName?.Contains("Belt") == true)
+                return;
+
             if (body.ScanData == null)
             {
                 body.ScanData = new ScanData
@@ -624,7 +665,7 @@ namespace EDDCanonn
                     //Primitives
                     BodyID = body.BodyID,
                     IsPlanet = eventData.Contains("PlanetClass"),
-                    ScanType = eventData["ScanType"].Value?.ToString(),
+                    ScanType = eventData["ScanType"]?.Value?.ToString(),
 
                     //List<JObject>  
                     Signals = CanonnHelper.GetJObjectList(eventData, "Signals"),
@@ -639,7 +680,7 @@ namespace EDDCanonn
                 //Primitives
                 body.ScanData.BodyID = body.BodyID;
                 body.ScanData.IsPlanet = eventData.Contains("PlanetClass");
-                body.ScanData.ScanType = eventData["ScanType"].Value?.ToString();
+                body.ScanData.ScanType = eventData["ScanType"]?.Value?.ToString();
 
                 //List<JObject> : AddRange(field.OfType<JObject>().Where(s => !body.ScanData.field.Any(existing => JToken.DeepEquals(existing, s)))) --> Should work?
                 if (eventData["Signals"] is JArray signals)
@@ -656,7 +697,7 @@ namespace EDDCanonn
                     body.ScanData.Rings.AddRange(rings.OfType<JObject>().Where(r => !body.ScanData.Rings.Any(existing => JToken.DeepEquals(existing, r))));
                 }
 
-                if (eventData["Organics"] is JArray organics)
+                if (eventData["Organics"] is JArray organics) //I think that's unnecessary. We'll leave it anyway.
                 {
                     if (body.ScanData.Organics == null)
                         body.ScanData.Organics = new List<JObject>();
@@ -680,7 +721,7 @@ namespace EDDCanonn
             }
         }
 
-        private void ProcessScan(JObject eventData)
+        private void ProcessScan(JObject eventData) //We can use this for most scan events.
         {
             if (systemData == null)
                 systemData = new SystemData(); //Enforces encapsulation and creates a new SystemData instance internally, disregarding any parameters.
@@ -691,10 +732,7 @@ namespace EDDCanonn
                 {
                     systemData.Bodys = new Dictionary<int, Body>();
                 }
-
-                if (eventData["BodyName"]?.Value?.ToString()?.Contains("Belt") == true)
-                    return;
-                
+      
                 int bodyId = CanonnHelper.GetValueOrDefault(eventData["BodyID"]?? null, -1);
 
                 if (bodyId == -1)
@@ -707,13 +745,12 @@ namespace EDDCanonn
                     body = new Body
                     {
                         BodyID = bodyId,
-                        BodyName = eventData["BodyName"].Value?.ToString(),
+                        BodyName = eventData["BodyName"]?.Value?.ToString(),
                     };
                     systemData.Bodys[bodyId] = body;
                 }
                 else
                     body = systemData.Bodys[bodyId];
-
 
                 fetchScanData(eventData, body);
             }
@@ -731,29 +768,99 @@ namespace EDDCanonn
             }
         }
 
-        private void ProcessFSSBodySignals(JObject eventData)//wip
+        /*
+        Sample 'ScanOrganic' event
         {
+        "timestamp":"2025-02-06T20:51:14Z",
+        "event":"ScanOrganic",
+        "Genus":"$Codex_Ent_Tussocks_Genus_Name;",
+        "Species":"$Codex_Ent_Tussocks_09_Name;",
+        "Body":14
+        }
+        */
+
+        private void ProcessOrganic(JObject eventData) //The 'ScanOrganic' event is special. We cannot treat it as a 'ProcessScan' (although similar) because the keys are named differently.
+        { //wip
+            if (systemData == null)
+                systemData = new SystemData(); //Enforces encapsulation and creates a new SystemData instance internally, disregarding any parameters.
+
             lock (_lockSystemData)
             {
+                if (systemData.Bodys == null)
+                {
+                    systemData.Bodys = new Dictionary<int, Body>();
+                }
 
+                int bodyId = CanonnHelper.GetValueOrDefault(eventData["Body"] ?? null, -1);
+
+                if (bodyId == -1)
+                    return;
+
+                Body body;
+
+                if (!systemData.Bodys.ContainsKey(bodyId)) //We have to take consider here if someone freshly installs EDD and then directly scans an organic on a planet he has already been on.
+                {
+                    body = new Body
+                    {
+                        BodyID = bodyId,
+                        BodyName = "none",
+                    };
+                    systemData.Bodys[bodyId] = body;
+                }
+                else
+                    body = systemData.Bodys[bodyId];
+
+                if (eventData["Genus"] is JToken genus)
+                {
+                    JObject newOrganic = new JObject
+                    {
+                        ["Genus"] = genus
+                    };
+
+                    body.ScanData.Organics.Add(newOrganic.OfType<JObject>().FirstOrDefault(sf => !body.ScanData.Organics.Any(existing => JToken.DeepEquals(existing, sf))));
+                }
             }
         }
 
-        private void ProcessFSSSignalDiscovered(JObject eventData)//wip
+        private void ProcessFSSSignalDiscovered(JObject eventData) //wip
         {
+            if (systemData == null)
+                systemData = new SystemData(); //Enforces encapsulation and creates a new SystemData instance internally, disregarding any parameters.
+
             lock (_lockSystemData)
             {
+                if (eventData["SignalName"] is JToken signal)
+                {
+                    JObject newSignal = new JObject
+                    {
+                        ["SignalName"] = signal
+                    };
 
+                    systemData.FSSSignalList.Add(newSignal.OfType<JObject>().FirstOrDefault(sf => !systemData.FSSSignalList.Any(existing => JToken.DeepEquals(existing, sf))));
+                }
             }
         }
 
-        private void ProcessSAASignalsFound(JObject eventData)//wip
+        private void ProcessCodex(JObject eventData) //wip
         {
+            if (systemData == null)
+                systemData = new SystemData(); //Enforces encapsulation and creates a new SystemData instance internally, disregarding any parameters.
+
             lock (_lockSystemData)
             {
+                if (eventData["Name"] is JToken codex)
+                {
+                    JObject newCodex = new JObject
+                    {
+                        ["Name"] = codex
+                    };
 
+                    systemData.CodexEntryList.Add(newCodex.OfType<JObject>().FirstOrDefault(sf => !systemData.CodexEntryList.Any(existing => JToken.DeepEquals(existing, sf))));
+                }
             }
         }
+
+
         #endregion
 
         #region ProcessCallbackSystem
@@ -803,9 +910,9 @@ namespace EDDCanonn
         {
             // Extract and populate main system details
             systemData.Name = system["Name"].Value?.ToString();
-            systemData.X = CanonnHelper.GetValueOrDefault(system["X"]?? null,0.0);
-            systemData.Y = CanonnHelper.GetValueOrDefault(system["Y"] ?? null,0.0);
-            systemData.Z = CanonnHelper.GetValueOrDefault(system["Z"] ?? null,0.0);
+            systemData.X = CanonnHelper.GetValueOrDefault(system["x"]?? null,0.0);
+            systemData.Y = CanonnHelper.GetValueOrDefault(system["y"] ?? null,0.0);
+            systemData.Z = CanonnHelper.GetValueOrDefault(system["z"] ?? null,0.0);
             systemData.HasCoordinate = system["HasCoordinate"]?.ToObject<bool>() ?? false;
             systemData.SystemAddress = CanonnHelper.GetValueOrDefault(system["SystemAddress"] ?? null, 0l);
         }
@@ -903,7 +1010,7 @@ namespace EDDCanonn
             try
             {
                 if (requestTag == null || data == null)
-                    throw new ArgumentNullException("requestTag or data cannot be null.");
+                    return;
 
                 JObject o = data.JSONParse().Object();
                 if (!(requestTag is RequestTag || requestTag is JObject))
@@ -961,10 +1068,13 @@ namespace EDDCanonn
             DLLCallBack = EDDCanonnEDDClass.DLLCallBack;
             PanelCallBack = callbacks;
 
+            NotifyMainFields("Start Up...");
+
             try
             {
                 if(CanonnHelper.InstanceCount > 0)
                 {
+                    NotifyMainFields("Aborted");
                     CanonnHelper.InstanceCount++;
                     gridData.SelectedIndex = gridData.TabCount -1;
                     DebugLog.AppendText("Only one Canonn Panel instance can be active.");
@@ -992,10 +1102,11 @@ namespace EDDCanonn
                         {
                             Task.Delay(250).Wait();
                         }
-                        Invoke((MethodInvoker)delegate
+                        BeginInvoke((MethodInvoker)delegate
                         {
                             DLLCallBack.RequestScanData(RequestTag.OnStart, this, "", true);
                         });
+                        return;
                     },
                     ex =>
                     {
@@ -1029,7 +1140,7 @@ namespace EDDCanonn
                     if (je.eventid.Equals("FSDJump")) //Prepare data for the next system. Include ‘FSDJump’ event as requestTag in case the System is unknown.
                     {
                         resetSystemData();
-                        Invoke((MethodInvoker)delegate
+                        BeginInvoke((MethodInvoker)delegate
                         {
                             DLLCallBack.RequestScanData(je.json.JSONParseObject(), this, je.systemname, true);
                         });
@@ -1037,7 +1148,7 @@ namespace EDDCanonn
                     else if (je.eventid.Equals("Location")) //Prepare data for the next system. Include ‘Location’ event as requestTag in case of a crash. 
                     {
                         resetSystemData();
-                        Invoke((MethodInvoker)delegate
+                        BeginInvoke((MethodInvoker)delegate
                         {
                             DLLCallBack.RequestScanData(je.json.JSONParseObject(), this, je.systemname, true);
                         });
@@ -1078,7 +1189,7 @@ namespace EDDCanonn
                 _statusJson = o;
         }
 
-        private JObject getStatusJson()
+        private JObject getStatusJson() //Return a copy.
         {
             lock (_lockStatusJson)
                 return new JObject(_statusJson);
@@ -1102,7 +1213,7 @@ namespace EDDCanonn
         {
             if (CanonnHelper.InstanceCount > 1)
                 return;
-
+            Console.WriteLine("Hallo");
             if (!historyset)
                 historyset = true;
         }
@@ -1210,6 +1321,17 @@ namespace EDDCanonn
                 textBoxSystem.AppendText(system.Name);
                 textBoxBodyCount.Clear();
                 textBoxBodyCount.AppendText(system.Bodys?.Count + " / " + system.FSSTotalBodies);
+            });
+        }
+
+        private void NotifyMainFields(String arg)
+        {
+            Invoke((MethodInvoker)delegate
+            {
+                textBoxSystem.Text = arg;
+                toolStripRange.Text = arg;
+                toolStripPatrol.Text = arg;
+                textBoxNews.Text = arg;
             });
         }
     }
