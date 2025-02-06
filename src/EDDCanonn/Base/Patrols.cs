@@ -80,34 +80,36 @@ namespace EDDCanonn.Base
     public class Patrol
     {
 
-        public Patrol(string patrolType, string category, double x, double y, double z, string instructions, string url)
+        public Patrol(string patrolType, string category, string system, double x, double y, double z, string instructions, string url)
         {
-            PatrolType = patrolType;
+            this.patrolType = patrolType;
             this.category = category;
-            X = x;
-            Y = y;
-            Z = z;
-            Instructions = instructions;
-            Url = url;
+            this.system = system;
+            this.x = x;
+            this.y = y;
+            this.z = z;
+            this.instructions = instructions;
+            this.url = url;
         }
 
-        public Patrol(string category, double x, double y, double z, string instructions, string url)
+        public Patrol(string category, string system, double x, double y, double z, string instructions, string url)
         {
             this.category = category;
-            X = x;
-            Y = y;
-            Z = z;
-            Instructions = instructions;
-            Url = url;
+            this.system = system;
+            this.x = x;
+            this.y = y;
+            this.z = z;
+            this.instructions = instructions;
+            this.url = url;
         }
 
-        public string PatrolType { get; set; }
+        public string patrolType { get; set; }
         public string category {  get; set; }
-        public long Id64 { get; set; }
-        public double X { get; set; }
-        public double Y { get; set; }
-        public double Z { get; set; }
-        public string Instructions { get; set; }
-        public string Url { get; set; }
+        public string system { get; set; }
+        public double x { get; set; }
+        public double y { get; set; }
+        public double z { get; set; }
+        public string instructions { get; set; }
+        public string url { get; set; }
     }
 }
