@@ -76,13 +76,30 @@ namespace EDDCanonn
             }
         }
 
+        public static List<JObject> GetUniqueEntries(JObject eventData, string key, List<JObject> existingList, string exclude = null)
+        {
+            if (eventData[key] is JArray array)
+            {
+                List<JObject> result = existingList ?? new List<JObject>();
+                result.AddRange(array.OfType<JObject>()
+                                        .Where(item => (exclude == null || !item.ToString().Contains(exclude)) &&
+                                                    !result.Any(existing => JToken.DeepEquals(existing, item))));
+                return result;
+            }
+            return existingList ?? new List<JObject>();
+        }
 
-        public static List<JObject> GetJObjectList(JObject source, string key)
+        public static List<JObject> GetJObjectList(JObject source, string key, string exclude = null)
         {
             if (source[key] is JArray array)
-                return array.OfType<JObject>().ToList();
+            {
+                return array.OfType<JObject>()
+                            .Where(obj => exclude == null || !obj.ToString().Contains(exclude))
+                            .ToList();
+            }
             return null;
         }
+
 
         public static List<Dictionary<string, string>> ParseTsv(string tsvContent)
         {
