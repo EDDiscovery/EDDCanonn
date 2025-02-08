@@ -567,6 +567,7 @@ namespace EDDCanonn
             this.dataGridPatrol.ShowRowErrors = false;
             this.dataGridPatrol.Size = new System.Drawing.Size(364, 179);
             this.dataGridPatrol.TabIndex = 12;
+            this.dataGridPatrol.MouseDown += new System.Windows.Forms.MouseEventHandler(this.DataGridPatrol_MouseDown);
             // 
             // Patrol
             // 
@@ -666,7 +667,6 @@ namespace EDDCanonn
             // 
             // toolStripRange
             // 
-            this.toolStripRange.Enabled = false;
             this.toolStripRange.Name = "toolStripRange";
             this.toolStripRange.Size = new System.Drawing.Size(121, 23);
             this.toolStripRange.Text = "Range";
@@ -687,7 +687,6 @@ namespace EDDCanonn
             // 
             // toolStripPatrol
             // 
-            this.toolStripPatrol.Enabled = false;
             this.toolStripPatrol.Name = "toolStripPatrol";
             this.toolStripPatrol.Size = new System.Drawing.Size(121, 23);
             this.toolStripPatrol.Text = "Category";
@@ -780,6 +779,7 @@ namespace EDDCanonn
             this.Controls.Add(this.dataGridPatrol);
             this.Controls.Add(this.gridData);
             this.Controls.Add(this.tableLayoutPanel1);
+            this.Enabled = false;
             this.Name = "EDDCanonnUserControl";
             this.Size = new System.Drawing.Size(407, 512);
             this.tableLayoutPanel1.ResumeLayout(false);

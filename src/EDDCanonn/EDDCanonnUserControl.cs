@@ -124,7 +124,7 @@ namespace EDDCanonn
                             toolStripRange.Enabled = true; toolStripRange.SelectedIndex = 2;
                             _patrolLock = false;
                         });
-                        UpdatePatrol();
+                        UpdatePatrols();
                     })
                 );
             }
@@ -148,9 +148,9 @@ namespace EDDCanonn
                                             record.TryGetValue("Type", out string typeValue) ? typeValue : string.Empty;
                         string system = record.TryGetValue("System", out string systemValue) ? systemValue : string.Empty;
 
-                        double x = CanonnHelper.GetValueOrDefault(new JToken(record["X"]?? null), 0.0);
-                        double y = CanonnHelper.GetValueOrDefault(new JToken(record["Y"]?? null), 0.0);
-                        double z = CanonnHelper.GetValueOrDefault(new JToken(record["Z"]?? null), 0.0);
+                        double x = CanonnHelper.GetValueOrDefault(new JToken(record["X"]?? null), CanonnHelper.PositionFallback);
+                        double y = CanonnHelper.GetValueOrDefault(new JToken(record["Y"]?? null), CanonnHelper.PositionFallback);
+                        double z = CanonnHelper.GetValueOrDefault(new JToken(record["Z"]?? null), CanonnHelper.PositionFallback);
 
                         string instructions = record.TryGetValue("Instructions", out string instructionsValue) ? instructionsValue : "none";
                         string urlp = record.TryGetValue("Url", out string urlValue) ? urlValue : string.Empty;
@@ -195,9 +195,9 @@ namespace EDDCanonn
 
                         string system = record["system"]?.Value?.ToString() ?? string.Empty;
 
-                        double x = CanonnHelper.GetValueOrDefault(record["x"]?? null, 0.0);
-                        double y = CanonnHelper.GetValueOrDefault(record["y"]?? null, 0.0);
-                        double z = CanonnHelper.GetValueOrDefault(record["z"]?? null, 0.0);
+                        double x = CanonnHelper.GetValueOrDefault(record["x"]?? null, CanonnHelper.PositionFallback);
+                        double y = CanonnHelper.GetValueOrDefault(record["y"]?? null, CanonnHelper.PositionFallback);
+                        double z = CanonnHelper.GetValueOrDefault(record["z"]?? null, CanonnHelper.PositionFallback);
 
                         string instructions = record["instructions"]?.Value?.ToString() ?? "none";
                         string urlp = record["url"]?.Value?.ToString() ?? string.Empty;
@@ -224,7 +224,7 @@ namespace EDDCanonn
         }
 
         private bool _patrolLock = true;
-        private void UpdatePatrol()
+        private void UpdatePatrols()
         {
              dataHandler.StartTaskAsync(
                  () =>
@@ -233,7 +233,7 @@ namespace EDDCanonn
                     {
                         while (systemData == null)
                         {
-                            Task.Delay(1000).Wait();
+                            Task.Delay(250).Wait();
                         }
 
                         string type = "";
@@ -269,15 +269,15 @@ namespace EDDCanonn
                     }
                     catch (Exception ex)
                     {
-                        Console.Error.WriteLine($"EDDCanonn: Unexpected error in UpdatePatrol Task: {ex.Message}");
+                        Console.Error.WriteLine($"EDDCanonn: Unexpected error in UpdatePatrols Task: {ex.Message}");
                     }
                     finally
                     {
                         _patrolLock = false;
                     }
                 },
-                ex => Console.Error.WriteLine($"EDDCanonn: Error during UpdatePatrol: {ex.Message}"),
-                "UpdatePatrol"
+                ex => Console.Error.WriteLine($"EDDCanonn: Error during UpdatePatrols: {ex.Message}"),
+                "UpdatePatrols"
             );
         }
 
@@ -287,7 +287,7 @@ namespace EDDCanonn
             if (_patrolLock)
                 return;
             _patrolLock = true;
-            UpdatePatrol();
+            UpdatePatrols();
         }
 
         private void toolStripRange_IndexChanged(object sender, EventArgs e)
@@ -295,28 +295,60 @@ namespace EDDCanonn
             if (_patrolLock)
                 return;
             _patrolLock = true;
-            UpdatePatrol();
+            UpdatePatrols();
         }
 
         private void CopySystem_Click(object sender, EventArgs e)
         {
             if (dataGridPatrol.SelectedCells.Count == 0) return;
-            DataGridViewRow selectedRow = dataGridPatrol.Rows[dataGridPatrol.SelectedCells[0].RowIndex];
 
-            if (dataGridPatrol.Columns["SysName"] == null) return;
+            int rowIndex = dataGridPatrol.SelectedCells[0].RowIndex;
+            if (rowIndex < 0 || rowIndex >= dataGridPatrol.Rows.Count) return;
+
+            DataGridViewRow selectedRow = dataGridPatrol.Rows[rowIndex];
+            if (dataGridPatrol.Columns["SysName"] == null || selectedRow.Cells["SysName"] == null) return;
+
             object cellValue = selectedRow.Cells["SysName"].Value;
             if (cellValue == null) return;
-            Clipboard.SetText(cellValue.ToString());
+
+            try
+            {
+                Clipboard.SetText(cellValue.ToString());
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"EDDCanonn: Clipboard error:: {ex.Message}");
+            }
         }
+
         private void OpenUrl_Click(object sender, EventArgs e)
         {
             if (dataGridPatrol.SelectedCells.Count == 0) return;
-            DataGridViewRow selectedRow = dataGridPatrol.Rows[dataGridPatrol.SelectedCells[0].RowIndex];
 
-            if (dataGridPatrol.Columns["PatrolUrl"] == null) return;
+            int rowIndex = dataGridPatrol.SelectedCells[0].RowIndex;
+            if (rowIndex < 0 || rowIndex >= dataGridPatrol.Rows.Count) return;
+
+            DataGridViewRow selectedRow = dataGridPatrol.Rows[rowIndex];
+            if (dataGridPatrol.Columns["PatrolUrl"] == null || selectedRow.Cells["PatrolUrl"] == null) return;
+
             object cellValue = selectedRow.Cells["PatrolUrl"].Value;
             if (cellValue == null) return;
+
             CanonnHelper.OpenUrl(cellValue.ToString());
+        }
+
+
+        private void DataGridPatrol_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button != MouseButtons.Right)
+                return;
+
+            DataGridView.HitTestInfo hit = dataGridPatrol.HitTest(e.X, e.Y);
+            if (hit.RowIndex < 0 || hit.ColumnIndex < 0)
+                return;
+
+            dataGridPatrol.ClearSelection();
+            dataGridPatrol.Rows[hit.RowIndex].Cells[hit.ColumnIndex].Selected = true;
         }
 
         #endregion
@@ -593,7 +625,7 @@ namespace EDDCanonn
 
         //This only affects the data structure for visual feedback.
         #region ProcessEvents
-        private void ProcessEvent(JournalEntry je)
+        private void ProcessVisualEvent(JournalEntry je)
         {
             try
             {
@@ -641,19 +673,19 @@ namespace EDDCanonn
             lock (_lockSystemData)
             {
                 systemData.Name = eventData["StarSystem"].Value?.ToString();
-                systemData.SystemAddress = eventData["SystemAddress"]?.ToObject<long>() ?? 0;
+                systemData.SystemAddress = eventData["SystemAddress"]?.ToObject<long>() ?? -1;
 
                 if (eventData["StarPos"] != null)
                 {
-                    systemData.X = CanonnHelper.GetValueOrDefault(eventData["StarPos"][0] ?? null, 0.0);
-                    systemData.Y = CanonnHelper.GetValueOrDefault(eventData["StarPos"][1] ?? null, 0.0);
-                    systemData.Z = CanonnHelper.GetValueOrDefault(eventData["StarPos"][2] ?? null, 0.0);
+                    systemData.X = CanonnHelper.GetValueOrDefault(eventData["StarPos"][0] ?? null, CanonnHelper.PositionFallback);
+                    systemData.Y = CanonnHelper.GetValueOrDefault(eventData["StarPos"][1] ?? null, CanonnHelper.PositionFallback);
+                    systemData.Z = CanonnHelper.GetValueOrDefault(eventData["StarPos"][2] ?? null, CanonnHelper.PositionFallback);
                     systemData.HasCoordinate = true;
                 }
             }
         }
 
-        private void fetchScanData(JObject eventData, Body body) //Call this method only via a lock. Otherwise it could get bad.
+        private void fetchScanData(JObject eventData, Body body) //Call this method only via the '_lockSystemData' lock. Otherwise it could get bad.
         {
             if (body.BodyName?.Contains("Belt") == true)
                 return;
@@ -724,7 +756,7 @@ namespace EDDCanonn
         private void ProcessScan(JObject eventData) //We can use this for most scan events.
         {
             if (systemData == null)
-                systemData = new SystemData(); //Enforces encapsulation and creates a new SystemData instance internally, disregarding any parameters.
+                systemData = new SystemData(); //Enforces encapsulation.
 
             lock (_lockSystemData)
             {
@@ -759,12 +791,12 @@ namespace EDDCanonn
         private void ProcessFSSDiscoveryScan(JObject eventData)
         {
             if (systemData == null)
-                systemData = new SystemData(); //Enforces encapsulation and creates a new SystemData instance internally, disregarding any parameters.
+                systemData = new SystemData(); //Enforces encapsulation.
 
             lock (_lockSystemData)
             {
-                systemData.FSSTotalBodies = eventData["BodyCount"]?.ToObject<int>() ?? 0;
-                systemData.FSSTotalNonBodies = eventData["NonBodyCount"]?.ToObject<int>() ?? 0;
+                systemData.FSSTotalBodies = eventData["BodyCount"]?.ToObject<int>() ?? -1;
+                systemData.FSSTotalNonBodies = eventData["NonBodyCount"]?.ToObject<int>() ?? -1;
             }
         }
 
@@ -782,7 +814,7 @@ namespace EDDCanonn
         private void ProcessOrganic(JObject eventData) //The 'ScanOrganic' event is special. We cannot treat it as a 'ProcessScan' (although similar) because the keys are named differently.
         { //wip
             if (systemData == null)
-                systemData = new SystemData(); //Enforces encapsulation and creates a new SystemData instance internally, disregarding any parameters.
+                systemData = new SystemData(); //Enforces encapsulation.
 
             lock (_lockSystemData)
             {
@@ -825,7 +857,7 @@ namespace EDDCanonn
         private void ProcessFSSSignalDiscovered(JObject eventData) //wip
         {
             if (systemData == null)
-                systemData = new SystemData(); //Enforces encapsulation and creates a new SystemData instance internally, disregarding any parameters.
+                systemData = new SystemData(); //Enforces encapsulation.
 
             lock (_lockSystemData)
             {
@@ -844,7 +876,7 @@ namespace EDDCanonn
         private void ProcessCodex(JObject eventData) //wip
         {
             if (systemData == null)
-                systemData = new SystemData(); //Enforces encapsulation and creates a new SystemData instance internally, disregarding any parameters.
+                systemData = new SystemData(); //Enforces encapsulation.
 
             lock (_lockSystemData)
             {
@@ -893,8 +925,8 @@ namespace EDDCanonn
                     systemData.FSSSignalList = CanonnHelper.GetJObjectList(root, "FSSSignalList");
                     systemData.CodexEntryList = CanonnHelper.GetJObjectList(root, "CodexEntryList");
 
-                    systemData.FSSTotalBodies = root["FSSTotalBodies"]?.ToObject<int>() ?? 0;
-                    systemData.FSSTotalNonBodies = root["FSSTotalNonBodies"]?.ToObject<int>() ?? 0;
+                    systemData.FSSTotalBodies = root["FSSTotalBodies"]?.ToObject<int>() ?? -1;
+                    systemData.FSSTotalNonBodies = root["FSSTotalNonBodies"]?.ToObject<int>() ?? -1;
 
                 }
                 catch (Exception ex)
@@ -910,11 +942,11 @@ namespace EDDCanonn
         {
             // Extract and populate main system details
             systemData.Name = system["Name"].Value?.ToString();
-            systemData.X = CanonnHelper.GetValueOrDefault(system["x"]?? null,0.0);
-            systemData.Y = CanonnHelper.GetValueOrDefault(system["y"] ?? null,0.0);
-            systemData.Z = CanonnHelper.GetValueOrDefault(system["z"] ?? null,0.0);
+            systemData.X = CanonnHelper.GetValueOrDefault(system["X"] ?? null, CanonnHelper.PositionFallback);
+            systemData.Y = CanonnHelper.GetValueOrDefault(system["Y"] ?? null, CanonnHelper.PositionFallback);
+            systemData.Z = CanonnHelper.GetValueOrDefault(system["Z"] ?? null, CanonnHelper.PositionFallback);
             systemData.HasCoordinate = system["HasCoordinate"]?.ToObject<bool>() ?? false;
-            systemData.SystemAddress = CanonnHelper.GetValueOrDefault(system["SystemAddress"] ?? null, 0l);
+            systemData.SystemAddress = CanonnHelper.GetValueOrDefault(system["SystemAddress"] ?? null, -1l);
         }
 
         private void ProcessCallbackStarNodes(JObject starNodes, int? parentBodyId = null) //wip
@@ -1018,24 +1050,32 @@ namespace EDDCanonn
 
                 dataHandler.StartTaskAsync(() =>
                 {
-                    if (requestTag is RequestTag rt && rt.Equals(RequestTag.OnStart))
+                    if (requestTag is RequestTag rt && rt.Equals(RequestTag.OnStart)) //Triggered by panel creation.
                     {
                         lock (_lockSystemData) ProcessCallbackSystem(o);
-                        draw();
+
+                        Invoke((MethodInvoker)delegate
+                        {
+                            this.Enabled = true;
+                        });
+
+                        activated = true;
                     }
                     else if (requestTag is JObject jb)
                     {
                         string evt = jb["event"]?.Value?.ToString();
-                        if (evt == "Location" || evt == "FSDJump")
+                        if (evt == "Location" || evt == "FSDJump") //Triggered by 'jump' or 'location' Event.
                         {
                             lock (_lockSystemData)
-                            {
+                            {                             
                                 ProcessCallbackSystem(o);
                                 if (systemData == null) ProcessNewSystem(jb);
                             }
-                            draw();
+                            activated = true;
                         }
                     }
+                    draw();
+//                    UpdatePatrols();
                 },
                 ex => Console.Error.WriteLine($"EDDCanonn: Error processing Systemdata: {ex.Message}"),
                 "DataResult");
@@ -1092,6 +1132,7 @@ namespace EDDCanonn
                 if (DLLCallBack.RequestHistory(1, false, out je) == true)
                 {
                     DLLCallBack.RequestScanData(RequestTag.OnStart, this, "", true);
+                    return;
                 }
                 else
                 {
@@ -1102,7 +1143,7 @@ namespace EDDCanonn
                         {
                             Task.Delay(250).Wait();
                         }
-                        BeginInvoke((MethodInvoker)delegate
+                        Invoke((MethodInvoker)delegate
                         {
                             DLLCallBack.RequestScanData(RequestTag.OnStart, this, "", true);
                         });
@@ -1122,6 +1163,7 @@ namespace EDDCanonn
             }
         }
 
+        private bool activated = false;
         public void NewFilteredJournal(JournalEntry je) //wip
         {
             if (CanonnHelper.InstanceCount > 1)
@@ -1132,29 +1174,46 @@ namespace EDDCanonn
                 dataHandler.StartTaskAsync(
                 () =>
                 {
-                    if (IsEventValid(je.eventid, je.json))
-                    {
-                        //Payload.BuildPayload(je, getStatusJson());
-                    }
-
+                    JObject o = je.json.JSONParseObject();
                     if (je.eventid.Equals("FSDJump")) //Prepare data for the next system. Include ‘FSDJump’ event as requestTag in case the System is unknown.
                     {
+                        activated = false; //As long as we make a callback, we hold back the events (canonn events excluded).
                         resetSystemData();
                         BeginInvoke((MethodInvoker)delegate
                         {
-                            DLLCallBack.RequestScanData(je.json.JSONParseObject(), this, je.systemname, true);
+                            //The callback may take some time. That's why we give the user some feedback in an early stage.
+                            NotifyField(textBoxSystem, je.systemname);
+                            NotifyField(textBoxBodyCount, "Fetch...");
+                            DLLCallBack.RequestScanData(o, this, je.systemname, true);
                         });
+                        return;
                     }
                     else if (je.eventid.Equals("Location")) //Prepare data for the next system. Include ‘Location’ event as requestTag in case of a crash. 
                     {
+                        activated = false;
                         resetSystemData();
                         BeginInvoke((MethodInvoker)delegate
                         {
-                            DLLCallBack.RequestScanData(je.json.JSONParseObject(), this, je.systemname, true);
+                            NotifyField(textBoxSystem, je.systemname);
+                            NotifyField(textBoxBodyCount, "Fetch...");
+                            DLLCallBack.RequestScanData(o, this, je.systemname, true);
                         });
+                        return;
                     }
                     else
-                        ProcessEvent(je);
+                    {
+                        if (IsEventValid(je.eventid, je.json)) //Send event to canonn if valid.
+                        {
+                            //Payload.BuildPayload(je, getStatusJson()); --> wip
+                        }
+
+                        while (!activated) //Wait until a 'DataResult' has been completed.
+                        {
+                            Task.Delay(250).Wait();
+                        }
+
+                        ProcessVisualEvent(je);
+                    }
                     draw(); //wip
                 },
                 ex =>
@@ -1189,7 +1248,7 @@ namespace EDDCanonn
                 _statusJson = o;
         }
 
-        private JObject getStatusJson() //Return a copy.
+        private JObject getStatusJson() //Return a deep copy.
         {
             lock (_lockStatusJson)
                 return new JObject(_statusJson);
@@ -1229,6 +1288,8 @@ namespace EDDCanonn
         public void LoadLayout()
         {
             PanelCallBack.LoadGridLayout(dataGridPatrol);
+
+            //wip
         }
 
         public void ScreenShotCaptured(string file, Size s)
@@ -1237,6 +1298,8 @@ namespace EDDCanonn
                 return;
 
             throw new NotImplementedException();
+
+            //wip
         }
 
         public void SetTransparency(bool ison, Color curcol)
@@ -1245,6 +1308,8 @@ namespace EDDCanonn
                 return;
 
             this.BackColor = curcol;
+
+            //wip
         }
 
         public void ThemeChanged(string themeasjson)
@@ -1277,11 +1342,15 @@ namespace EDDCanonn
                 return;
 
             throw new NotImplementedException();
+
+            //wip
         }
 
         public string HelpKeyOrAddress()
         {
             throw new NotImplementedException();
+
+            //wip
         }
         #endregion
 
@@ -1301,14 +1370,15 @@ namespace EDDCanonn
             DebugLog.Clear();
         }
 
-        private void LogSystem_Click(object sender, EventArgs e)//wip
+        private void LogSystem_Click(object sender, EventArgs e)
         {
-            DebugLog.AppendText(systemData?.ToString() + "\n");
+            SystemData system = deepCopySystemData();
+            DebugLog.AppendText(system?.ToString() ?? "none" + "\n");
 
         }
         #endregion
 
-        private void draw()
+        private void draw() //wip
         {
             SystemData system = deepCopySystemData();
 
@@ -1318,13 +1388,22 @@ namespace EDDCanonn
             Invoke((MethodInvoker)delegate
             {
                 textBoxSystem.Clear();
-                textBoxSystem.AppendText(system.Name);
+                textBoxSystem.AppendText(system.Name ?? "none");
                 textBoxBodyCount.Clear();
                 textBoxBodyCount.AppendText(system.Bodys?.Count + " / " + system.FSSTotalBodies);
             });
         }
 
-        private void NotifyMainFields(String arg)
+        #region Notify
+        private void NotifyField(Control control, String arg) //wip
+        {
+            BeginInvoke((MethodInvoker)delegate
+            {
+                control.Text = arg;
+            });
+        }
+
+        private void NotifyMainFields(String arg) //wip
         {
             Invoke((MethodInvoker)delegate
             {
@@ -1334,5 +1413,6 @@ namespace EDDCanonn
                 textBoxNews.Text = arg;
             });
         }
+        #endregion
     }
 }
