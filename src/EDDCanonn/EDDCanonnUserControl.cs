@@ -714,42 +714,12 @@ namespace EDDCanonn
                 body.ScanData.IsPlanet = eventData.Contains("PlanetClass");
                 body.ScanData.ScanType = eventData["ScanType"]?.Value?.ToString();
 
-                //List<JObject> : AddRange(field.OfType<JObject>().Where(s => !body.ScanData.field.Any(existing => JToken.DeepEquals(existing, s)))) --> Should work?
-                if (eventData["Signals"] is JArray signals)
-                {
-                    if (body.ScanData.Signals == null)
-                        body.ScanData.Signals = new List<JObject>();
-                    body.ScanData.Signals.AddRange(signals.OfType<JObject>().Where(s => !body.ScanData.Signals.Any(existing => JToken.DeepEquals(existing, s))));
-                }
-
-                if (eventData["Rings"] is JArray rings)
-                {
-                    if (body.ScanData.Rings == null)
-                        body.ScanData.Rings = new List<JObject>();
-                    body.ScanData.Rings.AddRange(rings.OfType<JObject>().Where(r => !body.ScanData.Rings.Any(existing => JToken.DeepEquals(existing, r))));
-                }
-
-                if (eventData["Organics"] is JArray organics) //I think that's unnecessary. We'll leave it anyway.
-                {
-                    if (body.ScanData.Organics == null)
-                        body.ScanData.Organics = new List<JObject>();
-                    body.ScanData.Organics.AddRange(organics.OfType<JObject>().Where(o => !body.ScanData.Organics.Any(existing => JToken.DeepEquals(existing, o))));
-                }
-
-                if (eventData["Genuses"] is JArray genuses)
-                {
-                    if (body.ScanData.Genuses == null)
-                        body.ScanData.Genuses = new List<JObject>();
-                    body.ScanData.Genuses.AddRange(genuses.OfType<JObject>().Where(g => !body.ScanData.Genuses.Any(existing => JToken.DeepEquals(existing, g))));
-                }
-
-                if (eventData["SurfaceFeatures"] is JArray surfaceFeatures)
-                {
-                    if (body.ScanData.SurfaceFeatures == null)
-                        body.ScanData.SurfaceFeatures = new List<JObject>();
-                    body.ScanData.SurfaceFeatures.AddRange(surfaceFeatures.OfType<JObject>().Where(sf => !body.ScanData.SurfaceFeatures.Any(existing => JToken.DeepEquals(existing, sf))));
-                }
-
+                //List<JObject>  
+                body.ScanData.Signals = CanonnHelper.GetUniqueEntries(eventData, "Signals", body.ScanData.Signals);
+                body.ScanData.Rings = CanonnHelper.GetUniqueEntries(eventData, "Rings", body.ScanData.Rings,"Belt");
+                body.ScanData.Organics = CanonnHelper.GetUniqueEntries(eventData, "Organics", body.ScanData.Organics);
+                body.ScanData.Genuses = CanonnHelper.GetUniqueEntries(eventData, "Genuses", body.ScanData.Genuses);
+                body.ScanData.SurfaceFeatures = CanonnHelper.GetUniqueEntries(eventData, "SurfaceFeatures", body.ScanData.SurfaceFeatures);
             }
         }
 
@@ -766,8 +736,11 @@ namespace EDDCanonn
                 }
       
                 int bodyId = CanonnHelper.GetValueOrDefault(eventData["BodyID"]?? null, -1);
-
                 if (bodyId == -1)
+                    return;
+
+                string bodyName = eventData["BodyName"]?.Value?.ToString();
+                if (bodyName?.Contains("Belt") == true)
                     return;
 
                 Body body;
@@ -777,7 +750,7 @@ namespace EDDCanonn
                     body = new Body
                     {
                         BodyID = bodyId,
-                        BodyName = eventData["BodyName"]?.Value?.ToString(),
+                        BodyName = bodyName,
                     };
                     systemData.Bodys[bodyId] = body;
                 }
@@ -849,7 +822,7 @@ namespace EDDCanonn
                         ["Genus"] = genus
                     };
 
-                    body.ScanData.Organics.Add(newOrganic.OfType<JObject>().FirstOrDefault(sf => !body.ScanData.Organics.Any(existing => JToken.DeepEquals(existing, sf))));
+                //    body.ScanData.Organics.AddRange(CanonnHelper.GetUniqueEntries(newOrganic, "Genus", body.ScanData.Organics));
                 }
             }
         }
@@ -868,7 +841,7 @@ namespace EDDCanonn
                         ["SignalName"] = signal
                     };
 
-                    systemData.FSSSignalList.Add(newSignal.OfType<JObject>().FirstOrDefault(sf => !systemData.FSSSignalList.Any(existing => JToken.DeepEquals(existing, sf))));
+                //    systemData.FSSSignalList.AddRange(CanonnHelper.GetUniqueEntries(newSignal, "SignalName", systemData.FSSSignalList));
                 }
             }
         }
@@ -887,7 +860,7 @@ namespace EDDCanonn
                         ["Name"] = codex
                     };
 
-                    systemData.CodexEntryList.Add(newCodex.OfType<JObject>().FirstOrDefault(sf => !systemData.CodexEntryList.Any(existing => JToken.DeepEquals(existing, sf))));
+                //    systemData.CodexEntryList.AddRange(CanonnHelper.GetUniqueEntries(newCodex, "Name", systemData.CodexEntryList));
                 }
             }
         }
@@ -1010,7 +983,7 @@ namespace EDDCanonn
                         //List<JObject>    
                         Signals = CanonnHelper.GetJObjectList(scanDataNode, "Signals"),
                         SurfaceFeatures = CanonnHelper.GetJObjectList(scanDataNode, "SurfaceFeatures"),
-                        Rings = CanonnHelper.GetJObjectList(scanDataNode, "Rings"),
+                        Rings = CanonnHelper.GetJObjectList(scanDataNode, "Rings", "Belt"),
                         Organics = CanonnHelper.GetJObjectList(scanDataNode, "Organics"),
                         Genuses = CanonnHelper.GetJObjectList(scanDataNode, "Genuses"),
                     };
@@ -1405,7 +1378,7 @@ namespace EDDCanonn
 
         private void NotifyMainFields(String arg) //wip
         {
-            Invoke((MethodInvoker)delegate
+            BeginInvoke((MethodInvoker)delegate
             {
                 textBoxSystem.Text = arg;
                 toolStripRange.Text = arg;
