@@ -21,17 +21,22 @@ using System.Runtime.InteropServices;
 using QuickJSON;
 namespace EDDCanonn
 {
+    //Class for outsourced help functions.
     public static class CanonnHelper
     {
+        //Count for active canonn plugin instances.
         public static int InstanceCount = 0;
+        //Array for the patrol ranges.
         public static readonly int[] PatrolRanges = { 6, 24, 120, 720, 5040 };
-
+        //Default fallback for galactic coords.
         public static readonly double PositionFallback = -99999.99;
 
+        //Canonn urls.
         public static readonly string WhitelistUrl = "https://us-central1-canonn-api-236217.cloudfunctions.net/postEventWhitelist";
         public static readonly string EventPushUrl = "https://us-central1-canonn-api-236217.cloudfunctions.net/postEvent";
         public static readonly string PatrolUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQsi1Vbfx4Sk2msNYiqo0PVnW3VHSrvvtIRkjT-JvH_oG9fP67TARWX2jIjehFHKLwh4VXdSh0atk3J/pub?gid=0&single=true&output=tsv";
 
+        //Attempts to convert a JToken to a specified value type, returning a fallback value. It is for numbers!
         public static T GetValueOrDefault<T>(JToken obj, T fallback) where T : struct
         {
             if (obj == null)
@@ -76,6 +81,22 @@ namespace EDDCanonn
             }
         }
 
+        //Checks if a given JObject is unique within a list and returns it if it is not already present and does not contain an excluded value.
+        public static JObject GetUniqueEntry(JObject eventData, List<JObject> existingList, string exclude = null)
+        {
+            if (eventData == null || existingList == null)
+                return null;
+
+            if (exclude != null && eventData.ToString().Contains(exclude))
+                return null;
+
+            if (existingList.Any(existing => JToken.DeepEquals(existing, eventData)))
+                return null;
+
+            return eventData;
+        }
+
+        //The same as above, but for JArrays.
         public static List<JObject> GetUniqueEntries(JObject eventData, string key, List<JObject> existingList, string exclude = null)
         {
             if (eventData[key] is JArray array)
@@ -89,6 +110,7 @@ namespace EDDCanonn
             return existingList ?? new List<JObject>();
         }
 
+        //The same as 'GetUniqueEntries', but without duplicate check.
         public static List<JObject> GetJObjectList(JObject source, string key, string exclude = null)
         {
             if (source[key] is JArray array)
@@ -100,7 +122,7 @@ namespace EDDCanonn
             return null;
         }
 
-
+        //Parses TSV content into a list of dictionaries.
         public static List<Dictionary<string, string>> ParseTsv(string tsvContent)
         {
             if (string.IsNullOrWhiteSpace(tsvContent))
@@ -144,6 +166,7 @@ namespace EDDCanonn
             return records;
         }
 
+        //Attempts to open a given URL in the default web browser.
         public static void OpenUrl(string url)
         {
             if (string.IsNullOrWhiteSpace(url))
