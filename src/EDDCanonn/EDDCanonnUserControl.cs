@@ -24,6 +24,7 @@ using KdTree;
 using KdTree.Math;
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 
 namespace EDDCanonn
@@ -283,14 +284,6 @@ namespace EDDCanonn
 
 
         private void toolStripPatrol_IndexChanged(object sender, EventArgs e)
-        {
-            if (_patrolLock)
-                return;
-            _patrolLock = true;
-            UpdatePatrols();
-        }
-
-        private void toolStripRange_IndexChanged(object sender, EventArgs e)
         {
             if (_patrolLock)
                 return;
@@ -648,14 +641,8 @@ namespace EDDCanonn
                     case "FSSDiscoveryScan":
                         ProcessFSSDiscoveryScan(eventData);
                         break;
-                    case "FSSSignalDiscovered":
-                        ProcessFSSSignalDiscovered(eventData);
-                        break;
-                    case "CodexEntry":
-                        ProcessCodex(eventData);
-                        break;
                     default:
-                        // Unsupported event
+                        Console.WriteLine($"EDDCanonn: Skip unsupported event: " + je.eventid);
                         break;
                 }
             }
@@ -817,55 +804,17 @@ namespace EDDCanonn
 
                 if (eventData["Genus"] is JToken genus)
                 {
+                    if (CanonnHelper.ContainsKeyValuePair(body.ScanData.Organics, "Genus", genus.Value.ToString()))
+                        return;
                     JObject newOrganic = new JObject
                     {
                         ["Genus"] = genus
                     };
 
-                //    body.ScanData.Organics.AddRange(CanonnHelper.GetUniqueEntries(newOrganic, "Genus", body.ScanData.Organics));
+                    body.ScanData.Organics.Add(CanonnHelper.GetUniqueEntry(eventData, body.ScanData.Organics));
                 }
             }
         }
-
-        private void ProcessFSSSignalDiscovered(JObject eventData) //wip
-        {
-            if (systemData == null)
-                systemData = new SystemData(); //Enforces encapsulation.
-
-            lock (_lockSystemData)
-            {
-                if (eventData["SignalName"] is JToken signal)
-                {
-                    JObject newSignal = new JObject
-                    {
-                        ["SignalName"] = signal
-                    };
-
-                //    systemData.FSSSignalList.AddRange(CanonnHelper.GetUniqueEntries(newSignal, "SignalName", systemData.FSSSignalList));
-                }
-            }
-        }
-
-        private void ProcessCodex(JObject eventData) //wip
-        {
-            if (systemData == null)
-                systemData = new SystemData(); //Enforces encapsulation.
-
-            lock (_lockSystemData)
-            {
-                if (eventData["Name"] is JToken codex)
-                {
-                    JObject newCodex = new JObject
-                    {
-                        ["Name"] = codex
-                    };
-
-                //    systemData.CodexEntryList.AddRange(CanonnHelper.GetUniqueEntries(newCodex, "Name", systemData.CodexEntryList));
-                }
-            }
-        }
-
-
         #endregion
 
         #region ProcessCallbackSystem

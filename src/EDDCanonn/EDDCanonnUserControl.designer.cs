@@ -670,7 +670,7 @@ namespace EDDCanonn
             this.toolStripRange.Name = "toolStripRange";
             this.toolStripRange.Size = new System.Drawing.Size(121, 23);
             this.toolStripRange.Text = "Range";
-            this.toolStripRange.SelectedIndexChanged += new System.EventHandler(this.toolStripRange_IndexChanged);
+            this.toolStripRange.SelectedIndexChanged += new System.EventHandler(this.toolStripPatrol_IndexChanged);
             // 
             // menuStrip1
             // 
