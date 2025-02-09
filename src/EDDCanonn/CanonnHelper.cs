@@ -81,10 +81,20 @@ namespace EDDCanonn
             }
         }
 
+        //Checks if a key value pair exists.
+        public static bool ContainsKeyValuePair(List<JObject> existingList, string key, string value)
+        {
+            if (existingList == null  ||  string.IsNullOrWhiteSpace(key) || value == null)
+                return false;
+
+            return existingList.Any(obj => obj.Contains(key) && obj[key]?.Value?.ToString() == value);
+        }
+
+
         //Checks if a given JObject is unique within a list and returns it if it is not already present and does not contain an excluded value.
         public static JObject GetUniqueEntry(JObject eventData, List<JObject> existingList, string exclude = null)
         {
-            if (eventData == null || existingList == null)
+            if (eventData == null || eventData.Count == 0 || existingList == null)
                 return null;
 
             if (exclude != null && eventData.ToString().Contains(exclude))
