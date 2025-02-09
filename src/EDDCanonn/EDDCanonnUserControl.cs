@@ -24,8 +24,6 @@ using KdTree;
 using KdTree.Math;
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
-
 
 namespace EDDCanonn
 {
