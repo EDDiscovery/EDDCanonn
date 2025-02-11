@@ -12,6 +12,7 @@
  * governing permissions and limitations under the License.
  */
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using QuickJSON;
@@ -62,6 +63,25 @@ namespace EDDCanonn.Base
         public List<JObject> FSSSignalList { get; set; } = null;
         public List<JObject> CodexEntryList { get; set; } = null;
 
+        public Body GetBodyByName(string bodyName)
+        {
+            return Bodys?.Values.FirstOrDefault(body =>
+                !string.IsNullOrEmpty(body.BodyName) &&
+                body.BodyName.Equals(bodyName, StringComparison.OrdinalIgnoreCase));
+        }
+
+        public int CountBodysFilteredByPhrases(params string[] excludeNamePhrases)
+        {
+            if (Bodys == null)
+                return 0;
+
+            return (excludeNamePhrases == null || excludeNamePhrases.Length == 0)
+                ? Bodys.Count
+                : Bodys.Values.Count(body =>
+                    body.BodyName == null || !excludeNamePhrases.Any(phrase =>
+                        body.BodyName.IndexOf(phrase, StringComparison.OrdinalIgnoreCase) >= 0));
+        }
+
         public override string ToString()
         {
             string result = $"System Name: {Name}\n" +
@@ -103,8 +123,8 @@ namespace EDDCanonn.Base
                 foreach (var bodyEntry in Bodys)
                 {
                     var body = bodyEntry.Value;
-                    result += $"  Body ID: {body.BodyID}\n" +
-                              $"    Node Type: {body.NodeType}\n" +
+                    result += $"    Body ID: {body.BodyID}\n" +
+                              $"    IsMapped: {body.IsMapped}\n" +
                               $"    Body Name: {body.BodyName}\n";
 
                     if (body.ScanData != null)
@@ -112,8 +132,7 @@ namespace EDDCanonn.Base
                         result += "    Scan Data:\n" +
                                   $"      Is Planet: {body.ScanData.IsPlanet}\n" +
                                   $"      Scan Type: {body.ScanData.ScanType}\n" +
-                                  $"      Body ID: {body.ScanData.BodyID}\n" +
-                                  $"      Has Rings: {body.ScanData.HasRings}\n";
+                                  $"      Body ID: {body.ScanData.BodyID}\n";
 
                         result += AddListToString("Rings", body.ScanData.Rings);
                         result += AddListToString("Signals", body.ScanData.Signals);
@@ -155,16 +174,16 @@ namespace EDDCanonn.Base
         public Body() { }
         public Body(Body body) { 
             BodyID = body.BodyID;
-            NodeType = body.NodeType;
             BodyName = body.BodyName;
+            IsMapped = body.IsMapped;
 
             if(body.ScanData != null) 
                 ScanData = new ScanData(body.ScanData);
         }
 
         public int BodyID { get; set; } = 0;
-        public string NodeType { get; set; } = null;
         public string BodyName { get; set; } = null;
+        public bool IsMapped { get; set; } = false;
         public ScanData ScanData { get; set; } = null;
     }
 
@@ -178,7 +197,6 @@ namespace EDDCanonn.Base
             IsPlanet = scanData.IsPlanet;
             ScanType = scanData.ScanType;
             BodyID = scanData.BodyID;
-            HasRings = scanData.HasRings;
 
             Rings = scanData.Rings?.Select(j => new JObject(j)).ToList() ?? new List<JObject>();
             Signals = scanData.Signals?.Select(j => new JObject(j)).ToList() ?? new List<JObject>();
@@ -190,7 +208,6 @@ namespace EDDCanonn.Base
         public bool IsPlanet { get; set; } = false;
         public string ScanType { get; set; } = null;
         public int BodyID { get; set; } = 0;
-        public bool HasRings { get; set; } = false;
         public List<JObject> Rings { get; set; } = null;
         public List<JObject> Signals { get; set; } = null;
         public List<JObject> Organics { get; set; } = null;
