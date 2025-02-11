@@ -260,11 +260,7 @@ namespace EDDCanonn
                             result.Add(row);
                         }
 
-                        BeginInvoke((MethodInvoker)delegate
-                        {
-                            dataGridPatrol.Rows.Clear();
-                            dataGridPatrol.Rows.AddRange(result.ToArray());
-                        });
+                         UpdateDataGridPatrol(result);
                     }
                     catch (Exception ex)
                     {
@@ -570,6 +566,7 @@ namespace EDDCanonn
 
         //This only affects the data structure for visual feedback.
         #region SystemData
+
         private readonly object _lockSystemData = new object();
         private SystemData _systemData; //Do not use this. Otherwise it could get bad.
 
@@ -616,6 +613,7 @@ namespace EDDCanonn
 
         //This only affects the data structure for visual feedback.
         #region ProcessEvents
+
         private void ProcessVisualEvent(JournalEntry je)
         {
             try
@@ -638,6 +636,9 @@ namespace EDDCanonn
                         break;
                     case "FSSDiscoveryScan":
                         ProcessFSSDiscoveryScan(eventData);
+                        break;
+                    case "SAAScanComplete":
+                        ProcessSAAScan(eventData);
                         break;
                     default:
                         Console.WriteLine($"EDDCanonn: Skip unsupported event: " + je.eventid);
@@ -675,6 +676,7 @@ namespace EDDCanonn
             if (body.BodyName?.Contains("Belt") == true)
                 return;
 
+            //Even if the event tells us that a body has been mapped, we do not apply this because we cannot know if it is also the case for the databases.
             if (body.ScanData == null)
             {
                 body.ScanData = new ScanData
@@ -758,6 +760,19 @@ namespace EDDCanonn
             }
         }
 
+        private void ProcessSAAScan(JObject eventData)
+        {
+            if (systemData == null)
+                systemData = new SystemData(); //Enforces encapsulation.
+
+            lock (_lockSystemData)
+            {
+                Body body = systemData.GetBodyByName(eventData["BodyName"]?.Value?.ToString());
+                if (body == null) return;
+                body.IsMapped = true;
+            }
+        }
+
         /*
         Sample 'ScanOrganic' event
         {
@@ -804,10 +819,6 @@ namespace EDDCanonn
                 {
                     if (CanonnHelper.ContainsKeyValuePair(body.ScanData.Organics, "Genus", genus.Value.ToString()))
                         return;
-                    JObject newOrganic = new JObject
-                    {
-                        ["Genus"] = genus
-                    };
 
                     body.ScanData.Organics.Add(CanonnHelper.GetUniqueEntry(eventData, body.ScanData.Organics));
                 }
@@ -815,7 +826,9 @@ namespace EDDCanonn
         }
         #endregion
 
+        //This only affects the data structure for visual feedback.
         #region ProcessCallbackSystem
+
         public void ProcessCallbackSystem(JObject root)
         {
             if (root == null || root.Count == 0) // If this is true after a ‘Location’ event, the system is later initialised via that event.
@@ -876,7 +889,6 @@ namespace EDDCanonn
 
             foreach (KeyValuePair<string, JToken> property in starNodes)
             {
-                string nodeKey = property.Key;
                 JObject starNode = property.Value as JObject;
 
                 if (starNode == null || starNode.Count == 0)
@@ -901,7 +913,6 @@ namespace EDDCanonn
                     systemData.Bodys = new Dictionary<int, Body>();
                 }
 
-
                 if (systemData.Bodys.ContainsKey(bodyId))
                 {
                     continue;
@@ -911,8 +922,8 @@ namespace EDDCanonn
                 {
                     //Primitives
                     BodyID = bodyId,
-                    NodeType = starNode["NodeType"].Value?.ToString(),
                     BodyName = starNode["BodyDesignator"].Value?.ToString(),
+                    IsMapped = starNode["IsPlanet"]?.ToObject<bool>() ?? false
                 };
 
 
@@ -923,9 +934,8 @@ namespace EDDCanonn
                     {
                         //Primitives
                         ScanType = scanDataNode["ScanType"].Value?.ToString(),
-                        BodyID = CanonnHelper.GetValueOrDefault(scanDataNode["ScanType"]?? null, -1),
+                        BodyID = bodyId,
                         IsPlanet = scanDataNode["IsPlanet"]?.ToObject<bool>() ?? false,
-                        HasRings = scanDataNode["HasRings"]?.ToObject<bool>() ?? false,
 
                         //List<JObject>    
                         Signals = CanonnHelper.GetJObjectList(scanDataNode, "Signals"),
@@ -948,10 +958,13 @@ namespace EDDCanonn
         }
         #endregion
 
+        //This only affects the data structure for visual feedback.
         #region ProcessData
+
         public enum RequestTag
         {
-            OnStart
+            OnStart,
+            Log 
         }
 
         public void DataResult(object requestTag, string data)
@@ -970,16 +983,26 @@ namespace EDDCanonn
 
                 dataHandler.StartTaskAsync(() =>
                 {
-                    if (requestTag is RequestTag rt && rt.Equals(RequestTag.OnStart)) //Triggered by panel creation.
+                    if (requestTag is RequestTag rt) //Triggered by panel creation.
                     {
-                        lock (_lockSystemData) ProcessCallbackSystem(o);
-
-                        Invoke((MethodInvoker)delegate
+                        if (rt.Equals(RequestTag.OnStart))
                         {
-                            this.Enabled = true;
-                        });
+                            lock (_lockSystemData) ProcessCallbackSystem(o);
 
-                        activated = true;
+                            Invoke((MethodInvoker)delegate
+                            {
+                                this.Enabled = true;
+                            });
+
+                            activated = true;
+                        }
+                        else if (rt.Equals(RequestTag.Log))
+                        {
+                            Invoke((MethodInvoker)delegate
+                            {
+                                DebugLog.AppendText(data ?? "none" + "\n");
+                            });
+                        }
                     }
                     else if (requestTag is JObject jb)
                     {
@@ -994,7 +1017,7 @@ namespace EDDCanonn
                             activated = true;
                         }
                     }
-                    draw();
+                    UpdateMainFields();
 //                    UpdatePatrols();
                 },
                 ex => Console.Error.WriteLine($"EDDCanonn: Error processing Systemdata: {ex.Message}"),
@@ -1005,6 +1028,60 @@ namespace EDDCanonn
                 Console.Error.WriteLine($"EDDCanonn: Unexpected error in DataResult: {ex.Message}");
             }
         }
+        #endregion
+
+        #region ProcessUpperTabControl
+
+        #endregion
+
+        #region UIUpdate
+
+        private void UpdateMainFields() //wip
+        {
+            SystemData system = deepCopySystemData();
+
+            if (system == null)
+                return;
+
+            BeginInvoke((MethodInvoker)delegate
+            {
+                textBoxSystem.Clear();
+                textBoxBodyCount.Clear();
+
+                textBoxSystem.AppendText(system.Name ?? "none");
+                textBoxBodyCount.AppendText(system.CountBodysFilteredByPhrases(new string[] { "Ring", "Belt" }) + " / " + system.FSSTotalBodies);
+            });
+        }
+
+        private void UpdateDataGridPatrol(List<DataGridViewRow> result)
+        {
+            BeginInvoke((MethodInvoker)delegate
+            {
+                dataGridPatrol.Rows.Clear();
+                dataGridPatrol.Rows.AddRange(result.ToArray());
+            });
+        }
+
+        #region Notify
+        private void NotifyField(Control control, String arg)
+        {
+            BeginInvoke((MethodInvoker)delegate
+            {
+                control.Text = arg;
+            });
+        }
+
+        private void NotifyMainFields(String arg)
+        {
+            BeginInvoke((MethodInvoker)delegate
+            {
+                textBoxSystem.Text = arg;
+                toolStripRange.Text = arg;
+                toolStripPatrol.Text = arg;
+                textBoxNews.Text = arg;
+            });
+        }
+        #endregion
         #endregion
 
         #region IEDDPanelExtension
@@ -1027,6 +1104,7 @@ namespace EDDCanonn
         {
             DLLCallBack = EDDCanonnEDDClass.DLLCallBack;
             PanelCallBack = callbacks;
+            ThemeChanged(themeasjson);
 
             NotifyMainFields("Start Up...");
 
@@ -1036,7 +1114,7 @@ namespace EDDCanonn
                 {
                     NotifyMainFields("Aborted");
                     CanonnHelper.InstanceCount++;
-                    gridData.SelectedIndex = gridData.TabCount -1;
+                    extTabControlData.SelectedIndex = extTabControlData.TabCount -1;
                     DebugLog.AppendText("Only one Canonn Panel instance can be active.");
                     this.Enabled = false;
                     return;
@@ -1134,7 +1212,7 @@ namespace EDDCanonn
 
                         ProcessVisualEvent(je);
                     }
-                    draw(); //wip
+                    UpdateMainFields(); //wip
                 },
                 ex =>
                 {
@@ -1232,12 +1310,10 @@ namespace EDDCanonn
             //wip
         }
 
+        Color FromJson(JToken color) { return System.Drawing.ColorTranslator.FromHtml(color.Str("Yellow")); }
         public void ThemeChanged(string themeasjson)
         {
-            if (CanonnHelper.InstanceCount > 1)
-                return;
-
-            //wip
+            setTheme(themeasjson);
         }
 
         public void TransparencyModeChanged(bool on)
@@ -1294,45 +1370,13 @@ namespace EDDCanonn
         {
             SystemData system = deepCopySystemData();
             DebugLog.AppendText(system?.ToString() ?? "none" + "\n");
+        }
 
+        private void CallSystem_Click(object sender, EventArgs e)
+        {
+            DLLCallBack.RequestScanData(RequestTag.Log, this, "", true);
         }
         #endregion
 
-        private void draw() //wip
-        {
-            SystemData system = deepCopySystemData();
-
-            if (system == null)
-                return;
-
-            Invoke((MethodInvoker)delegate
-            {
-                textBoxSystem.Clear();
-                textBoxSystem.AppendText(system.Name ?? "none");
-                textBoxBodyCount.Clear();
-                textBoxBodyCount.AppendText(system.Bodys?.Count + " / " + system.FSSTotalBodies);
-            });
-        }
-
-        #region Notify
-        private void NotifyField(Control control, String arg) //wip
-        {
-            BeginInvoke((MethodInvoker)delegate
-            {
-                control.Text = arg;
-            });
-        }
-
-        private void NotifyMainFields(String arg) //wip
-        {
-            BeginInvoke((MethodInvoker)delegate
-            {
-                textBoxSystem.Text = arg;
-                toolStripRange.Text = arg;
-                toolStripPatrol.Text = arg;
-                textBoxNews.Text = arg;
-            });
-        }
-        #endregion
     }
 }
