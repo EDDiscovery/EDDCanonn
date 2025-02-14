@@ -118,8 +118,17 @@
     <None Include="app.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Resources\canonn.png" />
-    <Content Include="Resources\Test.txt" />
+    <None Include="Resources\edd.png" />
+    <None Include="Resources\geology.png" />
+    <None Include="Resources\biology.png" />
+    <None Include="Resources\ring.png" />
+    <None Include="Resources\ring.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\canonn.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Resources\t.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
