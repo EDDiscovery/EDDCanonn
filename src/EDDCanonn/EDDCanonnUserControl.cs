@@ -48,8 +48,9 @@ namespace EDDCanonn
         {
             try
             {
-                toolStripPatrol.Items.Add("all"); //The 'all' KdTree-Dictionary has already been set in “Patrols.cs”.
-                toolStripRange.Items.AddRange(CanonnHelper.PatrolRanges.Cast<object>().ToArray());
+                ExtComboBoxPatrol.Items.Add("all"); //The 'all' KdTree-Dictionary has already been set in “Patrols.cs”.
+
+                ExtComboBoxRange.Items.AddRange(CanonnHelper.PatrolRanges.Select(x => x.ToString()).ToArray());
 
                 ConcurrentBag<Task> _tasks = new ConcurrentBag<Task>(); //We have to make sure that all workers are finished before we update the patrols.
 
@@ -119,8 +120,8 @@ namespace EDDCanonn
                         Task.WaitAll(_tasks.ToArray()); //The 'HeadThread' must wait until its workers are all finished.
                         Invoke((MethodInvoker)delegate
                         {
-                            toolStripPatrol.Enabled = true; toolStripPatrol.SelectedIndex = 0;
-                            toolStripRange.Enabled = true; toolStripRange.SelectedIndex = 2;
+                            ExtComboBoxPatrol.Enabled = true; ExtComboBoxPatrol.SelectedIndex = 0;
+                            ExtComboBoxRange.Enabled = true; ExtComboBoxRange.SelectedIndex = 2;
                             _patrolLock = false;
                         });
                         UpdatePatrols();
@@ -165,7 +166,7 @@ namespace EDDCanonn
                 patrols.Add(category, kdT);
                 BeginInvoke((MethodInvoker)delegate
                 {
-                    toolStripPatrol.Items.Add(category);
+                    ExtComboBoxPatrol.Items.Add(category);
                 });  
 
             }
@@ -213,7 +214,7 @@ namespace EDDCanonn
                 patrols.Add(category, kdT);
                 BeginInvoke((MethodInvoker)delegate
                 {
-                    toolStripPatrol.Items.Add(category);
+                    ExtComboBoxPatrol.Items.Add(category);
                 });
             }
             catch (Exception ex)
@@ -241,8 +242,8 @@ namespace EDDCanonn
 
                         Invoke((MethodInvoker)delegate
                         {
-                            type = toolStripPatrol.SelectedItem?.ToString() ?? "";
-                            range = double.TryParse(toolStripRange.SelectedItem?.ToString(), out double r) ? r : 0.0;
+                            type = ExtComboBoxPatrol.SelectedItem?.ToString() ?? "";
+                            range = double.TryParse(ExtComboBoxRange.SelectedItem?.ToString(), out double r) ? r : 0.0;
                         });
 
                          List<(string category, Patrol patrol, double distance)> patrolList = patrols.FindPatrolsInRange(type, system.X, system.Y, system.Z, range);
@@ -275,7 +276,6 @@ namespace EDDCanonn
                 "UpdatePatrols"
             );
         }
-
 
         private void toolStripPatrol_IndexChanged(object sender, EventArgs e)
         {
@@ -710,7 +710,7 @@ namespace EDDCanonn
             }
         }
 
-        private void ProcessScan(JObject eventData) //We can use this for most scan events.
+        private Body ProcessScan(JObject eventData) //We can use this for most scan events.
         {
             if (systemData == null)
                 systemData = new SystemData(); //Enforces encapsulation.
@@ -723,12 +723,10 @@ namespace EDDCanonn
                 }
       
                 int bodyId = CanonnHelper.GetValueOrDefault(eventData["BodyID"]?? null, -1);
-                if (bodyId == -1)
-                    return;
+                if (bodyId == -1) return null;
 
                 string bodyName = eventData["BodyName"]?.Value?.ToString();
-                if (bodyName?.Contains("Belt") == true)
-                    return;
+                if (bodyName?.Contains("Belt") == true) return null;
 
                 Body body;
 
@@ -742,9 +740,15 @@ namespace EDDCanonn
                     systemData.Bodys[bodyId] = body;
                 }
                 else
+                {
                     body = systemData.Bodys[bodyId];
+                    //We just set the name again. In case the body was initialized without a name.
+                    body.BodyName = bodyName;
+                }
 
                 fetchScanData(eventData, body);
+
+                return body;
             }
         }
 
@@ -767,8 +771,15 @@ namespace EDDCanonn
 
             lock (_lockSystemData)
             {
-                Body body = systemData.GetBodyByName(eventData["BodyName"]?.Value?.ToString());
-                if (body == null) return;
+                int bodyId = CanonnHelper.GetValueOrDefault(eventData["BodyID"] ?? null, -1);
+                if (bodyId == -1) return;
+
+                Body body;
+                if (!systemData.Bodys?.ContainsKey(bodyId) ?? false) //In the event that the SAA scan comes before the scan event.
+                    body = ProcessScan(eventData); //We are entering a second lock here
+                else
+                    body = systemData.Bodys[bodyId];
+
                 body.IsMapped = true;
             }
         }
@@ -815,13 +826,13 @@ namespace EDDCanonn
                 else
                     body = systemData.Bodys[bodyId];
 
-                if (eventData["Genus"] is JToken genus)
-                {
-                    if (CanonnHelper.ContainsKeyValuePair(body.ScanData.Organics, "Genus", genus.Value.ToString()))
-                        return;
+                if (eventData["Genus"] == null)
+                    return;
 
-                    body.ScanData.Organics.Add(CanonnHelper.GetUniqueEntry(eventData, body.ScanData.Organics));
-                }
+                if (CanonnHelper.ContainsKeyValuePair(body.ScanData.Organics, "Genus", eventData["Genus"]?.Value?.ToString()))
+                    return;
+
+                body.ScanData.Organics.Add(CanonnHelper.GetUniqueEntry(eventData, body.ScanData.Organics));   
             }
         }
         #endregion
@@ -923,7 +934,7 @@ namespace EDDCanonn
                     //Primitives
                     BodyID = bodyId,
                     BodyName = starNode["BodyDesignator"].Value?.ToString(),
-                    IsMapped = starNode["IsPlanet"]?.ToObject<bool>() ?? false
+                    IsMapped = starNode["IsMapped"]?.ToObject<bool>() ?? false
                 };
 
 
@@ -1032,6 +1043,38 @@ namespace EDDCanonn
 
         #region ProcessUpperTabControl
 
+        private List<DataGridViewRow> CollectBioData(SystemData system)
+        {
+            if (system?.Bodys == null) return null;
+
+            List<DataGridViewRow> rows = new List<DataGridViewRow>();
+
+            rows.Add(CanonnHelper.CreateDataGridViewRow(dataGridViewData, new object[] { "Missing Biological Data:", null, new Bitmap(1, 1) }));
+            return rows.Count > 1 ? rows : null;
+        }
+
+
+        private List<DataGridViewRow> CollectRingData(SystemData system)
+        {
+            if (system?.Bodys == null) return null;
+
+            List<DataGridViewRow> rows = new List<DataGridViewRow>();
+            rows.Add(CanonnHelper.CreateDataGridViewRow(dataGridViewData, new object[] { "Missing Rings:", null, new Bitmap(1, 1) }));
+;
+            foreach (Body body in system.Bodys.Values)
+            {
+                if (body?.ScanData?.Rings == null) continue;
+
+                foreach (JObject ring in body.ScanData.Rings)
+                {
+                    string ringName = ring["Name"]?.Value?.ToString();
+                    if (system.GetBodyByName(ringName)?.IsMapped == true) continue;
+
+                    rows.Add(CanonnHelper.CreateDataGridViewRow(dataGridViewData, new object[] { body.BodyName, ringName, Properties.Resources.ring }));
+                }
+            }
+            return rows.Count > 1 ? rows : null;
+        }
         #endregion
 
         #region UIUpdate
@@ -1050,6 +1093,13 @@ namespace EDDCanonn
 
                 textBoxSystem.AppendText(system.Name ?? "none");
                 textBoxBodyCount.AppendText(system.CountBodysFilteredByPhrases(new string[] { "Ring", "Belt" }) + " / " + system.FSSTotalBodies);
+
+                dataGridViewData.Rows.Clear();
+
+                List<DataGridViewRow> ringRows = CollectRingData(system);
+                if(ringRows != null && ringRows.Count > 0)
+                dataGridViewData.Rows.AddRange(ringRows.ToArray());
+
             });
         }
 
@@ -1060,6 +1110,21 @@ namespace EDDCanonn
                 dataGridPatrol.Rows.Clear();
                 dataGridPatrol.Rows.AddRange(result.ToArray());
             });
+        }
+
+        private void linkLabelEDDCanonn_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            CanonnHelper.OpenUrl(CanonnHelper.EDDCanonnGitHub);
+        }
+
+        private void pictureBoxCanonn_Click(object sender, EventArgs e)
+        {
+            CanonnHelper.OpenUrl(CanonnHelper.CanonnWebPage);
+        }
+
+        private void pictureBoxEDD_Click(object sender, EventArgs e)
+        {
+            CanonnHelper.OpenUrl(CanonnHelper.EDDGitHub);
         }
 
         #region Notify
@@ -1076,8 +1141,8 @@ namespace EDDCanonn
             BeginInvoke((MethodInvoker)delegate
             {
                 textBoxSystem.Text = arg;
-                toolStripRange.Text = arg;
-                toolStripPatrol.Text = arg;
+                ExtComboBoxRange.Text = arg;
+                ExtComboBoxPatrol.Text = arg;
                 textBoxNews.Text = arg;
             });
         }
@@ -1085,6 +1150,107 @@ namespace EDDCanonn
         #endregion
 
         #region IEDDPanelExtension
+
+        private bool activated = false;
+        public void NewUnfilteredJournal(JournalEntry je)
+        {
+            if (CanonnHelper.InstanceCount > 1)
+                return;
+            try
+            {
+                dataHandler.StartTaskAsync(
+                () =>
+                {
+                    JObject o = je.json.JSONParseObject();
+                    if (je.eventid.Equals("FSDJump")) //Prepare data for the next system. Include ‘FSDJump’ event as requestTag in case the System is unknown.
+                    {
+                        activated = false; //As long as we make a callback, we hold back the events (canonn events excluded).
+                        resetSystemData();
+                        BeginInvoke((MethodInvoker)delegate
+                        {
+                            //The callback may take some time. That's why we give the user some feedback in an early stage.
+                            NotifyField(textBoxSystem, je.systemname);
+                            NotifyField(textBoxBodyCount, "Fetch...");
+                            DLLCallBack.RequestScanData(o, this, je.systemname, true);
+                        });
+                        return;
+                    }
+                    else if (je.eventid.Equals("Location")) //Prepare data for the next system. Include ‘Location’ event as requestTag in case of a crash. 
+                    {
+                        activated = false;
+                        resetSystemData();
+                        BeginInvoke((MethodInvoker)delegate
+                        {
+                            NotifyField(textBoxSystem, je.systemname);
+                            NotifyField(textBoxBodyCount, "Fetch...");
+                            DLLCallBack.RequestScanData(o, this, je.systemname, true);
+                        });
+                        return;
+                    }
+                    else
+                    {
+                        if (IsEventValid(je.eventid, je.json)) //Send event to canonn if valid.
+                        {
+                            //Payload.BuildPayload(je, getStatusJson()); --> wip
+                        }
+
+                        while (!activated) //Wait until a 'DataResult' has been completed.
+                        {
+                            Task.Delay(250).Wait();
+                        }
+
+                        ProcessVisualEvent(je);
+                    }
+                    UpdateMainFields(); //wip
+                },
+                ex =>
+                {
+                    Console.Error.WriteLine($"EDDCanonn: Error processing JournalEntry: {ex.Message}");
+                },
+                    "NewUnfilteredJournal: " + je.eventid
+                );
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"EDDCanonn: Unexpected error in NewUnfilteredJournal: {ex.Message}");
+            }
+        }
+
+        private bool historyset = false;
+        public void HistoryChange(int count, string commander, bool beta, bool legacy)
+        {
+            if (CanonnHelper.InstanceCount > 1)
+                return;
+            Console.WriteLine("Hallo");
+            if (!historyset)
+                historyset = true;
+        }
+
+        private readonly object _lockStatusJson = new object();
+        private JObject _statusJson;
+        public void NewUIEvent(string jsonui)
+        {
+            if (CanonnHelper.InstanceCount > 1)
+                return;
+
+            JObject o = jsonui.JSONParse().Object();
+            if (o == null)
+                return;
+
+            string type = o["EventTypeStr"].Str();
+            if (string.IsNullOrEmpty(type))
+                return;
+
+            lock (_lockStatusJson)
+                _statusJson = o;
+        }
+
+        private JObject getStatusJson() //Return a deep copy.
+        {
+            lock (_lockStatusJson)
+                return new JObject(_statusJson);
+        }
+
         public bool SupportTransparency => true;
 
         public bool DefaultTransparent => false;
@@ -1161,95 +1327,16 @@ namespace EDDCanonn
             }
         }
 
-        private bool activated = false;
-        public void NewFilteredJournal(JournalEntry je) //wip
+        Color FromJson(JToken color) { return System.Drawing.ColorTranslator.FromHtml(color.Str("Yellow")); }
+        public void ThemeChanged(string themeasjson)
+        {
+            setTheme(themeasjson);
+        }
+
+        public void NewFilteredJournal(JournalEntry je)
         {
             if (CanonnHelper.InstanceCount > 1)
                 return;
-
-            try
-            {
-                dataHandler.StartTaskAsync(
-                () =>
-                {
-                    JObject o = je.json.JSONParseObject();
-                    if (je.eventid.Equals("FSDJump")) //Prepare data for the next system. Include ‘FSDJump’ event as requestTag in case the System is unknown.
-                    {
-                        activated = false; //As long as we make a callback, we hold back the events (canonn events excluded).
-                        resetSystemData();
-                        BeginInvoke((MethodInvoker)delegate
-                        {
-                            //The callback may take some time. That's why we give the user some feedback in an early stage.
-                            NotifyField(textBoxSystem, je.systemname);
-                            NotifyField(textBoxBodyCount, "Fetch...");
-                            DLLCallBack.RequestScanData(o, this, je.systemname, true);
-                        });
-                        return;
-                    }
-                    else if (je.eventid.Equals("Location")) //Prepare data for the next system. Include ‘Location’ event as requestTag in case of a crash. 
-                    {
-                        activated = false;
-                        resetSystemData();
-                        BeginInvoke((MethodInvoker)delegate
-                        {
-                            NotifyField(textBoxSystem, je.systemname);
-                            NotifyField(textBoxBodyCount, "Fetch...");
-                            DLLCallBack.RequestScanData(o, this, je.systemname, true);
-                        });
-                        return;
-                    }
-                    else
-                    {
-                        if (IsEventValid(je.eventid, je.json)) //Send event to canonn if valid.
-                        {
-                            //Payload.BuildPayload(je, getStatusJson()); --> wip
-                        }
-
-                        while (!activated) //Wait until a 'DataResult' has been completed.
-                        {
-                            Task.Delay(250).Wait();
-                        }
-
-                        ProcessVisualEvent(je);
-                    }
-                    UpdateMainFields(); //wip
-                },
-                ex =>
-                {
-                    Console.Error.WriteLine($"EDDCanonn: Error processing JournalEntry: {ex.Message}");
-                },
-                    "NewFilteredJournal: " + je.eventid
-                );
-            }
-            catch (Exception ex)
-            {
-                Console.Error.WriteLine($"EDDCanonn: Unexpected error in NewFilteredJournal: {ex.Message}");
-            }
-        }
-
-        private readonly object _lockStatusJson = new object();
-        private JObject _statusJson;
-        public void NewUIEvent(string jsonui)
-        {
-            if (CanonnHelper.InstanceCount > 1)
-                return;
-
-            JObject o = jsonui.JSONParse().Object();
-            if (o == null)
-                return;
-
-            string type = o["EventTypeStr"].Str();
-            if (string.IsNullOrEmpty(type))
-                return;
-
-            lock (_lockStatusJson)
-                _statusJson = o;
-        }
-
-        private JObject getStatusJson() //Return a deep copy.
-        {
-            lock (_lockStatusJson)
-                return new JObject(_statusJson);
         }
 
         public void NewTarget(Tuple<string, double, double, double> target)
@@ -1257,22 +1344,6 @@ namespace EDDCanonn
             if (CanonnHelper.InstanceCount > 1)
                 return;
             //wip
-        }
-
-        public void NewUnfilteredJournal(JournalEntry je)
-        {
-            if (CanonnHelper.InstanceCount > 1)
-                return;
-            //wip
-        }
-        private bool historyset = false;
-        public void HistoryChange(int count, string commander, bool beta, bool legacy)
-        {
-            if (CanonnHelper.InstanceCount > 1)
-                return;
-            Console.WriteLine("Hallo");
-            if (!historyset)
-                historyset = true;
         }
 
         public void InitialDisplay()
@@ -1310,12 +1381,6 @@ namespace EDDCanonn
             //wip
         }
 
-        Color FromJson(JToken color) { return System.Drawing.ColorTranslator.FromHtml(color.Str("Yellow")); }
-        public void ThemeChanged(string themeasjson)
-        {
-            setTheme(themeasjson);
-        }
-
         public void TransparencyModeChanged(bool on)
         {
             if (CanonnHelper.InstanceCount > 1)
@@ -1344,13 +1409,12 @@ namespace EDDCanonn
 
         public string HelpKeyOrAddress()
         {
-            throw new NotImplementedException();
-
-            //wip
+            return CanonnHelper.EDDCanonnGitHub;
         }
         #endregion
 
         #region Debug
+
         private void LogWhitelist_Click(object sender, EventArgs e)
         {
             PrintWhitelist();
@@ -1377,6 +1441,5 @@ namespace EDDCanonn
             DLLCallBack.RequestScanData(RequestTag.Log, this, "", true);
         }
         #endregion
-
     }
 }

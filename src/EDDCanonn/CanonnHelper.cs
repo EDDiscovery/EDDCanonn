@@ -18,6 +18,8 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading;
+using System.Windows.Forms;
 using QuickJSON;
 namespace EDDCanonn
 {
@@ -35,6 +37,16 @@ namespace EDDCanonn
         public static readonly string WhitelistUrl = "https://us-central1-canonn-api-236217.cloudfunctions.net/postEventWhitelist";
         public static readonly string EventPushUrl = "https://us-central1-canonn-api-236217.cloudfunctions.net/postEvent";
         public static readonly string PatrolUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQsi1Vbfx4Sk2msNYiqo0PVnW3VHSrvvtIRkjT-JvH_oG9fP67TARWX2jIjehFHKLwh4VXdSh0atk3J/pub?gid=0&single=true&output=tsv";
+
+        public static readonly string EDDCanonnGitHub = "https://github.com/EDDiscovery/EDDCanonn";
+        public static readonly string EDDGitHub = "https://github.com/EDDiscovery";
+        public static readonly string CanonnWebPage = "https://canonn.science";
+
+        private static int _currentId = 998;
+        public static int GenerateId()
+        {
+            return Interlocked.Increment(ref _currentId);
+        }
 
         //Attempts to convert a JToken to a specified value type, returning a fallback value. It is for numbers!
         public static T GetValueOrDefault<T>(JToken obj, T fallback) where T : struct
@@ -130,6 +142,13 @@ namespace EDDCanonn
                             .ToList();
             }
             return null;
+        }
+
+        public static DataGridViewRow CreateDataGridViewRow(DataGridView dataGridView, Object[] objects)
+        {
+            DataGridViewRow dataGridViewRow = new DataGridViewRow();
+            dataGridViewRow.CreateCells(dataGridView, objects);
+            return dataGridViewRow;
         }
 
         //Parses TSV content into a list of dictionaries.
