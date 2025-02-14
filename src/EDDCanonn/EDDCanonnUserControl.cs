@@ -673,9 +673,6 @@ namespace EDDCanonn
 
         private void fetchScanData(JObject eventData, Body body) //Call this method only via the '_lockSystemData' lock. Otherwise it could get bad.
         {
-            if (body.BodyName?.Contains("Belt") == true)
-                return;
-
             //Even if the event tells us that a body has been mapped, we do not apply this because we cannot know if it is also the case for the databases.
             if (body.ScanData == null)
             {
@@ -683,7 +680,6 @@ namespace EDDCanonn
                 {
                     //Primitives
                     BodyID = body.BodyID,
-                    IsPlanet = eventData.Contains("PlanetClass"),
                     ScanType = eventData["ScanType"]?.Value?.ToString(),
 
                     //List<JObject>  
@@ -698,7 +694,6 @@ namespace EDDCanonn
             {
                 //Primitives
                 body.ScanData.BodyID = body.BodyID;
-                body.ScanData.IsPlanet = eventData.Contains("PlanetClass");
                 body.ScanData.ScanType = eventData["ScanType"]?.Value?.ToString();
 
                 //List<JObject>  
@@ -708,6 +703,19 @@ namespace EDDCanonn
                 body.ScanData.Genuses = CanonnHelper.GetUniqueEntries(eventData, "Genuses", body.ScanData.Genuses);
                 body.ScanData.SurfaceFeatures = CanonnHelper.GetUniqueEntries(eventData, "SurfaceFeatures", body.ScanData.SurfaceFeatures);
             }
+        }
+
+        private void IdentifyNodeType(Body body, JObject eventData) //Call this method only via the '_lockSystemData' lock. Otherwise it could get bad.
+        {
+            if (body.NodeType != null) return;
+            if (eventData.Contains("PlanetClass") && !eventData["PlanetClass"].IsNull)
+                body.NodeType = "body";
+            else if (eventData.Contains("StarType") && !eventData["StarType"].IsNull)
+                body.NodeType = "star";
+            else if (body.BodyName?.Contains("Belt") == true)
+                body.NodeType = "belt";
+            else if (body.BodyName?.Contains("Ring") == true)
+                body.NodeType = "ring";
         }
 
         private Body ProcessScan(JObject eventData) //We can use this for most scan events.
@@ -726,7 +734,6 @@ namespace EDDCanonn
                 if (bodyId == -1) return null;
 
                 string bodyName = eventData["BodyName"]?.Value?.ToString();
-                if (bodyName?.Contains("Belt") == true) return null;
 
                 Body body;
 
@@ -737,6 +744,7 @@ namespace EDDCanonn
                         BodyID = bodyId,
                         BodyName = bodyName,
                     };
+                    IdentifyNodeType(body, eventData);
                     systemData.Bodys[bodyId] = body;
                 }
                 else
@@ -744,6 +752,7 @@ namespace EDDCanonn
                     body = systemData.Bodys[bodyId];
                     //We just set the name again. In case the body was initialized without a name.
                     body.BodyName = bodyName;
+                    IdentifyNodeType(body, eventData);
                 }
 
                 fetchScanData(eventData, body);
@@ -820,6 +829,7 @@ namespace EDDCanonn
                     {
                         BodyID = bodyId,
                         BodyName = "none",
+                        NodeType = "planet"
                     };
                     systemData.Bodys[bodyId] = body;
                 }
@@ -907,11 +917,6 @@ namespace EDDCanonn
                     continue;
                 }
 
-                if (starNode["NodeType"].Value?.ToString() == "belt")
-                {
-                    continue;
-                }
-
                 // Extract BodyID; skip processing if invalid
                 int bodyId = CanonnHelper.GetValueOrDefault(starNode["BodyID"] ?? null, -1);
                 if (bodyId == -1)
@@ -934,7 +939,9 @@ namespace EDDCanonn
                     //Primitives
                     BodyID = bodyId,
                     BodyName = starNode["BodyDesignator"].Value?.ToString(),
-                    IsMapped = starNode["IsMapped"]?.ToObject<bool>() ?? false
+                    IsMapped = starNode["IsMapped"]?.ToObject<bool>() ?? false,
+                    NodeType = starNode["NodeType"].Value?.ToString(),
+                
                 };
 
 
@@ -946,7 +953,6 @@ namespace EDDCanonn
                         //Primitives
                         ScanType = scanDataNode["ScanType"].Value?.ToString(),
                         BodyID = bodyId,
-                        IsPlanet = scanDataNode["IsPlanet"]?.ToObject<bool>() ?? false,
 
                         //List<JObject>    
                         Signals = CanonnHelper.GetJObjectList(scanDataNode, "Signals"),
@@ -1092,7 +1098,7 @@ namespace EDDCanonn
                 textBoxBodyCount.Clear();
 
                 textBoxSystem.AppendText(system.Name ?? "none");
-                textBoxBodyCount.AppendText(system.CountBodysFilteredByPhrases(new string[] { "Ring", "Belt" }) + " / " + system.FSSTotalBodies);
+                textBoxBodyCount.AppendText(system.CountBodysFilteredByNodeType(new string[] { "body", "star" }) + " / " + system.FSSTotalBodies);
 
                 dataGridViewData.Rows.Clear();
 

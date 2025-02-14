@@ -70,16 +70,16 @@ namespace EDDCanonn.Base
                 body.BodyName.Equals(bodyName, StringComparison.OrdinalIgnoreCase));
         }
 
-        public int CountBodysFilteredByPhrases(params string[] excludeNamePhrases)
+        public int CountBodysFilteredByNodeType(string[] include)
         {
             if (Bodys == null)
                 return 0;
 
-            return (excludeNamePhrases == null || excludeNamePhrases.Length == 0)
+            return (include == null || include.Length == 0)
                 ? Bodys.Count
                 : Bodys.Values.Count(body =>
-                    body.BodyName == null || !excludeNamePhrases.Any(phrase =>
-                        body.BodyName.IndexOf(phrase, StringComparison.OrdinalIgnoreCase) >= 0));
+                    body.NodeType != null && include.Any(phrase =>
+                        body.NodeType.Equals(phrase, StringComparison.OrdinalIgnoreCase)));
         }
 
         public override string ToString()
@@ -123,14 +123,14 @@ namespace EDDCanonn.Base
                 foreach (var bodyEntry in Bodys)
                 {
                     var body = bodyEntry.Value;
-                    result += $"    Body ID: {body.BodyID}\n" +
+                    result += $"    ID: {body.BodyID}\n" +
+                              $"    Body Name: {body.BodyName}\n" +
                               $"    IsMapped: {body.IsMapped}\n" +
-                              $"    Body Name: {body.BodyName}\n";
+                              $"    NodeType: {body.NodeType}\n";
 
                     if (body.ScanData != null)
                     {
                         result += "    Scan Data:\n" +
-                                  $"      Is Planet: {body.ScanData.IsPlanet}\n" +
                                   $"      Scan Type: {body.ScanData.ScanType}\n" +
                                   $"      Body ID: {body.ScanData.BodyID}\n";
 
@@ -176,13 +176,14 @@ namespace EDDCanonn.Base
             BodyID = body.BodyID;
             BodyName = body.BodyName;
             IsMapped = body.IsMapped;
-
+            NodeType = body.NodeType;
             if(body.ScanData != null) 
                 ScanData = new ScanData(body.ScanData);
         }
 
         public int BodyID { get; set; } = 0;
         public string BodyName { get; set; } = null;
+        public string NodeType { get; set; } = null;
         public bool IsMapped { get; set; } = false;
         public ScanData ScanData { get; set; } = null;
     }
@@ -194,7 +195,6 @@ namespace EDDCanonn.Base
 
         public ScanData(ScanData scanData)
         { //deep copy
-            IsPlanet = scanData.IsPlanet;
             ScanType = scanData.ScanType;
             BodyID = scanData.BodyID;
 
@@ -205,7 +205,6 @@ namespace EDDCanonn.Base
             Genuses = scanData.Genuses?.Select(j => new JObject(j)).ToList() ?? new List<JObject>();
         }
 
-        public bool IsPlanet { get; set; } = false;
         public string ScanType { get; set; } = null;
         public int BodyID { get; set; } = 0;
         public List<JObject> Rings { get; set; } = null;
