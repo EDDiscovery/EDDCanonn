@@ -172,7 +172,7 @@ namespace EDDCanonn.Base
     public class Body
     {
         public Body() { }
-        public Body(Body body) { 
+        public Body(Body body) {
             BodyID = body.BodyID;
             BodyName = body.BodyName;
             IsMapped = body.IsMapped;
