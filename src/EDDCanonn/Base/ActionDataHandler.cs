@@ -15,8 +15,10 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace EDDCanonn.Base
@@ -24,27 +26,20 @@ namespace EDDCanonn.Base
     public class ActionDataHandler
     {
         #region Threading
-        public Task StartTaskAsync(Action job, Action<Exception> errorCallback = null, string name = "default", Action finalAction = null)
+
+        public Task StartTaskAsync(Action<CancellationToken> job, Action<Exception> errorCallback = null, string name = "default", Action finalAction = null, CancellationToken? token = null)
         {
-            return StartTask(() =>
-            {
-                try
-                {
-                    job?.Invoke();
-                }
-                catch (Exception ex)
-                {
-                    errorCallback?.Invoke(ex);
-                }
-            }, name, finalAction);
+            CancellationToken effectiveToken = token ?? _cts.Token;
+
+            return StartTask(() => job(effectiveToken), name, effectiveToken, finalAction, errorCallback);
         }
 
 
-
         private readonly List<Task> _tasks = new List<Task>();
+        private CancellationTokenSource _cts = new CancellationTokenSource();
         private readonly object _lock = new object();
 
-        private Task StartTask(Action job, string name, Action finalAction = null)
+        private Task StartTask(Action job, string name, CancellationToken token, Action finalAction = null, Action<Exception> errorCallback = null)
         {
             lock (_lock)
             {
@@ -55,35 +50,46 @@ namespace EDDCanonn.Base
                 {
                     try
                     {
+                        token.ThrowIfCancellationRequested();
                         job.Invoke();
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        Console.WriteLine($"EDDCanonn: Task canceled. [ID: {Task.CurrentId}, Name: {name}]");
                     }
                     catch (Exception ex)
                     {
+                        errorCallback?.Invoke(ex);
                         Console.Error.WriteLine($"EDDCanonn: Error in job execution: {ex.Message}");
-                        throw;
                     }
-                });
+                }, token);
 
                 _tasks.Add(task);
-
                 Console.WriteLine($"EDDCanonn: Task registered. [ID: {task.Id}, Name: {name}, Status: {task.Status}]");
 
                 task.ContinueWith(t =>
                 {
                     finalAction?.Invoke();
-
                     lock (_lock)
                     {
                         _tasks.Remove(t);
                         Console.WriteLine($"EDDCanonn: Task finished. [ID: {t.Id}, Name: {name}, Final Status: {t.Status}]");
                     }
-
                 }, TaskContinuationOptions.ExecuteSynchronously);
 
                 return task;
             }
         }
 
+        public void CancelAllTasks()
+        {
+            lock (_lock)
+            {
+                Console.WriteLine("EDDCanonn: Cancelling all tasks...");
+                _cts.Cancel(); 
+                _cts = new CancellationTokenSource();
+            }
+        }
 
         private bool _isClosing = false;
         public void Closing()
@@ -91,27 +97,13 @@ namespace EDDCanonn.Base
             lock (_lock)
                 _isClosing = true;
 
-            Task.WaitAll(_tasks.ToArray());
+            CancelAllTasks();
+
+            Task.WaitAll(_tasks.Where(t => !t.IsCanceled).ToArray());
         }
         #endregion
 
-
         #region Networking 
-        public void FetchDataAsync(string fullUrl, Action<string> callback, Action<Exception> errorCallback = null, string name = "default")
-        {
-            StartTask(() =>
-            {
-                try
-                {
-                    string jsonResponse = PerformGetRequest(fullUrl);
-                    callback?.Invoke(jsonResponse);
-                }
-                catch (Exception ex)
-                {
-                    errorCallback?.Invoke(ex);
-                }
-            }, name);
-        }
 
         public string FetchData(string fullUrl)
         {
@@ -123,23 +115,6 @@ namespace EDDCanonn.Base
             {
                 throw;
             }
-        }
-
-        public void PushDataAsync(string fullUrl, string jsonData, Action<bool> callback, Action<Exception> errorCallback = null, string name = "default")
-        {
-            StartTask(() =>
-            {
-                try
-                {
-                    string response = PerformPostRequest(fullUrl, jsonData, "application/json");
-                    bool success = !string.IsNullOrEmpty(response);
-                    callback?.Invoke(success);
-                }
-                catch (Exception ex)
-                {
-                    errorCallback?.Invoke(ex);
-                }
-            }, name);
         }
 
         public bool PushData(string fullUrl, string jsonData)
