@@ -44,7 +44,7 @@ namespace EDDCanonn
 
         #region start
 
-        private void StartUp() //First triggered by panel Initialize.
+        private void StartUp() //Triggered by panel Initialize.
         {
             NotifyMainFields("Start Up...");
 
@@ -1090,8 +1090,9 @@ namespace EDDCanonn
                             {
                                 this.Enabled = true;
                             });
-
                             activated = true;
+                            UpdateMainFields(); // wip
+                            UpdateUpperGridViews(); // wip
                         }
                         else if (rt.Equals(RequestTag.Log))
                         {
@@ -1113,9 +1114,9 @@ namespace EDDCanonn
                             }
                             activated = true;
                         }
+                        UpdateMainFields(); // wip
+                        UpdateUpperGridViews(); // wip
                     }
-                    UpdateMainFields();
-                    //UpdatePatrols();
                 },
                 ex => Console.Error.WriteLine($"EDDCanonn: Error processing Systemdata: {ex.Message}"),
                 "DataResult");
@@ -1128,16 +1129,42 @@ namespace EDDCanonn
 
         #endregion
 
-        #region ProcessUpperTabControl
+        #region ProcessUpperGridViews
 
         private List<DataGridViewRow> CollectBioData(SystemData system)
         {
             if (system?.Bodys == null) return null;
 
             List<DataGridViewRow> rows = new List<DataGridViewRow>();
+            rows.Add(CanonnHelper.CreateDataGridViewRow(dataGridViewData, new object[] { "Missing Bio Data:", null, new Bitmap(1, 1) }));
 
-            rows.Add(CanonnHelper.CreateDataGridViewRow(dataGridViewData, new object[] { "Missing Biological Data:", null, new Bitmap(1, 1) }));
-            return rows.Count > 1 ? rows : null;
+            foreach (Body body in system.Bodys.Values)
+            {
+                if (body?.ScanData?.Signals == null) continue;
+
+                JObject o = CanonnHelper.FindFirstMatchingJObject(body.ScanData.Signals, "Type", "$SAA_SignalType_Biological;"); if (o == null) continue; 
+
+                if (body.ScanData.Genuses == null || body.ScanData.Genuses.Count == 0)
+                {
+                    rows.Add(CanonnHelper.CreateDataGridViewRow(dataGridViewData, new object[] { body.BodyName, $"{CanonnHelper.GetValueOrDefault(o["Count"] ?? null, 0)} unknown species", Properties.Resources.biology })); continue;
+                }
+
+                foreach (JObject genus in body.ScanData.Genuses)
+                {
+                    string genusName = genus["Genus"]?.Value?.ToString();
+                    if (string.IsNullOrWhiteSpace(genusName)) continue;
+
+                    if (body.ScanData.Organics == null || !CanonnHelper.ContainsKeyValuePair(body.ScanData.Organics, "Genus", genusName))
+                    {
+                        rows.Add(CanonnHelper.CreateDataGridViewRow(dataGridViewData, new object[] { body.BodyName, $"Sample needed: {genus["Genus_Localised"]?.Value?.ToString() ?? genusName}", Properties.Resources.biology }));
+                    }
+                }
+            }
+            if (rows.Count <= 1)
+            {
+                CanonnHelper.DisposeDataGridViewRowList(rows); return null;
+            }
+            return rows;
         }
 
 
@@ -1161,7 +1188,11 @@ namespace EDDCanonn
                     rows.Add(CanonnHelper.CreateDataGridViewRow(dataGridViewData, new object[] { body.BodyName, ringName, Properties.Resources.ring }));
                 }
             }
-            return rows.Count > 1 ? rows : null;
+            if (rows.Count <= 1)
+            {
+                CanonnHelper.DisposeDataGridViewRowList(rows); return null;
+            }
+            return rows;
         }
         #endregion
 
@@ -1181,12 +1212,6 @@ namespace EDDCanonn
 
                 textBoxSystem.AppendText(system.Name ?? "none");
                 textBoxBodyCount.AppendText(system.CountBodysFilteredByNodeType(new string[] { "body", "star" }) + " / " + system.FSSTotalBodies);
-
-                dataGridViewData.Rows.Clear();
-
-                List<DataGridViewRow> ringRows = CollectRingData(system);
-                if (ringRows != null && ringRows.Count > 0)
-                    dataGridViewData.Rows.AddRange(ringRows.ToArray());
             });
         }
 
@@ -1196,6 +1221,36 @@ namespace EDDCanonn
             {
                 dataGridPatrol.Rows.Clear();
                 dataGridPatrol.Rows.AddRange(result.ToArray());
+            });
+        }
+
+        private void UpdateUpperGridViews()
+        {
+            SystemData system = deepCopySystemData();
+            if (system == null)
+                return;
+
+            SafeBeginInvoke(() =>
+            {
+                dataGridViewData.Rows.Clear();
+                dataGridViewRing.Rows.Clear();
+                dataGridViewBio.Rows.Clear();
+
+                List<DataGridViewRow> ringRows = CollectRingData(system);
+                if (ringRows != null && ringRows.Count > 0)
+                {
+                    dataGridViewData.Rows.AddRange(CanonnHelper.CloneDataGridViewRowList(ringRows).ToArray());
+                    dataGridViewRing.Rows.AddRange(CanonnHelper.CloneDataGridViewRowList(ringRows).ToArray());
+                }
+                List<DataGridViewRow> bioRows = CollectBioData(system);
+                if (bioRows != null && bioRows.Count > 0)
+                {
+                    dataGridViewData.Rows.AddRange(CanonnHelper.CloneDataGridViewRowList(bioRows).ToArray());
+                    dataGridViewBio.Rows.AddRange(CanonnHelper.CloneDataGridViewRowList(bioRows).ToArray());
+                }
+
+                CanonnHelper.DisposeDataGridViewRowList(ringRows);
+                CanonnHelper.DisposeDataGridViewRowList(bioRows);
             });
         }
 
@@ -1316,6 +1371,7 @@ namespace EDDCanonn
                         ProcessVisualEvent(je);
                     }
                     UpdateMainFields(); //wip
+                    UpdateUpperGridViews(); // wip
                 },
                 ex =>
                 {

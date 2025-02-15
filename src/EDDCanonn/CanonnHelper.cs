@@ -102,6 +102,15 @@ namespace EDDCanonn
             return existingList.Any(obj => obj.Contains(key) && obj[key]?.Value?.ToString() == value);
         }
 
+        public static JObject FindFirstMatchingJObject(List<JObject> existingList, string key, string value)
+        {
+            if (existingList == null || string.IsNullOrWhiteSpace(key) || value == null)
+                return null;
+
+            return existingList.FirstOrDefault(obj => obj.Contains(key) &&
+                string.Equals(obj[key]?.Value?.ToString(), value, StringComparison.OrdinalIgnoreCase));
+        }
+
 
         //Checks if a given JObject is unique within a list and returns it if it is not already present and does not contain an excluded value.
         public static JObject GetUniqueEntry(JObject eventData, List<JObject> existingList, string exclude = null)
@@ -150,6 +159,33 @@ namespace EDDCanonn
             dataGridViewRow.CreateCells(dataGridView, objects);
             return dataGridViewRow;
         }
+
+        public static void DisposeDataGridViewRowList(List<DataGridViewRow> rows)
+        {
+            if (rows == null || rows.Count == 0)
+                return;
+
+            foreach (DataGridViewRow row in rows)
+            {
+                row?.Dispose();
+            }
+
+            rows.Clear();
+        }
+
+        public static List<DataGridViewRow> CloneDataGridViewRowList(List<DataGridViewRow> rows)
+        {
+            return rows.Select((DataGridViewRow row) =>
+            {
+                DataGridViewRow clonedRow = (DataGridViewRow)row.Clone();
+                for (int i = 0; i < row.Cells.Count; i++)
+                {
+                    clonedRow.Cells[i].Value = row.Cells[i].Value;
+                }
+                return clonedRow;
+            }).ToList();
+        }
+
 
         //Parses TSV content into a list of dictionaries.
         public static List<Dictionary<string, string>> ParseTsv(string tsvContent)
