@@ -55,17 +55,23 @@ namespace EDDCanonn.Base
                     }
                     catch (OperationCanceledException)
                     {
-                        Console.WriteLine($"EDDCanonn: Task canceled. [ID: {Task.CurrentId}, Name: {name}]");
+                        string error = $"EDDCanonn: Task canceled. [ID: {Task.CurrentId}, Name: {name}]";
+                        Console.Error.WriteLine(error);
+                        CanonnLogging.Instance.LogToFile(error);
                     }
                     catch (Exception ex)
                     {
                         errorCallback?.Invoke(ex);
-                        Console.Error.WriteLine($"EDDCanonn: Error in job execution: {ex.Message}");
+                        string error = $"EDDCanonn: Error in job execution: {ex.Message}";
+                        Console.Error.WriteLine(error);
+                        CanonnLogging.Instance.LogToFile(error);
                     }
                 }, token);
 
                 _tasks.Add(task);
-                Console.WriteLine($"EDDCanonn: Task registered. [ID: {task.Id}, Name: {name}, Status: {task.Status}]");
+                string mgReg = $"EDDCanonn: Task registered. [ID: {task.Id}, Name: {name}, Status: {task.Status}]";
+                Console.WriteLine(mgReg);
+                CanonnLogging.Instance.LogToFile(mgReg);
 
                 task.ContinueWith(t =>
                 {
@@ -73,7 +79,9 @@ namespace EDDCanonn.Base
                     lock (_lock)
                     {
                         _tasks.Remove(t);
-                        Console.WriteLine($"EDDCanonn: Task finished. [ID: {t.Id}, Name: {name}, Final Status: {t.Status}]");
+                        string mgFinished = $"EDDCanonn: Task finished. [ID: {t.Id}, Name: {name}, Final Status: {t.Status}]";
+                        Console.WriteLine(mgFinished);
+                        CanonnLogging.Instance.LogToFile(mgFinished);
                     }
                 }, TaskContinuationOptions.ExecuteSynchronously);
 
@@ -85,9 +93,12 @@ namespace EDDCanonn.Base
         {
             lock (_lock)
             {
-                Console.WriteLine("EDDCanonn: Cancelling all tasks...");
                 _cts.Cancel(); 
                 _cts = new CancellationTokenSource();
+
+                string mg = $"EDDCanonn: Cancelling all tasks...";
+                Console.WriteLine(mg);
+                CanonnLogging.Instance.LogToFile(mg);
             }
         }
 
@@ -156,7 +167,9 @@ namespace EDDCanonn.Base
             }
             catch (WebException ex)
             {
-                Console.Error.WriteLine($"EDDCanonn: Error performing GET request: {ex.Message}");
+                string error = $"EDDCanonn: Error performing GET request: {ex.Message}";
+                Console.Error.WriteLine(error);
+                CanonnLogging.Instance.LogToFile(error);
                 throw;
             }
         }
@@ -193,7 +206,9 @@ namespace EDDCanonn.Base
             }
             catch (WebException ex)
             {
-                Console.Error.WriteLine($"EDDCanonn: Error performing POST request: {ex.Message}");
+                string error = $"EDDCanonn: Error performing POST request: {ex.Message}";
+                Console.Error.WriteLine(error);
+                CanonnLogging.Instance.LogToFile(error);
                 throw;
             }
         }

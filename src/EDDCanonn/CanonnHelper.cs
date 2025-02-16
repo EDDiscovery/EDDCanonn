@@ -20,6 +20,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Forms;
+using EDDCanonn.Base;
 using QuickJSON;
 namespace EDDCanonn
 {
@@ -88,7 +89,9 @@ namespace EDDCanonn
             }
             catch (Exception ex)
             {
-                Console.Error.WriteLine($"EDDCanonn: Error parsing value: {ex.Message}");
+                string error = $"EDDCanonn: Error parsing value: {ex.Message}";
+                Console.Error.WriteLine(error);
+                CanonnLogging.Instance.LogToFile(error);
                 return fallback;
             }
         }
@@ -102,6 +105,7 @@ namespace EDDCanonn
             return existingList.Any(obj => obj.Contains(key) && obj[key]?.Value?.ToString() == value);
         }
 
+        //The same as above, but the JObject  is returned.
         public static JObject FindFirstMatchingJObject(List<JObject> existingList, string key, string value)
         {
             if (existingList == null || string.IsNullOrWhiteSpace(key) || value == null)
@@ -153,6 +157,7 @@ namespace EDDCanonn
             return null;
         }
 
+        //Returns a filled row for the passed GridView.
         public static DataGridViewRow CreateDataGridViewRow(DataGridView dataGridView, Object[] objects)
         {
             DataGridViewRow dataGridViewRow = new DataGridViewRow();
@@ -160,6 +165,7 @@ namespace EDDCanonn
             return dataGridViewRow;
         }
 
+        //Frees all contents of a rowlist. Makes sense if this rows has not been passed to any controls.
         public static void DisposeDataGridViewRowList(List<DataGridViewRow> rows)
         {
             if (rows == null || rows.Count == 0)
@@ -173,6 +179,7 @@ namespace EDDCanonn
             rows.Clear();
         }
 
+        //Makes a deepclone because a row can only have one parent.
         public static List<DataGridViewRow> CloneDataGridViewRowList(List<DataGridViewRow> rows)
         {
             return rows.Select((DataGridViewRow row) =>
@@ -219,12 +226,16 @@ namespace EDDCanonn
             }
             catch (FormatException fe)
             {
-                Console.WriteLine($"EDDCanonn: TSV parsing error: {fe.Message}");
+                string error = $"EDDCanonn: TSV parsing error: {fe.Message}";
+                Console.Error.WriteLine(error);
+                CanonnLogging.Instance.LogToFile(error);
                 throw;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"EDDCanonn: Unexpected error while parsing TSV: {ex.Message}");
+                string error = $"EDDCanonn: Unexpected error while parsing TSV: {ex.Message}";
+                Console.Error.WriteLine(error);
+                CanonnLogging.Instance.LogToFile(error);
                 throw;
             }
 
@@ -254,7 +265,9 @@ namespace EDDCanonn
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"EDDCanonn: Error opening URL: {ex.Message}");
+                string error = $"EDDCanonn: Error opening URL: {ex.Message}";
+                Console.Error.WriteLine(error);
+                CanonnLogging.Instance.LogToFile(error);
             }
         }
 

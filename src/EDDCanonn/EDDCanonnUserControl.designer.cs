@@ -314,6 +314,7 @@ namespace EDDCanonn
             this.TestWhitelist = new ExtendedControls.ExtButton();
             this.LogWhitelist = new ExtendedControls.ExtButton();
             this.DebugLog = new System.Windows.Forms.TextBox();
+            this.labelGMO = new System.Windows.Forms.Label();
             this.tableLayoutSystem.SuspendLayout();
             this.contextMenuStrip1.SuspendLayout();
             this.tableLayoutPatrol.SuspendLayout();
@@ -331,6 +332,7 @@ namespace EDDCanonn
             this.extPanelDataGridViewScrollBio.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewBio)).BeginInit();
             this.tabSurvey.SuspendLayout();
+            this.tabGmo.SuspendLayout();
             this.tabPageAbout.SuspendLayout();
             this.tableLayoutAbout.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxEDD)).BeginInit();
@@ -1018,7 +1020,7 @@ namespace EDDCanonn
             // labelSurvey
             // 
             this.labelSurvey.AutoSize = true;
-            this.labelSurvey.Location = new System.Drawing.Point(134, 21);
+            this.labelSurvey.Location = new System.Drawing.Point(134, 3);
             this.labelSurvey.Name = "labelSurvey";
             this.labelSurvey.Size = new System.Drawing.Size(91, 13);
             this.labelSurvey.TabIndex = 0;
@@ -1027,6 +1029,7 @@ namespace EDDCanonn
             // 
             // tabGmo
             // 
+            this.tabGmo.Controls.Add(this.labelGMO);
             this.tabGmo.Location = new System.Drawing.Point(4, 22);
             this.tabGmo.Name = "tabGmo";
             this.tabGmo.Padding = new System.Windows.Forms.Padding(3);
@@ -1210,6 +1213,16 @@ namespace EDDCanonn
             this.DebugLog.Size = new System.Drawing.Size(344, 101);
             this.DebugLog.TabIndex = 5;
             // 
+            // labelGMO
+            // 
+            this.labelGMO.AutoSize = true;
+            this.labelGMO.Location = new System.Drawing.Point(134, 3);
+            this.labelGMO.Name = "labelGMO";
+            this.labelGMO.Size = new System.Drawing.Size(91, 13);
+            this.labelGMO.TabIndex = 1;
+            this.labelGMO.Text = "Work in Progress.";
+            this.labelGMO.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
             // EDDCanonnUserControl
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Inherit;
@@ -1242,6 +1255,8 @@ namespace EDDCanonn
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewBio)).EndInit();
             this.tabSurvey.ResumeLayout(false);
             this.tabSurvey.PerformLayout();
+            this.tabGmo.ResumeLayout(false);
+            this.tabGmo.PerformLayout();
             this.tabPageAbout.ResumeLayout(false);
             this.tableLayoutAbout.ResumeLayout(false);
             this.tableLayoutAbout.PerformLayout();
@@ -1318,5 +1333,6 @@ namespace EDDCanonn
         private Label labelTest;
         private Label labelSpecial;
         private LinkLabel linkLabelEDDCanonn;
+        private Label labelGMO;
     }
 }
