@@ -346,6 +346,7 @@ namespace EDDCanonn
             this.textBoxSystem.ReadOnly = true;
             this.textBoxSystem.Size = new System.Drawing.Size(163, 20);
             this.textBoxSystem.TabIndex = 3;
+            this.textBoxSystem.Text = "#";
             // 
             // labelSysName
             // 
@@ -539,6 +540,7 @@ namespace EDDCanonn
             this.textBoxNews.ReadOnly = true;
             this.textBoxNews.Size = new System.Drawing.Size(262, 44);
             this.textBoxNews.TabIndex = 4;
+            this.textBoxNews.Text = "#";
             this.textBoxNews.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // buttonPrevNews

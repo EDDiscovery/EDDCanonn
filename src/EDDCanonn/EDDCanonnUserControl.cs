@@ -357,6 +357,15 @@ namespace EDDCanonn
            );
         }
 
+        private void UpdateDataGridPatrol(List<DataGridViewRow> result)
+        {
+            SafeBeginInvoke(() =>
+            {
+                dataGridPatrol.Rows.Clear();
+                dataGridPatrol.Rows.AddRange(result.ToArray());
+            });
+        }
+
         private void toolStripPatrol_IndexChanged(object sender, EventArgs e)
         {
             if (_patrolLock)
@@ -694,25 +703,22 @@ namespace EDDCanonn
         //This only affects the data structure for visual feedback.
         #region ProcessEvents
 
-        private void ProcessVisualEvent(JournalEntry je)
+        private void ProcessEvent(JournalEntry je)
         {
             try
             {
                 JObject eventData = je.json.JSONParse().Object();
+                bool matched = true;
 
                 switch (je.eventid)
                 {
                     case "Scan":
-                        ProcessScan(eventData);
-                        break;
                     case "FSSBodySignals":
-                        ProcessScan(eventData);
-                        break;
                     case "SAASignalsFound":
                         ProcessScan(eventData);
                         break;
                     case "ScanOrganic":
-                        ProcessOrganic(eventData); 
+                        ProcessOrganic(eventData);
                         break;
                     case "FSSDiscoveryScan":
                         ProcessFSSDiscoveryScan(eventData);
@@ -721,9 +727,15 @@ namespace EDDCanonn
                         ProcessSAAScan(eventData);
                         break;
                     default:
+                        matched = false;
                         Console.WriteLine($"EDDCanonn: Skip unsupported event: " + je.eventid);
                         break;
                 }
+                if (matched) //We only update the UI when changes are made.
+                {
+                    UpdateUI();
+                }
+
             }
             catch (Exception ex)
             {
@@ -733,23 +745,33 @@ namespace EDDCanonn
 
         private void ProcessNewSystem(JObject eventData)
         {
-            if (systemData == null)
-                systemData = new SystemData(); //Enforces encapsulation and creates a new SystemData instance internally, disregarding any parameters.
-
-            lock (_lockSystemData)
+            try
             {
-                systemData.Name = eventData["StarSystem"].Value?.ToString();
-                systemData.SystemAddress = eventData["SystemAddress"]?.ToObject<long>() ?? -1;
+                if (systemData == null)
+                    systemData = new SystemData(); //Enforces encapsulation and creates a new SystemData instance internally, disregarding any parameters.
 
-                if (eventData["StarPos"] != null)
+                lock (_lockSystemData)
                 {
-                    systemData.X = CanonnHelper.GetValueOrDefault(eventData["StarPos"][0] ?? null, CanonnHelper.PositionFallback);
-                    systemData.Y = CanonnHelper.GetValueOrDefault(eventData["StarPos"][1] ?? null, CanonnHelper.PositionFallback);
-                    systemData.Z = CanonnHelper.GetValueOrDefault(eventData["StarPos"][2] ?? null, CanonnHelper.PositionFallback);
-                    systemData.HasCoordinate = true;
+                    systemData.Name = eventData["StarSystem"].Value?.ToString();
+                    systemData.SystemAddress = eventData["SystemAddress"]?.ToObject<long>() ?? -1;
+
+                    if (eventData["StarPos"] != null)
+                    {
+                        systemData.X = CanonnHelper.GetValueOrDefault(eventData["StarPos"][0] ?? null, CanonnHelper.PositionFallback);
+                        systemData.Y = CanonnHelper.GetValueOrDefault(eventData["StarPos"][1] ?? null, CanonnHelper.PositionFallback);
+                        systemData.Z = CanonnHelper.GetValueOrDefault(eventData["StarPos"][2] ?? null, CanonnHelper.PositionFallback);
+                        systemData.HasCoordinate = true;
+                    }
                 }
             }
+            catch (Exception ex) //If we end up here. We have a problem.
+            {
+                resetSystemData(); //In any case, we set the system to null.
+                Console.WriteLine($"EDDCanonn: Error processing NewSystem: {ex.Message}");
+            }
         }
+
+
 
         private void fetchScanData(JObject eventData, Body body) //Call this method only via the '_lockSystemData' lock. Otherwise it could get bad.
         {
@@ -968,7 +990,6 @@ namespace EDDCanonn
                     resetSystemData(); //If something goes wrong here, we assume that no data is available. If this happens after a ‘Location’ event, the system is initialised via that event.
                     Console.Error.WriteLine($"EDDCanonn: Error processing CallbackSystem for visual feedback: {ex.Message}");
                 }
-
             }
         }
 
@@ -1091,8 +1112,6 @@ namespace EDDCanonn
                                 this.Enabled = true;
                             });
                             activated = true;
-                            UpdateMainFields(); // wip
-                            UpdateUpperGridViews(); // wip
                         }
                         else if (rt.Equals(RequestTag.Log))
                         {
@@ -1100,6 +1119,7 @@ namespace EDDCanonn
                             {
                                 DebugLog.AppendText(data ?? "none" + "\n");
                             });
+                            return;
                         }
                     }
                     else if (requestTag is JObject jb)
@@ -1114,9 +1134,9 @@ namespace EDDCanonn
                             }
                             activated = true;
                         }
-                        UpdateMainFields(); // wip
-                        UpdateUpperGridViews(); // wip
                     }
+                    UpdateUI();
+                    UpdatePatrols();
                 },
                 ex => Console.Error.WriteLine($"EDDCanonn: Error processing Systemdata: {ex.Message}"),
                 "DataResult");
@@ -1196,13 +1216,30 @@ namespace EDDCanonn
         }
         #endregion
 
-        #region UIUpdate
+        #region UpdateUI
 
-        private void UpdateMainFields() //wip
+        private void UpdateUI() //Updates all UI events. Except for the patrols.
         {
-            SystemData system = deepCopySystemData();
+            dataHandler.StartTaskAsync(
+            (token) =>
+            {
+                while (systemData == null) //We have to wait until the system data has been loaded.
+                {
+                    token.ThrowIfCancellationRequested(); //We abort here if a cancellation was requested.
+                    Task.Delay(250, token).Wait();
+                }
+                SystemData system = deepCopySystemData();
+                UpdateMainFields(system);
+                UpdateUpperGridViews(system);
+            },
+            ex => Console.Error.WriteLine($"EDDCanonn: Error during UpdateUI: {ex.Message}"),
+            "UpdateUI"
+            );
+        }
 
-            if (system == null)
+        private void UpdateMainFields(SystemData system) //This should only be called by 'UpdateMainFields'.
+        {
+            if (system == null) //Safety first.
                 return;
 
             SafeBeginInvoke(() =>
@@ -1215,19 +1252,9 @@ namespace EDDCanonn
             });
         }
 
-        private void UpdateDataGridPatrol(List<DataGridViewRow> result)
+        private void UpdateUpperGridViews(SystemData system) //This should only be called by 'UpdateMainFields'.
         {
-            SafeBeginInvoke(() =>
-            {
-                dataGridPatrol.Rows.Clear();
-                dataGridPatrol.Rows.AddRange(result.ToArray());
-            });
-        }
-
-        private void UpdateUpperGridViews()
-        {
-            SystemData system = deepCopySystemData();
-            if (system == null)
+            if (system == null) //Safety first.
                 return;
 
             SafeBeginInvoke(() =>
@@ -1249,10 +1276,13 @@ namespace EDDCanonn
                     dataGridViewBio.Rows.AddRange(CanonnHelper.CloneDataGridViewRowList(bioRows).ToArray());
                 }
 
+                //We dispose the originals to save memory.
                 CanonnHelper.DisposeDataGridViewRowList(ringRows);
                 CanonnHelper.DisposeDataGridViewRowList(bioRows);
             });
         }
+
+        #region Links
 
         private void linkLabelEDDCanonn_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
@@ -1268,8 +1298,10 @@ namespace EDDCanonn
         {
             CanonnHelper.OpenUrl(CanonnHelper.EDDGitHub);
         }
+        #endregion
 
         #region Notify
+
         private void NotifyField(Control control, String arg)
         {
             SafeBeginInvoke(() =>
@@ -1368,10 +1400,8 @@ namespace EDDCanonn
                             Task.Delay(250, token).Wait();
                         }
 
-                        ProcessVisualEvent(je);
+                        ProcessEvent(je);
                     }
-                    UpdateMainFields(); //wip
-                    UpdateUpperGridViews(); // wip
                 },
                 ex =>
                 {
