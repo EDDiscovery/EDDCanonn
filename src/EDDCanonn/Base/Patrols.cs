@@ -26,7 +26,7 @@ namespace EDDCanonn.Base
 
         public Patrols()
         {
-            CategoryTrees["all"] = new KdTree<double, Patrol>(3, new DoubleMath());
+            CategoryTrees["all"] = new KdTree<double, Patrol>(3, new DoubleMath(),AddDuplicateBehavior.Update);
         }
 
         private readonly object _addLock = new object();

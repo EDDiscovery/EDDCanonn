@@ -66,7 +66,7 @@ namespace EDDCanonn
 
                 if (DLLCallBack.RequestHistory(1, false, out je) == true) //We check here if EDD has already loaded the history.
                 {
-                    DLLCallBack.RequestScanData(RequestTag.OnStart, this, "", true);
+                    DLLCallBack.RequestScanDataExt(RequestTag.OnStart, this, "", 0, 3, null);
                     return;
                 }
                 else
@@ -81,7 +81,7 @@ namespace EDDCanonn
                         }
                         SafeInvoke(() =>
                         {
-                            DLLCallBack.RequestScanData(RequestTag.OnStart, this, "", true);
+                            DLLCallBack.RequestScanDataExt(RequestTag.OnStart, this, "", 0, 3, null);
                         });
                         return;
                     },
@@ -114,6 +114,9 @@ namespace EDDCanonn
             extTabControlData.SelectedIndex = extTabControlData.TabCount - 1;
 
             this.Enabled = false;
+
+            Whitelist = null;
+            patrols = null;
             dataHandler.CancelAllTasks();
         }
 
@@ -139,16 +142,20 @@ namespace EDDCanonn
                 (token) =>
                 {
                     //Fetch information about available patrols.
-                    List<Dictionary<string, string>> records = CanonnHelper.ParseTsv(dataHandler.FetchData(CanonnHelper.PatrolUrl));
+                    List<Dictionary<string, string>> records = CanonnHelper.ParseTsv(dataHandler.FetchData(CanonnHelper.PatrolUrl).response);
                     foreach (Dictionary<string, string> record in records)
                     {
                         token.ThrowIfCancellationRequested(); //We abort here if a cancellation was requested.
                         try
                         {
-                            string description = record.TryGetValue("Description", out string descriptionValue) ? descriptionValue : "uncategorized";
-                            bool enabled = record.TryGetValue("Enabled", out string enabledValue) && enabledValue == "Y";
-                            string type = record.TryGetValue("Type", out string typeValue) ? typeValue : string.Empty;
-                            string url = record.TryGetValue("Url", out string urlValue) ? urlValue : string.Empty;
+                            string description = record.TryGetValue("Description", out string descriptionValue)
+                            ? descriptionValue : "uncategorized";
+                            bool enabled = record.TryGetValue("Enabled", out string enabledValue)
+                            && enabledValue == "Y";
+                            string type = record.TryGetValue("Type", out string typeValue)
+                            ? typeValue : string.Empty;
+                            string url = record.TryGetValue("Url", out string urlValue)
+                            ? urlValue : string.Empty;
 
                             if (!enabled)
                                 continue;
@@ -232,10 +239,10 @@ namespace EDDCanonn
             try
             {
                 //Initialize a 3D KdTree for patrol locations.
-                KdTree<double, Patrol> kdT = new KdTree<double, Patrol>(3, new DoubleMath());
+                KdTree<double, Patrol> kdT = new KdTree<double, Patrol>(3, new DoubleMath(), AddDuplicateBehavior.Update);
 
                 //Fetch TSV data and parse it into a list of dictionaries.
-                List<Dictionary<string, string>> records = CanonnHelper.ParseTsv(dataHandler.FetchData(url));
+                List<Dictionary<string, string>> records = CanonnHelper.ParseTsv(dataHandler.FetchData(url).response);
 
                 foreach (Dictionary<string, string> record in records)
                 {
@@ -244,13 +251,16 @@ namespace EDDCanonn
                     try
                     {
                         string patrolType = record.TryGetValue("Patrol", out string patrolValue) ? patrolValue :
-                                            record.TryGetValue("Type", out string typeValue) ? typeValue : string.Empty;
+                            record.TryGetValue("Type", out string typeValue) ? typeValue : string.Empty;
 
                         string system = record.TryGetValue("System", out string systemValue) ? systemValue : string.Empty;
 
-                        double x = CanonnHelper.GetValueOrDefault(new JToken(record["X"] ?? null), CanonnHelper.PositionFallback);
-                        double y = CanonnHelper.GetValueOrDefault(new JToken(record["Y"] ?? null), CanonnHelper.PositionFallback);
-                        double z = CanonnHelper.GetValueOrDefault(new JToken(record["Z"] ?? null), CanonnHelper.PositionFallback);
+                        double x = CanonnHelper.GetValueOrDefault(new JToken(record["X"] ?? null), 
+                            CanonnHelper.PositionFallback);
+                        double y = CanonnHelper.GetValueOrDefault(new JToken(record["Y"] ?? null), 
+                            CanonnHelper.PositionFallback);
+                        double z = CanonnHelper.GetValueOrDefault(new JToken(record["Z"] ?? null), 
+                            CanonnHelper.PositionFallback);
 
                         string instructions = record.TryGetValue("Instructions", out string instructionsValue) ? instructionsValue : "none";
                         string urlp = record.TryGetValue("Url", out string urlValue) ? urlValue : string.Empty;
@@ -291,8 +301,8 @@ namespace EDDCanonn
             try
             {
                 //Initialize a 3D KdTree for patrol locations.
-                KdTree<double, Patrol> kdT = new KdTree<double, Patrol>(3, new DoubleMath());
-                JArray jsonRecords = dataHandler.FetchData(url).JSONParse().Array();
+                KdTree<double, Patrol> kdT = new KdTree<double, Patrol>(3, new DoubleMath(),AddDuplicateBehavior.Update);
+                JArray jsonRecords = dataHandler.FetchData(url).response.JSONParse().Array();
                 if (jsonRecords == null || jsonRecords.Count == 0)
                     return;
 
@@ -306,9 +316,12 @@ namespace EDDCanonn
 
                         string system = record["system"]?.Value?.ToString() ?? string.Empty;
 
-                        double x = CanonnHelper.GetValueOrDefault(record["x"] ?? null, CanonnHelper.PositionFallback);
-                        double y = CanonnHelper.GetValueOrDefault(record["y"] ?? null, CanonnHelper.PositionFallback);
-                        double z = CanonnHelper.GetValueOrDefault(record["z"] ?? null, CanonnHelper.PositionFallback);
+                        double x = CanonnHelper.GetValueOrDefault(record["x"] ?? null, 
+                            CanonnHelper.PositionFallback);
+                        double y = CanonnHelper.GetValueOrDefault(record["y"] ?? null, 
+                            CanonnHelper.PositionFallback);
+                        double z = CanonnHelper.GetValueOrDefault(record["z"] ?? null, 
+                            CanonnHelper.PositionFallback);
 
                         string instructions = record["instructions"]?.Value?.ToString() ?? "none";
                         string urlp = record["url"]?.Value?.ToString() ?? string.Empty;
@@ -542,7 +555,8 @@ namespace EDDCanonn
                 {
                     try
                     {
-                        JArray whitelistItems = dataHandler.FetchData(CanonnHelper.WhitelistUrl).JSONParseArray() ?? throw new Exception("EDDCanonn: Whitelist is null");
+                        JArray whitelistItems = dataHandler.FetchData(CanonnHelper.CanonnPostUrl + "Whitelist").response.JSONParseArray()
+                        ?? throw new Exception("EDDCanonn: Whitelist is null");
                         for (int i = 0; i < whitelistItems.Count; i++)
                         {
                             JObject itemObject = whitelistItems[i].Object();
@@ -675,30 +689,9 @@ namespace EDDCanonn
             return false;
         }
 
-        private void PrintWhitelist()
-        {
-            for (int i = 0; i < Whitelist.Events.Count; i++)
-            {
-                WhitelistEvent we = Whitelist.Events[i];
-                DebugLog.AppendText("Event Type: " + we.Type + "\r\n");
-
-                for (int j = 0; j < we.DataBlocks.Count; j++)
-                {
-                    DebugLog.AppendText("  Data Block:\r\n");
-                    Dictionary<string, object> db = we.DataBlocks[j];
-
-                    foreach (KeyValuePair<string, object> kvp in db)
-                    {
-                        DebugLog.AppendText("    " + kvp.Key + ": " + kvp.Value + "\r\n");
-                    }
-                }
-                DebugLog.AppendText("\r\n");
-            }
-        }
-
         private void RunWhiteListTestCases()
         {
-            foreach (var (eventName, jsonPayload, expectedResult) in TestData.WhiteListTestCases)
+            foreach (var (eventName, jsonPayload, expectedResult) in WhiteListTest.WhiteListTestCases)
                 DebugLog.AppendText($"{eventName} - ExpectedResult: {expectedResult} - Result: {IsEventValid(eventName, jsonPayload)}" + Environment.NewLine);
         }
         #endregion
@@ -1449,7 +1442,7 @@ namespace EDDCanonn
                         NotifyField(textBoxBodyCount, "Fetch...");
                         SafeBeginInvoke(() =>
                         {
-                            DLLCallBack.RequestScanData(o, this, je.systemname, true);
+                            DLLCallBack.RequestScanDataExt(o, this, je.systemname, je.systemaddress, 3, null);
                         });
                         return;
                     }
@@ -1462,7 +1455,7 @@ namespace EDDCanonn
                         NotifyField(textBoxBodyCount, "Fetch...");
                         SafeBeginInvoke(() =>
                         {
-                            DLLCallBack.RequestScanData(o, this, je.systemname, true);
+                            DLLCallBack.RequestScanDataExt(o, this, je.systemname, je.systemaddress, 3, null);
                         });
                         return;
                     }
@@ -1654,7 +1647,7 @@ namespace EDDCanonn
 
         private void LogWhitelist_Click(object sender, EventArgs e)
         {
-            PrintWhitelist();
+            DebugLog.AppendText(WhiteListTest.PrintWhitelist(Whitelist));
         }
 
         private void TestWhitelist_Click(object sender, EventArgs e)
@@ -1677,7 +1670,8 @@ namespace EDDCanonn
 
         private void CallSystem_Click(object sender, EventArgs e)
         {
-            DLLCallBack.RequestScanData(RequestTag.Log, this, "", true);
+            DLLCallBack.RequestSpanshDump(RequestTag.Log, this, "", 0, true, false, null);
+         //   DLLCallBack.RequestScanDataExt(RequestTag.Log, this, "", 0, 3, null);
         }
         #endregion
     }

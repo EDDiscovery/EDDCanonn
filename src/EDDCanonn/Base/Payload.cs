@@ -42,7 +42,7 @@ namespace EDDCanonn.Base
             gameState["systemCoordinates"] = JArray.FromObject(new double[] { je.x, je.y, je.z });
 
             //Body name
-            string bodyName = rawEvent["BodyName"].Value?.ToString();
+            string bodyName = rawEvent["BodyName"]?.Value?.ToString();
             if (!string.IsNullOrEmpty(bodyName))
             {
                 gameState["bodyName"] = bodyName;
@@ -53,7 +53,7 @@ namespace EDDCanonn.Base
             }
 
             //Station name
-            string stationName = rawEvent["StationName"].Value?.ToString();
+            string stationName = rawEvent["StationName"]?.Value?.ToString();
             if (!string.IsNullOrEmpty(stationName))
             {
                 gameState["station"] = stationName;
@@ -66,7 +66,7 @@ namespace EDDCanonn.Base
             //Data from status
             if (status != null &&
                 status.Contains("Pos") &&
-                status["Pos"]["ValidPosition"]?.ToObject<bool>() == true)
+                status["Pos"]?["ValidPosition"]?.ToObject<bool>() == true)
             {
                 if (status["Pos"]["Latitude"] != null)
                 {

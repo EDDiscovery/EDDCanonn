@@ -35,10 +35,11 @@ namespace EDDCanonn
         public static readonly double PositionFallback = -99999.99;
 
         //Canonn urls.
-        public static readonly string WhitelistUrl = "https://us-central1-canonn-api-236217.cloudfunctions.net/postEventWhitelist";
-        public static readonly string EventPushUrl = "https://us-central1-canonn-api-236217.cloudfunctions.net/postEvent";
+        public static readonly string CanonnPostUrl = "https://us-central1-canonn-api-236217.cloudfunctions.net/postEvent";
         public static readonly string PatrolUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQsi1Vbfx4Sk2msNYiqo0PVnW3VHSrvvtIRkjT-JvH_oG9fP67TARWX2jIjehFHKLwh4VXdSh0atk3J/pub?gid=0&single=true&output=tsv";
+        public static readonly string BioStats = "https://us-central1-canonn-api-236217.cloudfunctions.net/query/codex/biostats?id=";
 
+        //Other urls.
         public static readonly string EDDCanonnGitHub = "https://github.com/EDDiscovery/EDDCanonn";
         public static readonly string EDDGitHub = "https://github.com/EDDiscovery";
         public static readonly string CanonnWebPage = "https://canonn.science";

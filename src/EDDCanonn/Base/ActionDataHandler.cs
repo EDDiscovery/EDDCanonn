@@ -50,7 +50,6 @@ namespace EDDCanonn.Base
                 {
                     try
                     {
-                        token.ThrowIfCancellationRequested();
                         job.Invoke();
                     }
                     catch (OperationCanceledException)
@@ -94,7 +93,6 @@ namespace EDDCanonn.Base
             lock (_lock)
             {
                 _cts.Cancel(); 
-                _cts = new CancellationTokenSource();
 
                 string mg = $"EDDCanonn: Cancelling all tasks...";
                 Console.WriteLine(mg);
@@ -116,7 +114,7 @@ namespace EDDCanonn.Base
 
         #region Networking 
 
-        public string FetchData(string fullUrl)
+        public (bool success, string response) FetchData(string fullUrl)
         {
             try
             {
@@ -124,25 +122,30 @@ namespace EDDCanonn.Base
             }
             catch (Exception ex)
             {
-                throw;
+                string error = $"EDDCanonn: Exception in FetchData: {ex.Message}";
+                Console.Error.WriteLine(error);
+                CanonnLogging.Instance.LogToFile(error);
+                return (false, null);
             }
         }
 
-        public bool PushData(string fullUrl, string jsonData)
+        public (bool success, string response) PushData(string fullUrl, string jsonData)
         {
             try
             {
-                string response = PerformPostRequest(fullUrl, jsonData, "application/json");
-                return !string.IsNullOrEmpty(response);
+                return PerformPostRequest(fullUrl, jsonData, "application/json");
             }
             catch (Exception ex)
             {
-                throw;
+                string error = $"EDDCanonn: Exception in PushData: {ex.Message}";
+                Console.Error.WriteLine(error);
+                CanonnLogging.Instance.LogToFile(error);
+                return (false, null);
             }
         }
 
         // Performs a GET request to the specified endpoint
-        private string PerformGetRequest(string fullUrl)//wip
+        private (bool success, string response) PerformGetRequest(string fullUrl)
         {
             try
             {
@@ -155,27 +158,36 @@ namespace EDDCanonn.Base
                 {
                     if (response.StatusCode != HttpStatusCode.OK)
                     {
-                        Console.Error.WriteLine($"EDDCanonn: GET request failed. Status: {response.StatusCode}");
-                        return null;
+                        string error = $"EDDCanonn: GET request failed. Status: {response.StatusCode}";
+                        Console.Error.WriteLine(error);
+                        CanonnLogging.Instance.LogToFile(error);
+                        return (false, null);
                     }
 
                     using (StreamReader reader = new StreamReader(response.GetResponseStream(), Encoding.UTF8))
                     {
-                        return reader.ReadToEnd();
+                        return (true, reader.ReadToEnd());
                     }
                 }
             }
-            catch (WebException ex)
+            catch (WebException ex) when (ex.Response is HttpWebResponse httpResponse)
+            {
+                string error = $"EDDCanonn: GET request failed. Status: {httpResponse.StatusCode}, Error: {ex.Message}";
+                Console.Error.WriteLine(error);
+                CanonnLogging.Instance.LogToFile(error);
+                return (false, null);
+            }
+            catch (Exception ex)
             {
                 string error = $"EDDCanonn: Error performing GET request: {ex.Message}";
                 Console.Error.WriteLine(error);
                 CanonnLogging.Instance.LogToFile(error);
-                throw;
+                return (false, null);
             }
         }
 
         // Performs a POST request to the specified endpoint with JSON data
-        private string PerformPostRequest(string fullUrl, string postData, string contentType)//wip
+        private (bool success, string response) PerformPostRequest(string fullUrl, string postData, string contentType)
         {
             try
             {
@@ -194,24 +206,34 @@ namespace EDDCanonn.Base
                 {
                     if (response.StatusCode != HttpStatusCode.OK && response.StatusCode != HttpStatusCode.Created)
                     {
-                        Console.Error.WriteLine($"EDDCanonn: POST request failed. Status: {response.StatusCode}");
-                        return null;
+                        string error = $"EDDCanonn: POST request failed. Status: {response.StatusCode}";
+                        Console.Error.WriteLine(error);
+                        CanonnLogging.Instance.LogToFile(error);
+                        return (false, null);
                     }
 
                     using (StreamReader reader = new StreamReader(response.GetResponseStream(), Encoding.UTF8))
                     {
-                        return reader.ReadToEnd();
+                        return (true, reader.ReadToEnd());
                     }
                 }
             }
-            catch (WebException ex)
+            catch (WebException ex) when (ex.Response is HttpWebResponse httpResponse)
+            {
+                string error = $"EDDCanonn: POST request failed. Status: {httpResponse.StatusCode}, Error: {ex.Message}";
+                Console.Error.WriteLine(error);
+                CanonnLogging.Instance.LogToFile(error);
+                return (false, null);
+            }
+            catch (Exception ex)
             {
                 string error = $"EDDCanonn: Error performing POST request: {ex.Message}";
                 Console.Error.WriteLine(error);
                 CanonnLogging.Instance.LogToFile(error);
-                throw;
+                return (false, null);
             }
         }
         #endregion
+
     }
 }
