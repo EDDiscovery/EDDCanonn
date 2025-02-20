@@ -66,7 +66,7 @@ namespace EDDCanonn
 
                 if (DLLCallBack.RequestHistory(1, false, out je) == true) //We check here if EDD has already loaded the history.
                 {
-                    DLLCallBack.RequestScanDataExt(RequestTag.OnStart, this, "", 0, 3, null);
+                    DLLCallBack.RequestSpanshDump(RequestTag.OnStart, this, "", 0, true, false, null);
                     return;
                 }
                 else
@@ -81,7 +81,7 @@ namespace EDDCanonn
                         }
                         SafeInvoke(() =>
                         {
-                            DLLCallBack.RequestScanDataExt(RequestTag.OnStart, this, "", 0, 3, null);
+                            DLLCallBack.RequestSpanshDump(RequestTag.OnStart, this, "", 0, true, false, null);
                         });
                         return;
                     },
@@ -807,7 +807,6 @@ namespace EDDCanonn
                         systemData.X = CanonnHelper.GetValueOrDefault(eventData["StarPos"][0] ?? null, CanonnHelper.PositionFallback);
                         systemData.Y = CanonnHelper.GetValueOrDefault(eventData["StarPos"][1] ?? null, CanonnHelper.PositionFallback);
                         systemData.Z = CanonnHelper.GetValueOrDefault(eventData["StarPos"][2] ?? null, CanonnHelper.PositionFallback);
-                        systemData.HasCoordinate = true;
                     }
                 }
             }
@@ -831,11 +830,9 @@ namespace EDDCanonn
                 {
                     //Primitives
                     BodyID = body.BodyID,
-                    ScanType = eventData["ScanType"]?.Value?.ToString(),
 
                     //List<JObject>  
                     Signals = CanonnHelper.GetJObjectList(eventData, "Signals"),
-                    SurfaceFeatures = CanonnHelper.GetJObjectList(eventData, "SurfaceFeatures"),
                     Rings = CanonnHelper.GetJObjectList(eventData, "Rings"),
                     Organics = CanonnHelper.GetJObjectList(eventData, "Organics"),
                     Genuses = CanonnHelper.GetJObjectList(eventData, "Genuses"),
@@ -845,7 +842,6 @@ namespace EDDCanonn
             {
                 //Primitives
                 body.ScanData.BodyID = body.BodyID;
-                body.ScanData.ScanType = eventData["ScanType"]?.Value?.ToString();
 
                 //List<JObject>  
                 body.ScanData.Signals = CanonnHelper.GetUniqueEntries(eventData, "Signals", body.ScanData.Signals);
@@ -860,13 +856,13 @@ namespace EDDCanonn
         {
             if (body.NodeType != null) return;
             if (eventData.Contains("PlanetClass") && !eventData["PlanetClass"].IsNull)
-                body.NodeType = "body";
+                body.NodeType = "Planet";
             else if (eventData.Contains("StarType") && !eventData["StarType"].IsNull)
-                body.NodeType = "star";
+                body.NodeType = "Star";
             else if (body.BodyName?.Contains("Belt") == true)
-                body.NodeType = "belt";
+                body.NodeType = "Belt";
             else if (body.BodyName?.Contains("Ring") == true)
-                body.NodeType = "ring";
+                body.NodeType = "Ring";
         }
 
         private Body ProcessScan(JObject eventData) //We can use this for most scan events.
@@ -919,8 +915,7 @@ namespace EDDCanonn
 
             lock (_lockSystemData)
             {
-                systemData.FSSTotalBodies = eventData["BodyCount"]?.ToObject<int>() ?? -1;
-                systemData.FSSTotalNonBodies = eventData["NonBodyCount"]?.ToObject<int>() ?? -1;
+                systemData.BodyCount = CanonnHelper.GetValueOrDefault(eventData["BodyCount"] ?? null, -1);
             }
         }
 
@@ -999,9 +994,9 @@ namespace EDDCanonn
         #endregion
 
         //This only affects the data structure for visual feedback.
-        #region ProcessCallbackSystem
+        #region ProcessSpanshDump
 
-        public void ProcessCallbackSystem(JObject root)
+        public void ProcessSpanshDump(JObject root)
         {
             if (root == null || root.Count == 0) // If this is true after a ‘Location’ event, the system is later initialised via that event.
                 return;
@@ -1013,25 +1008,13 @@ namespace EDDCanonn
             {
                 try
                 {
-                    if (root["System"] != null)
-                    {
-                        JObject systemDataNode = root["System"]?.Object();
-                        if (systemDataNode != null)
-                            ProcessCallbackSystemData(systemDataNode);
-                    }
+                    JObject systemDataNode = root["system"]?.Object() ?? null;
+                    if (systemDataNode != null)
+                        ProcessSpanshSystemData(systemDataNode);
 
-                    if (root["StarNodes"] != null)
-                    {
-                        JObject starNodes = root["StarNodes"]?.Object();
-                        if (starNodes != null)
-                            ProcessCallbackStarNodes(starNodes);
-                    }
-
-                    systemData.FSSSignalList = CanonnHelper.GetJObjectList(root, "FSSSignalList");
-                    systemData.CodexEntryList = CanonnHelper.GetJObjectList(root, "CodexEntryList");
-
-                    systemData.FSSTotalBodies = root["FSSTotalBodies"]?.ToObject<int>() ?? -1;
-                    systemData.FSSTotalNonBodies = root["FSSTotalNonBodies"]?.ToObject<int>() ?? -1;
+                    JArray bodyNode = systemDataNode?["bodies"]?.Array() ?? null;
+                    if (bodyNode != null)
+                        ProcessSpanshBodyNode(bodyNode);
 
                 }
                 catch (Exception ex)
@@ -1044,33 +1027,34 @@ namespace EDDCanonn
             }
         }
 
-        private void ProcessCallbackSystemData(JObject system)
+        private void ProcessSpanshSystemData(JObject system)
         {
             // Extract and populate main system details
-            systemData.Name = system["Name"].Value?.ToString();
-            systemData.X = CanonnHelper.GetValueOrDefault(system["X"] ?? null, CanonnHelper.PositionFallback);
-            systemData.Y = CanonnHelper.GetValueOrDefault(system["Y"] ?? null, CanonnHelper.PositionFallback);
-            systemData.Z = CanonnHelper.GetValueOrDefault(system["Z"] ?? null, CanonnHelper.PositionFallback);
-            systemData.HasCoordinate = system["HasCoordinate"]?.ToObject<bool>() ?? false;
-            systemData.SystemAddress = CanonnHelper.GetValueOrDefault(system["SystemAddress"] ?? null, -1l);
+            systemData.Name = system["name"].Value?.ToString();
+
+            systemData.X = CanonnHelper.GetValueOrDefault(system["coords"]?["x"] ?? null, CanonnHelper.PositionFallback);
+            systemData.Y = CanonnHelper.GetValueOrDefault(system["coords"]?["y"] ?? null, CanonnHelper.PositionFallback);
+            systemData.Z = CanonnHelper.GetValueOrDefault(system["coords"]?["z"] ?? null, CanonnHelper.PositionFallback);
+
+            systemData.SystemAddress = CanonnHelper.GetValueOrDefault(system["id64"] ?? null, -1l);
+            systemData.BodyCount = CanonnHelper.GetValueOrDefault(system["bodyCount"] ?? null, -1);
         }
 
-        private void ProcessCallbackStarNodes(JObject starNodes, int? parentBodyId = null) //wip
+        private void ProcessSpanshBodyNode(JArray bodyNode) //wip
         {
-            if (starNodes == null)
+            if (bodyNode == null)
                 return;
 
-            foreach (KeyValuePair<string, JToken> property in starNodes)
+            foreach (JObject node in bodyNode)
             {
-                JObject starNode = property.Value as JObject;
 
-                if (starNode == null || starNode.Count == 0)
+                if (node == null || node.Count == 0)
                 {
                     continue;
                 }
 
                 // Extract BodyID; skip processing if invalid
-                int bodyId = CanonnHelper.GetValueOrDefault(starNode["BodyID"] ?? null, -1);
+                int bodyId = CanonnHelper.GetValueOrDefault(node["bodyId"] ?? null, -1);
                 if (bodyId == -1)
                 {
                     continue;
@@ -1090,39 +1074,21 @@ namespace EDDCanonn
                 {
                     //Primitives
                     BodyID = bodyId,
-                    BodyName = starNode["BodyDesignator"].Value?.ToString(),
-                    IsMapped = starNode["IsMapped"]?.ToObject<bool>() ?? false,
-                    NodeType = starNode["NodeType"].Value?.ToString(),
-
+                    BodyName = node["name"].Value?.ToString(),
+                    NodeType = node["type"].Value?.ToString(),
                 };
 
-
-                JObject scanDataNode = starNode["ScanData"] as JObject;
-                if (scanDataNode != null)
+                body.ScanData = new ScanData
                 {
-                    body.ScanData = new ScanData
-                    {
-                        //Primitives
-                        ScanType = scanDataNode["ScanType"].Value?.ToString(),
-                        BodyID = bodyId,
-
-                        //List<JObject>    
-                        Signals = CanonnHelper.GetJObjectList(scanDataNode, "Signals"),
-                        SurfaceFeatures = CanonnHelper.GetJObjectList(scanDataNode, "SurfaceFeatures"),
-                        Rings = CanonnHelper.GetJObjectList(scanDataNode, "Rings", "Belt"),
-                        Organics = CanonnHelper.GetJObjectList(scanDataNode, "Organics"),
-                        Genuses = CanonnHelper.GetJObjectList(scanDataNode, "Genuses"),
-                    };
-                }
-
+                    //Primitives
+                    BodyID = bodyId,
+                    //List<JObject>    
+                    Signals = CanonnHelper.GetJObjectList(node["signals"] as JObject, "signals"),
+                    Genuses = CanonnHelper.GetJObjectList(node["signals"] as JObject, "genuses", "Genus"),
+                    Rings = CanonnHelper.GetJObjectList(node, "rings"),
+                };
+                
                 systemData.Bodys[bodyId] = body;
-
-                // Recursively process child nodes
-                JObject children = starNode["Children"] as JObject;
-                if (children != null)
-                {
-                    ProcessCallbackStarNodes(children, bodyId);
-                }
             }
         }
         #endregion
@@ -1157,7 +1123,7 @@ namespace EDDCanonn
                     {
                         if (rt.Equals(RequestTag.OnStart))
                         {
-                            lock (_lockSystemData) ProcessCallbackSystem(o);
+                            lock (_lockSystemData) ProcessSpanshDump(o);
                             SafeInvoke(() =>
                             {
                                 this.Enabled = true;
@@ -1182,7 +1148,7 @@ namespace EDDCanonn
                         {
                             lock (_lockSystemData)
                             {
-                                ProcessCallbackSystem(o);
+                                ProcessSpanshDump(o);
                                 if (systemData == null) ProcessNewSystem(jb);
                             }
                             activated = true;
@@ -1221,13 +1187,13 @@ namespace EDDCanonn
 
             foreach (Body body in system.Bodys.Values)
             {
-                if (body?.ScanData?.Signals == null) continue;
+                if (body?.ScanData?.Signals == null || body.ScanData.Signals.Count == 0) continue;
 
-                JObject o = CanonnHelper.FindFirstMatchingJObject(body.ScanData.Signals, "Type", "$SAA_SignalType_Biological;"); if (o == null) continue;
+                JObject o = CanonnHelper.FindFirstMatchingJObject(body.ScanData.Signals, null, "$SAA_SignalType_Biological;"); if (o == null) continue;
 
                 if (body.ScanData.Genuses == null || body.ScanData.Genuses.Count == 0)
                 {
-                    rows.Add(CanonnHelper.CreateDataGridViewRow(dataGridViewData, new object[] { body.BodyName, $"{CanonnHelper.GetValueOrDefault(o["Count"] ?? null, 0)} unknown species", Properties.Resources.biology })); continue;
+                    rows.Add(CanonnHelper.CreateDataGridViewRow(dataGridViewData, new object[] { body.BodyName, $"{CanonnHelper.GetValueOrDefault(o[1] ?? null, 0)} unknown species", Properties.Resources.biology })); continue;
                 }
 
                 foreach (JObject genus in body.ScanData.Genuses)
@@ -1264,10 +1230,10 @@ namespace EDDCanonn
 
                 foreach (JObject ring in body.ScanData.Rings)
                 {
-                    string ringName = ring["Name"]?.Value?.ToString();
-                    if (system.GetBodyByName(ringName)?.IsMapped == true) continue;
+                    string ringName = ring["name"]?.Value?.ToString() ?? ring["Name"]?.Value?.ToString() ?? null;
                     if (ringName?.Contains("Ring") != true) continue;
 
+                    if (system.GetBodyByName(ringName)?.IsMapped == true || ring.Contains("id64")) continue;
                     rows.Add(CanonnHelper.CreateDataGridViewRow(dataGridViewData, new object[] { body.BodyName, ringName, Properties.Resources.ring }));
                 }
             }
@@ -1316,7 +1282,7 @@ namespace EDDCanonn
                 textBoxBodyCount.Clear();
 
                 textBoxSystem.AppendText(system.Name ?? "none");
-                textBoxBodyCount.AppendText(system.CountBodysFilteredByNodeType(new string[] { "body", "star" }) + " / " + system.FSSTotalBodies);
+                textBoxBodyCount.AppendText(system.CountBodysFilteredByNodeType(new string[] { "Planet", "Star" }) + " / " + system.BodyCount);
             });
         }
 
@@ -1442,7 +1408,7 @@ namespace EDDCanonn
                         NotifyField(textBoxBodyCount, "Fetch...");
                         SafeBeginInvoke(() =>
                         {
-                            DLLCallBack.RequestScanDataExt(o, this, je.systemname, je.systemaddress, 3, null);
+                            DLLCallBack.RequestSpanshDump(o, this, je.systemname, je.systemaddress, true, false, null);
                         });
                         return;
                     }
@@ -1455,7 +1421,7 @@ namespace EDDCanonn
                         NotifyField(textBoxBodyCount, "Fetch...");
                         SafeBeginInvoke(() =>
                         {
-                            DLLCallBack.RequestScanDataExt(o, this, je.systemname, je.systemaddress, 3, null);
+                            DLLCallBack.RequestSpanshDump(o, this, je.systemname, je.systemaddress, true, false, null);
                         });
                         return;
                     }
@@ -1671,7 +1637,6 @@ namespace EDDCanonn
         private void CallSystem_Click(object sender, EventArgs e)
         {
             DLLCallBack.RequestSpanshDump(RequestTag.Log, this, "", 0, true, false, null);
-         //   DLLCallBack.RequestScanDataExt(RequestTag.Log, this, "", 0, 3, null);
         }
         #endregion
     }

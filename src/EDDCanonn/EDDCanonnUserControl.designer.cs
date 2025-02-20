@@ -248,6 +248,8 @@ namespace EDDCanonn
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             ExtendedControls.TabStyleSquare tabStyleSquare1 = new ExtendedControls.TabStyleSquare();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(EDDCanonnUserControl));
             this.textBoxSystem = new System.Windows.Forms.TextBox();
             this.labelSysName = new System.Windows.Forms.Label();
@@ -299,6 +301,7 @@ namespace EDDCanonn
             this.tabSurvey = new System.Windows.Forms.TabPage();
             this.labelSurvey = new System.Windows.Forms.Label();
             this.tabGmo = new System.Windows.Forms.TabPage();
+            this.labelGMO = new System.Windows.Forms.Label();
             this.tabPageAbout = new System.Windows.Forms.TabPage();
             this.tableLayoutAbout = new System.Windows.Forms.TableLayoutPanel();
             this.pictureBoxEDD = new System.Windows.Forms.PictureBox();
@@ -314,7 +317,6 @@ namespace EDDCanonn
             this.TestWhitelist = new ExtendedControls.ExtButton();
             this.LogWhitelist = new ExtendedControls.ExtButton();
             this.DebugLog = new System.Windows.Forms.TextBox();
-            this.labelGMO = new System.Windows.Forms.Label();
             this.tableLayoutSystem.SuspendLayout();
             this.contextMenuStrip1.SuspendLayout();
             this.tableLayoutPatrol.SuspendLayout();
@@ -816,6 +818,7 @@ namespace EDDCanonn
             this.tabRing.Controls.Add(this.extPanelDataGridViewScrollRing);
             this.tabRing.Location = new System.Drawing.Point(4, 22);
             this.tabRing.Name = "tabRing";
+            this.tabRing.Padding = new System.Windows.Forms.Padding(3);
             this.tabRing.Size = new System.Drawing.Size(356, 133);
             this.tabRing.TabIndex = 8;
             this.tabRing.Text = "Ring";
@@ -877,6 +880,8 @@ namespace EDDCanonn
             this.dataGridViewRing.Location = new System.Drawing.Point(0, 0);
             this.dataGridViewRing.Name = "dataGridViewRing";
             this.dataGridViewRing.ReadOnly = true;
+            dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.dataGridViewRing.RowsDefaultCellStyle = dataGridViewCellStyle3;
             this.dataGridViewRing.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.dataGridViewRing.Size = new System.Drawing.Size(339, 134);
             this.dataGridViewRing.TabIndex = 14;
@@ -913,6 +918,7 @@ namespace EDDCanonn
             this.tabBio.Controls.Add(this.extPanelDataGridViewScrollBio);
             this.tabBio.Location = new System.Drawing.Point(4, 22);
             this.tabBio.Name = "tabBio";
+            this.tabBio.Padding = new System.Windows.Forms.Padding(3);
             this.tabBio.Size = new System.Drawing.Size(356, 133);
             this.tabBio.TabIndex = 7;
             this.tabBio.Text = "Bio";
@@ -964,6 +970,7 @@ namespace EDDCanonn
             // 
             this.dataGridViewBio.AllowUserToAddRows = false;
             this.dataGridViewBio.AllowUserToDeleteRows = false;
+            this.dataGridViewBio.AllowUserToResizeColumns = false;
             this.dataGridViewBio.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.dataGridViewBio.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.AllCells;
             this.dataGridViewBio.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
@@ -974,7 +981,13 @@ namespace EDDCanonn
             this.dataGridViewBio.Location = new System.Drawing.Point(0, 0);
             this.dataGridViewBio.Name = "dataGridViewBio";
             this.dataGridViewBio.ReadOnly = true;
+            dataGridViewCellStyle4.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.dataGridViewBio.RowsDefaultCellStyle = dataGridViewCellStyle4;
             this.dataGridViewBio.ScrollBars = System.Windows.Forms.ScrollBars.None;
+            this.dataGridViewBio.ShowCellErrors = false;
+            this.dataGridViewBio.ShowCellToolTips = false;
+            this.dataGridViewBio.ShowEditingIcon = false;
+            this.dataGridViewBio.ShowRowErrors = false;
             this.dataGridViewBio.Size = new System.Drawing.Size(339, 134);
             this.dataGridViewBio.TabIndex = 14;
             // 
@@ -1037,6 +1050,16 @@ namespace EDDCanonn
             this.tabGmo.TabIndex = 6;
             this.tabGmo.Text = "GMO";
             this.tabGmo.UseVisualStyleBackColor = true;
+            // 
+            // labelGMO
+            // 
+            this.labelGMO.AutoSize = true;
+            this.labelGMO.Location = new System.Drawing.Point(134, 3);
+            this.labelGMO.Name = "labelGMO";
+            this.labelGMO.Size = new System.Drawing.Size(91, 13);
+            this.labelGMO.TabIndex = 1;
+            this.labelGMO.Text = "Work in Progress.";
+            this.labelGMO.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // tabPageAbout
             // 
@@ -1212,16 +1235,6 @@ namespace EDDCanonn
             this.DebugLog.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
             this.DebugLog.Size = new System.Drawing.Size(344, 101);
             this.DebugLog.TabIndex = 5;
-            // 
-            // labelGMO
-            // 
-            this.labelGMO.AutoSize = true;
-            this.labelGMO.Location = new System.Drawing.Point(134, 3);
-            this.labelGMO.Name = "labelGMO";
-            this.labelGMO.Size = new System.Drawing.Size(91, 13);
-            this.labelGMO.TabIndex = 1;
-            this.labelGMO.Text = "Work in Progress.";
-            this.labelGMO.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // EDDCanonnUserControl
             // 

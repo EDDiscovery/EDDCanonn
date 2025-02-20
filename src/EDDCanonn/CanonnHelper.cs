@@ -100,8 +100,11 @@ namespace EDDCanonn
         //Checks if a key value pair exists.
         public static bool ContainsKeyValuePair(List<JObject> existingList, string key, string value)
         {
-            if (existingList == null  ||  string.IsNullOrWhiteSpace(key) || value == null)
+            if (existingList == null || value == null)
                 return false;
+
+            if (key == null)
+                return existingList.Any(obj => obj.Contains(value));
 
             return existingList.Any(obj => obj.Contains(key) && obj[key]?.Value?.ToString() == value);
         }
@@ -109,8 +112,11 @@ namespace EDDCanonn
         //The same as above, but the JObject  is returned.
         public static JObject FindFirstMatchingJObject(List<JObject> existingList, string key, string value)
         {
-            if (existingList == null || string.IsNullOrWhiteSpace(key) || value == null)
+            if (existingList == null || value == null)
                 return null;
+
+            if (key == null)
+                return existingList.FirstOrDefault(obj => obj.Contains(value));
 
             return existingList.FirstOrDefault(obj => obj.Contains(key) &&
                 string.Equals(obj[key]?.Value?.ToString(), value, StringComparison.OrdinalIgnoreCase));
@@ -147,16 +153,25 @@ namespace EDDCanonn
         }
 
         //The same as 'GetUniqueEntries', but without duplicate check.
-        public static List<JObject> GetJObjectList(JObject source, string key, string exclude = null)
+        public static List<JObject> GetJObjectList(JObject source, string key, string subKey = null ,string exclude = null)
         {
+            if (source == null)
+                return null;
+
             if (source[key] is JArray array)
             {
-                return array.OfType<JObject>()
-                            .Where(obj => exclude == null || !obj.ToString().Contains(exclude))
-                            .ToList();
+                return array.Select(token =>
+                            token is JObject obj ? obj : new JObject { [subKey ?? GenerateId().ToString()] = token })
+                        .Where(obj => exclude == null || !obj.ToString().Contains(exclude))
+                        .ToList();
+            }
+            else if (source[key] is JObject obj)
+            {
+                return new List<JObject> { obj };
             }
             return null;
         }
+
 
         //Returns a filled row for the passed GridView.
         public static DataGridViewRow CreateDataGridViewRow(DataGridView dataGridView, Object[] objects)

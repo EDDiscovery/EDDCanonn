@@ -29,11 +29,9 @@ namespace EDDCanonn.Base
             X = data.X;
             Y = data.Y;
             Z = data.Z;
-            HasCoordinate = data.HasCoordinate;
-            SystemAddress = data.SystemAddress;
 
-            FSSTotalBodies = data.FSSTotalBodies;
-            FSSTotalNonBodies = data.FSSTotalNonBodies;
+            SystemAddress = data.SystemAddress;
+            BodyCount = data.BodyCount;
 
             if (data.Bodys != null)
             {
@@ -53,13 +51,11 @@ namespace EDDCanonn.Base
         public double X { get; set; } = 0.0;
         public double Y { get; set; } = 0.0;
         public double Z { get; set; } = 0.0;
-        public bool HasCoordinate { get; set; } = false;
         public long SystemAddress { get; set; } = 0;
         public Dictionary<int,Body> Bodys { get; set; } = null;
 
         //Global
-        public int FSSTotalBodies { get; set; } = -1;
-        public int FSSTotalNonBodies { get; set; } = -1;
+        public int BodyCount { get; set; } = -1;
         public List<JObject> FSSSignalList { get; set; } = null;
         public List<JObject> CodexEntryList { get; set; } = null;
 
@@ -86,10 +82,8 @@ namespace EDDCanonn.Base
         {
             string result = $"System Name: {Name}\n" +
                             $"Coordinates: ({X}, {Y}, {Z})\n" +
-                            $"Has Coordinate: {HasCoordinate}\n" +
                             $"System Address: {SystemAddress}\n" +
-                            $"FSS Total Bodies: {FSSTotalBodies}\n" +
-                            $"FSS Total Non-Bodies: {FSSTotalNonBodies}\n\n";
+                            $"FSS Total Bodies: {BodyCount}\n\n";
 
             result += "FSS Signals:\n";
             if (FSSSignalList != null && FSSSignalList.Count > 0)
@@ -131,7 +125,6 @@ namespace EDDCanonn.Base
                     if (body.ScanData != null)
                     {
                         result += "    Scan Data:\n" +
-                                  $"      Scan Type: {body.ScanData.ScanType}\n" +
                                   $"      Body ID: {body.ScanData.BodyID}\n";
 
                         result += AddListToString("Rings", body.ScanData.Rings);
@@ -175,9 +168,9 @@ namespace EDDCanonn.Base
         public Body(Body body) {
             BodyID = body.BodyID;
             BodyName = body.BodyName;
-            IsMapped = body.IsMapped;
             NodeType = body.NodeType;
-            if(body.ScanData != null) 
+            IsMapped = body.IsMapped;
+            if (body.ScanData != null) 
                 ScanData = new ScanData(body.ScanData);
         }
 
@@ -195,7 +188,6 @@ namespace EDDCanonn.Base
 
         public ScanData(ScanData scanData)
         { //deep copy
-            ScanType = scanData.ScanType;
             BodyID = scanData.BodyID;
 
             Rings = scanData.Rings?.Select(j => new JObject(j)).ToList() ?? new List<JObject>();
@@ -205,7 +197,6 @@ namespace EDDCanonn.Base
             Genuses = scanData.Genuses?.Select(j => new JObject(j)).ToList() ?? new List<JObject>();
         }
 
-        public string ScanType { get; set; } = null;
         public int BodyID { get; set; } = 0;
         public List<JObject> Rings { get; set; } = null;
         public List<JObject> Signals { get; set; } = null;
