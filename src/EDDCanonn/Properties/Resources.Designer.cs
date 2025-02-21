@@ -63,6 +63,16 @@ namespace EDDCanonn.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap anomaly {
+            get {
+                object obj = ResourceManager.GetObject("anomaly", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap biology {
             get {
                 object obj = ResourceManager.GetObject("biology", resourceCulture);
@@ -76,6 +86,16 @@ namespace EDDCanonn.Properties {
         internal static System.Drawing.Bitmap canonn {
             get {
                 object obj = ResourceManager.GetObject("canonn", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap cloud {
+            get {
+                object obj = ResourceManager.GetObject("cloud", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -103,6 +123,16 @@ namespace EDDCanonn.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap guardian {
+            get {
+                object obj = ResourceManager.GetObject("guardian", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap other {
             get {
                 object obj = ResourceManager.GetObject("other", resourceCulture);
@@ -116,6 +146,16 @@ namespace EDDCanonn.Properties {
         internal static System.Drawing.Bitmap ring {
             get {
                 object obj = ResourceManager.GetObject("ring", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap tourist {
+            get {
+                object obj = ResourceManager.GetObject("tourist", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
