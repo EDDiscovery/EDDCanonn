@@ -25,6 +25,8 @@ using KdTree.Math;
 using System.Threading.Tasks;
 using System.Collections.Concurrent;
 using System.Threading;
+using System.Text.RegularExpressions;
+using System.Net;
 
 namespace EDDCanonn
 {
@@ -59,6 +61,7 @@ namespace EDDCanonn
                 else
                     CanonnHelper.InstanceCount++;
 
+                InitializeNews();
                 InitializeWhitelist();
                 InitializePatrols();
 
@@ -255,11 +258,11 @@ namespace EDDCanonn
 
                         string system = record.TryGetValue("System", out string systemValue) ? systemValue : string.Empty;
 
-                        double x = CanonnHelper.GetValueOrDefault(new JToken(record["X"] ?? null), 
+                        double x = CanonnHelper.GetValueOrDefault(new JToken(record["X"] ?? null),
                             CanonnHelper.PositionFallback);
-                        double y = CanonnHelper.GetValueOrDefault(new JToken(record["Y"] ?? null), 
+                        double y = CanonnHelper.GetValueOrDefault(new JToken(record["Y"] ?? null),
                             CanonnHelper.PositionFallback);
-                        double z = CanonnHelper.GetValueOrDefault(new JToken(record["Z"] ?? null), 
+                        double z = CanonnHelper.GetValueOrDefault(new JToken(record["Z"] ?? null),
                             CanonnHelper.PositionFallback);
 
                         string instructions = record.TryGetValue("Instructions", out string instructionsValue) ? instructionsValue : "none";
@@ -301,7 +304,7 @@ namespace EDDCanonn
             try
             {
                 //Initialize a 3D KdTree for patrol locations.
-                KdTree<double, Patrol> kdT = new KdTree<double, Patrol>(3, new DoubleMath(),AddDuplicateBehavior.Update);
+                KdTree<double, Patrol> kdT = new KdTree<double, Patrol>(3, new DoubleMath(), AddDuplicateBehavior.Update);
                 JArray jsonRecords = dataHandler.FetchData(url).response.JSONParse().Array();
                 if (jsonRecords == null || jsonRecords.Count == 0)
                     return;
@@ -316,11 +319,11 @@ namespace EDDCanonn
 
                         string system = record["system"]?.Value?.ToString() ?? string.Empty;
 
-                        double x = CanonnHelper.GetValueOrDefault(record["x"] ?? null, 
+                        double x = CanonnHelper.GetValueOrDefault(record["x"] ?? null,
                             CanonnHelper.PositionFallback);
-                        double y = CanonnHelper.GetValueOrDefault(record["y"] ?? null, 
+                        double y = CanonnHelper.GetValueOrDefault(record["y"] ?? null,
                             CanonnHelper.PositionFallback);
-                        double z = CanonnHelper.GetValueOrDefault(record["z"] ?? null, 
+                        double z = CanonnHelper.GetValueOrDefault(record["z"] ?? null,
                             CanonnHelper.PositionFallback);
 
                         string instructions = record["instructions"]?.Value?.ToString() ?? "none";
@@ -1087,7 +1090,7 @@ namespace EDDCanonn
                     Genuses = CanonnHelper.GetJObjectList(node["signals"] as JObject, "genuses", "Genus"),
                     Rings = CanonnHelper.GetJObjectList(node, "rings"),
                 };
-                
+
                 systemData.Bodys[bodyId] = body;
             }
         }
@@ -1189,11 +1192,15 @@ namespace EDDCanonn
             {
                 if (body?.ScanData?.Signals == null || body.ScanData.Signals.Count == 0) continue;
 
-                JObject o = CanonnHelper.FindFirstMatchingJObject(body.ScanData.Signals, null, "$SAA_SignalType_Biological;"); if (o == null) continue;
+                JObject o = CanonnHelper.FindFirstMatchingJObject(body.ScanData.Signals, null, "$SAA_SignalType_Biological;")
+                    ?? CanonnHelper.FindFirstMatchingJObject(body.ScanData.Signals, "Type", "$SAA_SignalType_Biological;");
+
+                if (o == null) continue;
 
                 if (body.ScanData.Genuses == null || body.ScanData.Genuses.Count == 0)
                 {
-                    rows.Add(CanonnHelper.CreateDataGridViewRow(dataGridViewData, new object[] { body.BodyName, $"{CanonnHelper.GetValueOrDefault(o[1] ?? null, 0)} unknown species", Properties.Resources.biology })); continue;
+                    rows.Add(CanonnHelper.CreateDataGridViewRow(dataGridViewData, new object[] { body.BodyName, $"{CanonnHelper.GetValueOrDefault(o["Count"] ?? null, CanonnHelper.GetValueOrDefault(o[1] ?? null, 0))} " +
+                        $"unknown species", Properties.Resources.biology })); continue;
                 }
 
                 foreach (JObject genus in body.ScanData.Genuses)
@@ -1214,19 +1221,21 @@ namespace EDDCanonn
             return rows;
         }
 
-
         private List<DataGridViewRow> CollectRingData(SystemData system)
         {
             if (system?.Bodys == null) return null;
 
             List<DataGridViewRow> rows = new List<DataGridViewRow>
             {
-                CanonnHelper.CreateDataGridViewRow(dataGridViewData, new object[] { "Missing Rings:", null, new Bitmap(1, 1) })
+                CanonnHelper.CreateDataGridViewRow(dataGridViewRing, new object[] { "Missing Rings:", null, null, new Bitmap(1, 1) })
             };
-            
+
+            Regex ringRegex = new Regex(@"([A-Z])\s+Ring$", RegexOptions.IgnoreCase);
+
             foreach (Body body in system.Bodys.Values)
             {
                 if (body?.ScanData?.Rings == null) continue;
+                bool first = true;
 
                 foreach (JObject ring in body.ScanData.Rings)
                 {
@@ -1234,14 +1243,93 @@ namespace EDDCanonn
                     if (ringName?.Contains("Ring") != true) continue;
 
                     if (system.GetBodyByName(ringName)?.IsMapped == true || ring.Contains("id64")) continue;
-                    rows.Add(CanonnHelper.CreateDataGridViewRow(dataGridViewData, new object[] { body.BodyName, ringName, Properties.Resources.ring }));
+
+                    double inner = Math.Round(Math.Sqrt(CanonnHelper.GetValueOrDefault(ring["innerRadius"] ?? ring["InnerRad"], 0.0) / 299792458), 3);
+
+                    Match match = ringRegex.Match(ringName);
+                    rows.Add(CanonnHelper.CreateDataGridViewRow(dataGridViewRing, new object[]
+                    {
+                        first ? body.BodyName : null,
+                        match.Success ? match.Groups[1].Value + " Ring" : ringName,
+                        inner.ToString() + " LS",
+                        Properties.Resources.ring
+                    }));
+
+                    first = false;
                 }
             }
+
             if (rows.Count <= 1)
             {
-                CanonnHelper.DisposeDataGridViewRowList(rows); return null;
+                CanonnHelper.DisposeDataGridViewRowList(rows);
+                return null;
             }
+
             return rows;
+        }
+
+        #endregion
+
+        #region CanonnNews
+
+        private JArray News;
+        private int NewsIndex = 0;
+
+        private void InitializeNews()
+        {
+            dataHandler.StartTaskAsync(
+            (token) =>
+            {
+                News = dataHandler.FetchData(CanonnHelper.CanonnNews).response.JSONParseArray();
+                if (News == null || News.Count == 0) return;
+                NewsIndexChanged(0);
+            },
+            ex =>
+            {
+                string error = $"EDDCanonn: Unexpected error in InitializeNews: {ex.Message}";
+                Console.Error.WriteLine(error);
+                CanonnLogging.Instance.LogToFile(error);
+            },
+                "InitializeNews"
+            );
+        }
+
+        private void NewsIndexChanged(int n)
+        {
+            if (News == null || News.Count == 0) return;
+
+            if (n == 1 && NewsIndex + n >= News.Count)
+                NewsIndex = 0;
+            else if (n == -1 && NewsIndex + n < 0)
+                NewsIndex = News.Count - 1;
+            else
+                NewsIndex += n;
+
+            SafeBeginInvoke(() =>
+            {
+                textBoxNews.Clear();
+                string decoded = System.Text.RegularExpressions.Regex.Unescape((News[NewsIndex]?["excerpt"]?["rendered"]?.Value?.ToString() ?? "none"));
+                decoded = WebUtility.HtmlDecode(decoded);
+                decoded = Regex.Replace(decoded, "<.*?>", "");
+                textBoxNews.AppendText(decoded);
+
+                labelNewsIndex.Text = "Page: " + (NewsIndex + 1);
+            });
+        }
+
+        private void textBoxNews_Click(object sender, EventArgs e)
+        {
+            CanonnHelper.OpenUrl(News[NewsIndex]?["link"]?.Value?.ToString() ?? CanonnHelper.CanonnWebPage);
+        }
+
+        private void buttonNextNews_Click(object sender, EventArgs e)
+        {
+            NewsIndexChanged(1);
+        }
+
+        private void buttonPrevNews_Click(object sender, EventArgs e)
+        {
+            NewsIndexChanged(-1);
         }
         #endregion
 
@@ -1300,19 +1388,16 @@ namespace EDDCanonn
                 List<DataGridViewRow> ringRows = CollectRingData(system);
                 if (ringRows != null && ringRows.Count > 0)
                 {
-                    dataGridViewData.Rows.AddRange(CanonnHelper.CloneDataGridViewRowList(ringRows).ToArray());
-                    dataGridViewRing.Rows.AddRange(CanonnHelper.CloneDataGridViewRowList(ringRows).ToArray());
+                    dataGridViewRing.Rows.AddRange(ringRows.ToArray());
+                    dataGridViewData.Rows.Add(CanonnHelper.CreateDataGridViewRow(dataGridViewData, new object[] { "There are new rings that can be scanned..", Properties.Resources.ring }));
                 }
                 List<DataGridViewRow> bioRows = CollectBioData(system);
                 if (bioRows != null && bioRows.Count > 0)
                 {
-                    dataGridViewData.Rows.AddRange(CanonnHelper.CloneDataGridViewRowList(bioRows).ToArray());
-                    dataGridViewBio.Rows.AddRange(CanonnHelper.CloneDataGridViewRowList(bioRows).ToArray());
+                    dataGridViewBio.Rows.AddRange(bioRows.ToArray());
+                    dataGridViewData.Rows.Add(CanonnHelper.CreateDataGridViewRow(dataGridViewData, new object[] { "There is new bio data available for scanning..", Properties.Resources.biology }));
                 }
-
-                //We dispose the originals to save memory.
-                CanonnHelper.DisposeDataGridViewRowList(ringRows);
-                CanonnHelper.DisposeDataGridViewRowList(bioRows);
+                dataGridViewData.Rows.Add(CanonnHelper.CreateDataGridViewRow(dataGridViewData, new object[] { "There are new surveys that can be confirmed. [WIP]", Properties.Resources.other }));
             });
         }
 
@@ -1492,7 +1577,7 @@ namespace EDDCanonn
                 return new JObject(_statusJson);
         }
 
-        public bool SupportTransparency => true;
+        public bool SupportTransparency => false;
 
         public bool DefaultTransparent => false;
 

@@ -129,6 +129,7 @@
     <None Include="Resources\canonn.png" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Resources\other.png" />
     <Content Include="Resources\t.txt" />
   </ItemGroup>
   <ItemGroup />
