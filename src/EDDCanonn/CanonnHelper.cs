@@ -39,6 +39,7 @@ namespace EDDCanonn
         public static readonly string PatrolUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQsi1Vbfx4Sk2msNYiqo0PVnW3VHSrvvtIRkjT-JvH_oG9fP67TARWX2jIjehFHKLwh4VXdSh0atk3J/pub?gid=0&single=true&output=tsv";
         public static readonly string BioStats = "https://us-central1-canonn-api-236217.cloudfunctions.net/query/codex/biostats?id=";
         public static readonly string CanonnNews = "https://canonn.science/wp-json/wp/v2/posts";
+        public static readonly string SignalsCanonnTech = "https://signals.canonn.tech/index.html?system=";
 
         //Other urls.
         public static readonly string EDDCanonnGitHub = "https://github.com/EDDiscovery/EDDCanonn";
@@ -175,11 +176,19 @@ namespace EDDCanonn
 
 
         //Returns a filled row for the passed GridView.
-        public static DataGridViewRow CreateDataGridViewRow(DataGridView dataGridView, Object[] objects)
+        public static DataGridViewRow CreateDataGridViewRow(DataGridView dataGridView, object[] objects, string[] tooltips = null)
         {
-            DataGridViewRow dataGridViewRow = new DataGridViewRow();
-            dataGridViewRow.CreateCells(dataGridView, objects);
-            return dataGridViewRow;
+            DataGridViewRow row = new DataGridViewRow();
+            row.CreateCells(dataGridView, objects);
+
+            if (tooltips != null)
+                row.Cells.Cast<DataGridViewCell>().Take(tooltips.Length)
+                    .Select((cell, i) => (cell, tooltip: tooltips[i]))
+                    .Where(x => !string.IsNullOrWhiteSpace(x.tooltip))
+                    .ToList()
+                    .ForEach(x => x.cell.ToolTipText = x.tooltip);
+
+            return row;
         }
 
         //Frees all contents of a rowlist. Makes sense if this rows has not been passed to any controls.
