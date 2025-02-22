@@ -152,6 +152,7 @@ namespace EDDCanonn.Base
                 HttpWebRequest request = (HttpWebRequest)WebRequest.Create(fullUrl);
                 request.Method = "GET";
                 request.Accept = "application/json";
+                request.UserAgent = "EDDCanonn";
                 request.Timeout = 20000;
 
                 using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
@@ -195,6 +196,7 @@ namespace EDDCanonn.Base
                 request.Method = "POST";
                 request.ContentType = contentType;
                 request.ContentLength = Encoding.UTF8.GetByteCount(postData);
+                request.UserAgent = "EDDCanonn";
                 request.Timeout = 20000;
 
                 using (StreamWriter writer = new StreamWriter(request.GetRequestStream()))
