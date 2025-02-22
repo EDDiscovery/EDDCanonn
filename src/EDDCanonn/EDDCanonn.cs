@@ -12,12 +12,15 @@
  * governing permissions and limitations under the License.
  */
 
+using System;
 using System.Diagnostics;
 
 namespace EDDCanonn
 {
     public class EDDCanonnEDDClass
     {
+        public static readonly string V = "0.0";
+        public static bool Outdated = false;
         public static EDDDLLInterfaces.EDDDLLIF.EDDCallBacks DLLCallBack;
 
         public EDDCanonnEDDClass()
@@ -42,7 +45,7 @@ namespace EDDCanonn
                 Debug.WriteLine("Panel registration failed: Incompatible version or AddPanel is null");
             }
 
-            return "1.0.0.0"; 
+            return V; 
 
         }
 
@@ -54,8 +57,22 @@ namespace EDDCanonn
 
         public void EDDTerminate()
         {
+            Debug.WriteLine("EDDCanonn Unload");
+        }
 
-            Debug.WriteLine("CSharpDLLPanel Unload");
+        public static int CompareVersions(string v)
+        {
+            try
+            {
+                Version ver1 = new Version(V);
+                Version ver2 = new Version(v);
+                return ver1.CompareTo(ver2);
+            }
+            catch
+            {
+                Console.Error.WriteLine($"EDDCanonn: Invalid version format");
+                return 0;
+            }
         }
 
     }

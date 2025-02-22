@@ -4,11 +4,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.12.35527.113
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestHarness", "Testharness\TestHarness.csproj", "{6F777AC2-67BF-41D3-8229-69DA848787FD}"
-	ProjectSection(ProjectDependencies) = postProject
-		{E1B095CA-24C3-4690-9300-FA0153C5B71E} = {E1B095CA-24C3-4690-9300-FA0153C5B71E}
-	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Win64DLL", "Win64DLL\Win64DLL.vcxproj", "{E1B095CA-24C3-4690-9300-FA0153C5B71E}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{735A35C7-C300-43E9-A9E3-D394A143D17C}"
 	ProjectSection(SolutionItems) = preProject
@@ -19,8 +14,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EDDCanonn", "EDDCanonn\EDDC
 	ProjectSection(ProjectDependencies) = postProject
 		{003712F8-76B2-499B-B176-F4994B1D7047} = {003712F8-76B2-499B-B176-F4994B1D7047}
 	EndProjectSection
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KdTreeLib", "KdTree\KdTreeLib\KdTreeLib.csproj", "{003712F8-76B2-499B-B176-F4994B1D7047}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -43,16 +36,6 @@ Global
 		{6F777AC2-67BF-41D3-8229-69DA848787FD}.Release|x64.Build.0 = Release|Any CPU
 		{6F777AC2-67BF-41D3-8229-69DA848787FD}.Release|x86.ActiveCfg = Release|Any CPU
 		{6F777AC2-67BF-41D3-8229-69DA848787FD}.Release|x86.Build.0 = Release|Any CPU
-		{E1B095CA-24C3-4690-9300-FA0153C5B71E}.Debug|Any CPU.ActiveCfg = Debug|Win32
-		{E1B095CA-24C3-4690-9300-FA0153C5B71E}.Debug|x64.ActiveCfg = Debug|x64
-		{E1B095CA-24C3-4690-9300-FA0153C5B71E}.Debug|x64.Build.0 = Debug|x64
-		{E1B095CA-24C3-4690-9300-FA0153C5B71E}.Debug|x86.ActiveCfg = Debug|Win32
-		{E1B095CA-24C3-4690-9300-FA0153C5B71E}.Debug|x86.Build.0 = Debug|Win32
-		{E1B095CA-24C3-4690-9300-FA0153C5B71E}.Release|Any CPU.ActiveCfg = Release|Win32
-		{E1B095CA-24C3-4690-9300-FA0153C5B71E}.Release|x64.ActiveCfg = Release|x64
-		{E1B095CA-24C3-4690-9300-FA0153C5B71E}.Release|x64.Build.0 = Release|x64
-		{E1B095CA-24C3-4690-9300-FA0153C5B71E}.Release|x86.ActiveCfg = Release|Win32
-		{E1B095CA-24C3-4690-9300-FA0153C5B71E}.Release|x86.Build.0 = Release|Win32
 		{4CFD7517-ED23-4B4D-94BD-5DE7BF75F0E3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{4CFD7517-ED23-4B4D-94BD-5DE7BF75F0E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4CFD7517-ED23-4B4D-94BD-5DE7BF75F0E3}.Debug|x64.ActiveCfg = Debug|Any CPU

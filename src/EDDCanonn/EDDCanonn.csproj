@@ -34,10 +34,6 @@
     <Reference Include="EDDDLLInterfaces">
       <HintPath>..\EDDDLLInterfaces\EDDDLLInterfaces.dll</HintPath>
     </Reference>
-    <Reference Include="KdTreeLib, Version=1.4.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\KdTree\KdTreeLib\bin\Debug\net45\KdTreeLib.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
@@ -96,6 +92,19 @@
     </Compile>
     <Compile Include="extendedcontrols\TabStyleCustom.cs" />
     <Compile Include="extendedcontrols\Win32Constants.cs" />
+    <Compile Include="KdTree\HyperRect.cs" />
+    <Compile Include="KdTree\IKdTree.cs" />
+    <Compile Include="KdTree\IPriorityQueue.cs" />
+    <Compile Include="KdTree\KdTree.cs" />
+    <Compile Include="KdTree\KdTreeNode.cs" />
+    <Compile Include="KdTree\Math\DoubleMath.cs" />
+    <Compile Include="KdTree\Math\FloatMath.cs" />
+    <Compile Include="KdTree\Math\GeoMath.cs" />
+    <Compile Include="KdTree\Math\GeoUtils.cs" />
+    <Compile Include="KdTree\Math\ITypeMath.cs" />
+    <Compile Include="KdTree\Math\TypeMath.cs" />
+    <Compile Include="KdTree\NearestNeighbourList.cs" />
+    <Compile Include="KdTree\PriorityQueue.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -130,17 +139,27 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\other.png" />
-    <Content Include="Resources\t.txt" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="Resources\tourist.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\guardian.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\cloud.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\anomaly.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\update.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>
 copy EDDCanonn*.dll ..\..\..\appdata
 copy EDDCanonn*.* c:\users\%25USERNAME%25\appdata\local\eddiscovery\dll
-
-copy KdTreeLib*.dll ..\..\..\appdata
-copy KdTreeLib*.* c:\users\%25USERNAME%25\appdata\local\eddiscovery\dll
 	</PostBuildEvent>
   </PropertyGroup>
 </Project>
