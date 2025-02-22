@@ -26,7 +26,7 @@ namespace EDDCanonn.Base
 
         public Patrols()
         {
-            CategoryTrees["all"] = new KdTree<double, Patrol>(3, new DoubleMath(),AddDuplicateBehavior.Update);
+            CategoryTrees["All"] = new KdTree<double, Patrol>(3, new DoubleMath(),AddDuplicateBehavior.Update);
         }
 
         private readonly object _addLock = new object();
@@ -39,7 +39,7 @@ namespace EDDCanonn.Base
                 CategoryTrees[category] = tree;
 
                 foreach (KdTreeNode<double, Patrol> node in tree)
-                    CategoryTrees["all"].Add(node.Point, node.Value);
+                    CategoryTrees["All"].Add(node.Point, node.Value);
             }
         }
 
