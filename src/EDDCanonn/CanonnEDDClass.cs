@@ -18,12 +18,12 @@ using System.Reflection;
 
 namespace EDDCanonnPanel
 {
-    public class EDDCanonnEDDClass
+    public class CanonnEDDClass
     {
         public static readonly Version V = Assembly.GetExecutingAssembly().GetName().Version;
         public static EDDDLLInterfaces.EDDDLLIF.EDDCallBacks DLLCallBack;
 
-        public EDDCanonnEDDClass()
+        public CanonnEDDClass()
         {
             Debug.WriteLine("EDDCanonn Made DLL instance");
         }

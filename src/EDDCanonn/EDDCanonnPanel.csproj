@@ -55,7 +55,7 @@
     <Compile Include="Diagnostics\WhiteListTest.cs" />
     <Compile Include="Base\WhitelistData.cs" />
     <Compile Include="CanonnHelper.cs" />
-    <Compile Include="EDDCanonn.cs" />
+    <Compile Include="CanonnEDDClass.cs" />
     <Compile Include="EDDCanonnUserControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -154,6 +154,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\update.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Util\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
