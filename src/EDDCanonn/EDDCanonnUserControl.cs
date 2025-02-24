@@ -206,7 +206,7 @@ namespace EDDCanonn
                             ExtComboBoxPatrol.Enabled = true; ExtComboBoxPatrol.SelectedIndex = 0;
                             ExtComboBoxRange.Enabled = true; ExtComboBoxRange.SelectedIndex = 2;
                         });
-                        UpdatePatrols();
+                        patrolToolStripLock = false;
                     })
                 );
             }
@@ -339,7 +339,7 @@ namespace EDDCanonn
         }
 
         private readonly object _patrolLock = new object();
-        private bool patrolSwitchLock = true;
+        private bool patrolToolStripLock = true;
         private void UpdatePatrols()
         {
             dataHandler.StartTaskAsync(
@@ -399,7 +399,7 @@ namespace EDDCanonn
                     {
                         SafeInvoke(() =>
                         {
-                            patrolSwitchLock = false;
+                            patrolToolStripLock = false;
                         });
                     })
             );
@@ -416,9 +416,9 @@ namespace EDDCanonn
 
         private void toolStripPatrol_IndexChanged(object sender, EventArgs e)
         {
-            if(patrolSwitchLock)
+            if(patrolToolStripLock)
                 return;
-            else patrolSwitchLock = true;
+            else patrolToolStripLock = true;
             UpdatePatrols();
         }
 
