@@ -268,7 +268,7 @@ namespace EDDCanonn
             return records;
         }
 
-        //Attempts to open a given URL in the default web browser.
+        // Attempts to open a given URL in the default web browser.
         public static void OpenUrl(string url)
         {
             if (string.IsNullOrWhiteSpace(url))
@@ -276,18 +276,13 @@ namespace EDDCanonn
 
             try
             {
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                ProcessStartInfo psi = new ProcessStartInfo
                 {
-                    Process.Start(new ProcessStartInfo("cmd", $"/c start {url.Replace("&", "^&")}")
-                    {
-                        CreateNoWindow = true
-                    });
-                }
-                else
-                {
-                    // Linux/macOS support (if needed)
-                    Process.Start("xdg-open", url);
-                }
+                    FileName = url,
+                    UseShellExecute = true
+                };
+
+                Process.Start(psi);
             }
             catch (Exception ex)
             {
@@ -296,6 +291,5 @@ namespace EDDCanonn
                 CanonnLogging.Instance.LogToFile(error);
             }
         }
-
     }
 }
