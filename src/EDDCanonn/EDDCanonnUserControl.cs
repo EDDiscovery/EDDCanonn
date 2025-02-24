@@ -27,7 +27,6 @@ using System.Collections.Concurrent;
 using System.Threading;
 using System.Text.RegularExpressions;
 using System.Net;
-using System.Xml.Linq;
 
 namespace EDDCanonn
 {
@@ -340,10 +339,9 @@ namespace EDDCanonn
         }
 
         private readonly object _patrolLock = new object();
-        private bool patrolSwitchLock = false;
+        private bool patrolSwitchLock = true;
         private void UpdatePatrols()
         {
-            patrolSwitchLock = true;
             dataHandler.StartTaskAsync(
                 (token) =>
                 {
@@ -362,8 +360,11 @@ namespace EDDCanonn
                         SafeInvoke(() =>
                         {
                             type = ExtComboBoxPatrol.SelectedItem?.ToString() ?? "";
-                            range = ExtComboBoxRange.SelectedIndex <= CanonnHelper.PatrolRanges.Length - 1 ? CanonnHelper.PatrolRanges[ExtComboBoxRange.SelectedIndex] : CanonnHelper.PatrolRanges[0];
+                            range = ExtComboBoxRange.HasChildren ? (ExtComboBoxRange.SelectedIndex <= CanonnHelper.PatrolRanges.Length - 1 ? CanonnHelper.PatrolRanges[ExtComboBoxRange.SelectedIndex] : CanonnHelper.PatrolRanges[0]) : -1;
                         });
+
+                        if(string.IsNullOrEmpty(type) || range == -1)
+                            return;
 
                         List<(string category, Patrol patrol, double distance)> patrolList = patrols.FindPatrolsInRange(type, system.X, system.Y, system.Z, range);
 
@@ -379,18 +380,24 @@ namespace EDDCanonn
 
                             result.Add(row);
                         }
-
                         UpdateDataGridPatrol(result); // Update UI with new patrol list.
-                        patrolSwitchLock = false;
                     }
                 },
-               ex =>
-               {
-                   string error = $"EDDCanonn: Error during UpdatePatrols Task: {ex.Message}";
-                   Console.Error.WriteLine(error);
-                   CanonnLogging.Instance.LogToFile(error);
-               },
-               "UpdatePatrols"
+            ex =>
+            {
+                string error = $"EDDCanonn: Error during UpdatePatrols Task: {ex.Message}";
+                Console.Error.WriteLine(error);
+                CanonnLogging.Instance.LogToFile(error);
+            },
+                "UpdatePatrols",
+                new Action(
+                    () => //We are still in the 'UpdatePatrolsThread' here. We forward this action as 'ContinueWith' -> ExecuteSynchronously.
+                    {
+                        SafeInvoke(() =>
+                        {
+                            patrolSwitchLock = false;
+                        });
+                    })
             );
         }
 
@@ -407,6 +414,7 @@ namespace EDDCanonn
         {
             if(patrolSwitchLock)
                 return;
+            else patrolSwitchLock = true;
             UpdatePatrols();
         }
 
