@@ -22,7 +22,7 @@ using System.Threading;
 using System.Windows.Forms;
 using EDDCanonn.Base;
 using QuickJSON;
-namespace EDDCanonn
+namespace EDDCanonnPanel
 {
     //Class for outsourced help functions.
     public static class CanonnHelper

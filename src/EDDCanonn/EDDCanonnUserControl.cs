@@ -27,8 +27,9 @@ using System.Collections.Concurrent;
 using System.Threading;
 using System.Text.RegularExpressions;
 using System.Net;
+using EDDCanonnPanel.Base;
 
-namespace EDDCanonn
+namespace EDDCanonnPanel
 {
     partial class EDDCanonnUserControl : UserControl, IEDDPanelExtension
     {
@@ -1607,7 +1608,14 @@ namespace EDDCanonn
 
                 if (IsEventValid(eventId, je.json)) // Send event to canonn if valid.
                 {
-                    Payload.BuildPayload(je, GetStatusJson());
+                    string msg = "\n" + Payload.BuildPayload(je, GetStatusJson()).ToString() + "\n";
+                    Console.Error.WriteLine(msg);
+                    CanonnLogging.Instance.LogToFile(msg);
+
+                    SafeBeginInvoke(() =>
+                    {
+                        DebugLog.AppendText(msg);
+                    });
                 }
 
                 while (!activated) // Wait until a 'DataResult' has been completed.

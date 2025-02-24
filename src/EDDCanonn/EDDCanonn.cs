@@ -16,7 +16,7 @@ using System;
 using System.Diagnostics;
 using System.Reflection;
 
-namespace EDDCanonn
+namespace EDDCanonnPanel
 {
     public class EDDCanonnEDDClass
     {
@@ -51,7 +51,7 @@ namespace EDDCanonn
 
         public void EDDDataResult(object requesttag, object usertag, string data)
         {
-            EDDCanonn.EDDCanonnUserControl uc = usertag as EDDCanonn.EDDCanonnUserControl;
+            EDDCanonnPanel.EDDCanonnUserControl uc = usertag as EDDCanonnPanel.EDDCanonnUserControl;
             uc.DataResult(requesttag, data);
         }
 

@@ -17,7 +17,7 @@ using System.Windows.Forms;
 using ExtendedControls;
 using QuickJSON;
 
-namespace EDDCanonn
+namespace EDDCanonnPanel
 {
     partial class EDDCanonnUserControl
     {
@@ -1222,7 +1222,7 @@ namespace EDDCanonn
             // 
             // pictureBoxEDD
             // 
-            this.pictureBoxEDD.Image = global::EDDCanonn.Properties.Resources.edd;
+            this.pictureBoxEDD.Image = global::EDDCanonnPanel.Properties.Resources.edd;
             this.pictureBoxEDD.Location = new System.Drawing.Point(303, 96);
             this.pictureBoxEDD.Name = "pictureBoxEDD";
             this.pictureBoxEDD.Size = new System.Drawing.Size(44, 28);

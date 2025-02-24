@@ -7,8 +7,8 @@
     <ProjectGuid>{4CFD7517-ED23-4B4D-94BD-5DE7BF75F0E3}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>EDDCanonn</RootNamespace>
-    <AssemblyName>EDDCanonn</AssemblyName>
+    <RootNamespace>EDDCanonnPanel</RootNamespace>
+    <AssemblyName>EDDCanonnPanel</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
@@ -158,8 +158,8 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>
-copy EDDCanonn*.dll ..\..\..\appdata
-copy EDDCanonn*.* c:\users\%25USERNAME%25\appdata\local\eddiscovery\dll
+copy EDDCanonnPanel*.dll ..\..\..\appdata
+copy EDDCanonnPanel*.* c:\users\%25USERNAME%25\appdata\local\eddiscovery\dll
 	</PostBuildEvent>
   </PropertyGroup>
 </Project>
