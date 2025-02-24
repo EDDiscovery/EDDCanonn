@@ -360,7 +360,11 @@ namespace EDDCanonn
                         SafeInvoke(() =>
                         {
                             type = ExtComboBoxPatrol.SelectedItem?.ToString() ?? "";
-                            range = ExtComboBoxRange.HasChildren ? (ExtComboBoxRange.SelectedIndex <= CanonnHelper.PatrolRanges.Length - 1 ? CanonnHelper.PatrolRanges[ExtComboBoxRange.SelectedIndex] : CanonnHelper.PatrolRanges[0]) : -1;
+                            range = ExtComboBoxRange.HasChildren && CanonnHelper.PatrolRanges.Length > 0
+                                ? (ExtComboBoxRange.SelectedIndex >= 0 && ExtComboBoxRange.SelectedIndex < CanonnHelper.PatrolRanges.Length
+                                    ? CanonnHelper.PatrolRanges[ExtComboBoxRange.SelectedIndex]
+                                    : CanonnHelper.PatrolRanges[0])
+                                : -1;
                         });
 
                         if(string.IsNullOrEmpty(type) || range == -1)
