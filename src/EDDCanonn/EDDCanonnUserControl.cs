@@ -1424,9 +1424,6 @@ namespace EDDCanonn
                     dataGridViewRing.Rows.Clear();
                     dataGridViewBio.Rows.Clear();
 
-                    if (EDDCanonnEDDClass.Outdated)
-                        dataGridViewData.Rows.Add(CanonnHelper.CreateDataGridViewRow(dataGridViewData, new object[] { "This EDDCanonn version is outdated. Update via the add-in panel.", Properties.Resources.update }));
-
                     List<DataGridViewRow> ringRows = CollectRingData(system);
                     if (ringRows?.Count > 0)
                     {

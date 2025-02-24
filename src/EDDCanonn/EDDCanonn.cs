@@ -14,13 +14,13 @@
 
 using System;
 using System.Diagnostics;
+using System.Reflection;
 
 namespace EDDCanonn
 {
     public class EDDCanonnEDDClass
     {
-        public static readonly string V = "0.0";
-        public static bool Outdated = false;
+        public static readonly Version V = Assembly.GetExecutingAssembly().GetName().Version;
         public static EDDDLLInterfaces.EDDDLLIF.EDDCallBacks DLLCallBack;
 
         public EDDCanonnEDDClass()
@@ -45,7 +45,7 @@ namespace EDDCanonn
                 Debug.WriteLine("Panel registration failed: Incompatible version or AddPanel is null");
             }
 
-            return V; 
+            return V.ToString(); 
 
         }
 
@@ -59,21 +59,5 @@ namespace EDDCanonn
         {
             Debug.WriteLine("EDDCanonn Unload");
         }
-
-        public static int CompareVersions(string v)
-        {
-            try
-            {
-                Version ver1 = new Version(V);
-                Version ver2 = new Version(v);
-                return ver1.CompareTo(ver2);
-            }
-            catch
-            {
-                Console.Error.WriteLine($"EDDCanonn: Invalid version format");
-                return 0;
-            }
-        }
-
     }
 }
