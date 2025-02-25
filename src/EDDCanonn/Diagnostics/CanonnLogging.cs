@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace EDDCanonn.Base
+namespace EDDCanonnPanel.Base
 {
     public sealed class CanonnLogging
     {
@@ -20,6 +22,27 @@ namespace EDDCanonn.Base
                 if (canonnLogging._logTask == null || canonnLogging._logTask.IsCompleted)
                     canonnLogging.StartLogging();
                 return _instance.Value;
+            }
+        }
+
+        private void CleanLogs(int maxLogs)
+        {
+            try
+            {
+                List <FileInfo> logFiles = Directory.GetFiles(_logDirectory, "CanonnLog_*.log")
+                                        .Select(f => new FileInfo(f))
+                                        .OrderBy(f => f.CreationTime) 
+                                        .ToList();
+
+                while (logFiles.Count > maxLogs)
+                {
+                    logFiles[0].Delete(); 
+                    logFiles.RemoveAt(0);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Logging Error: {ex.Message}");
             }
         }
 
@@ -43,6 +66,8 @@ namespace EDDCanonn.Base
             //Log directory setup. This will be the default location.
             _logDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "EDDiscovery", "AddonFiles", "Canonn", "Log");
             Directory.CreateDirectory(_logDirectory);
+
+            CleanLogs(10);
 
             //Creating a timestamped log file. Avoids overwriting.
             string timestamp = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
