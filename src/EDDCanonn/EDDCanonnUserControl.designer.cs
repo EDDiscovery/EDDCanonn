@@ -1258,9 +1258,9 @@ namespace EDDCanonnPanel
             this.labelTest.AutoSize = true;
             this.labelTest.Location = new System.Drawing.Point(3, 71);
             this.labelTest.Name = "labelTest";
-            this.labelTest.Size = new System.Drawing.Size(138, 13);
+            this.labelTest.Size = new System.Drawing.Size(238, 13);
             this.labelTest.TabIndex = 4;
-            this.labelTest.Text = "Tested by: Eahlstan, Jugom";
+            this.labelTest.Text = "Tested by: Eahlstan, Jugom, NYZCHF, MentalFS";
             this.labelTest.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // labelSpecial

@@ -19,7 +19,7 @@ using System.Drawing;
 using System.Collections.Generic;
 using QuickJSON;
 using System.Linq;
-using EDDCanonn.Base;
+using EDDCanonnPanel.Base;
 using KdTree;
 using KdTree.Math;
 using System.Threading.Tasks;
@@ -27,7 +27,7 @@ using System.Collections.Concurrent;
 using System.Threading;
 using System.Text.RegularExpressions;
 using System.Net;
-using EDDCanonnPanel.Base;
+
 
 namespace EDDCanonnPanel
 {
@@ -64,7 +64,7 @@ namespace EDDCanonnPanel
                 else
                     CanonnHelper.InstanceCount++;
 
-                linkLabelEDDCanonn.Text = "EDDCanonn v" + EDDCanonnEDDClass.V;
+                linkLabelEDDCanonn.Text = "EDDCanonn v" + CanonnEDDClass.V;
 
                 InitializeNews();
                 InitializeWhitelist();
@@ -860,7 +860,7 @@ namespace EDDCanonnPanel
             {
                 if (systemData.Bodys == null)
                 {
-                    systemData.Bodys = new Dictionary<int, Body>();
+                    systemData.Bodys = new SortedDictionary<int, Body>();
                 }
 
                 int bodyId = CanonnHelper.GetValueOrDefault(eventData["BodyID"] ?? null, -1);
@@ -945,7 +945,7 @@ namespace EDDCanonnPanel
             {
                 if (systemData.Bodys == null)
                 {
-                    systemData.Bodys = new Dictionary<int, Body>();
+                    systemData.Bodys = new SortedDictionary<int, Body>();
                 }
 
                 int bodyId = CanonnHelper.GetValueOrDefault(eventData["Body"] ?? null, -1);
@@ -971,7 +971,8 @@ namespace EDDCanonnPanel
                 if (eventData["Genus"] == null)
                     return;
 
-                if (CanonnHelper.ContainsKeyValuePair(body.ScanData.Organics, "Genus", eventData["Genus"]?.Value?.ToString()))
+                if (CanonnHelper.ContainsKeyValuePair(body.ScanData.Organics, "Genus", eventData["Genus"]?.Value?.ToString())
+                    || CanonnHelper.ContainsKeyValuePair(body.ScanData.Organics, null, eventData["Genus"]?.Value?.ToString()))
                     return;
 
                 body.ScanData.Organics.Add(CanonnHelper.GetUniqueEntry(eventData, body.ScanData.Organics));
@@ -1048,7 +1049,7 @@ namespace EDDCanonnPanel
 
                 if (systemData.Bodys == null)
                 {
-                    systemData.Bodys = new Dictionary<int, Body>();
+                    systemData.Bodys = new SortedDictionary<int, Body>();
                 }
 
                 if (systemData.Bodys.ContainsKey(bodyId))
@@ -1405,7 +1406,7 @@ namespace EDDCanonnPanel
                     textBoxBodyCount.Clear();
 
                     textBoxSystem.AppendText(system.Name ?? "none");
-                    textBoxBodyCount.AppendText(system.CountBodysFilteredByNodeType(new string[] { "Planet", "Star" }) + " / " + system.BodyCount);
+                    textBoxBodyCount.AppendText(system.CountBodysFilteredByNodeType(new string[] { "Planet", "Star" }) + " / " + (system.BodyCount == -1 ? "?" : system.BodyCount.ToString()));
                 }
                 catch (Exception ex)
                 {
@@ -1608,7 +1609,8 @@ namespace EDDCanonnPanel
 
                 if (IsEventValid(eventId, je.json)) // Send event to canonn if valid.
                 {
-                    string msg = "\n" + Payload.BuildPayload(je, GetStatusJson()).ToString() + "\n";
+                    string msg = "\n Build payload for: " + eventId + 
+                                 "\n" + Payload.BuildPayload(je, GetStatusJson()).ToString(true, "  ") + "\n";
                     Console.Error.WriteLine(msg);
                     CanonnLogging.Instance.LogToFile(msg);
 
@@ -1690,7 +1692,7 @@ namespace EDDCanonnPanel
 
         public void Initialise(EDDPanelCallbacks callbacks, int displayid, string themeasjson, string configuration)
         {
-            DLLCallBack = EDDCanonnEDDClass.DLLCallBack;
+            DLLCallBack = CanonnEDDClass.DLLCallBack;
             PanelCallBack = callbacks;
             ThemeChanged(themeasjson);
             StartUp();
@@ -1824,7 +1826,8 @@ namespace EDDCanonnPanel
         private void LogSystem_Click(object sender, EventArgs e)
         {
             SystemData system = DeepCopySystemData();
-            string mg = "\n" + system?.ToString() ?? "none" + "\n";
+            string mg = "\n LogSystem:" +
+                "\n" + system?.ToString() ?? "none" + "\n";
             DebugLog.AppendText(mg);
             CanonnLogging.Instance.LogToFile(mg);
         }
