@@ -20,7 +20,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Forms;
-using EDDCanonn.Base;
+using EDDCanonnPanel.Base;
 using QuickJSON;
 namespace EDDCanonnPanel
 {
