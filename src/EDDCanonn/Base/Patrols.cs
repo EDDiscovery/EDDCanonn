@@ -18,7 +18,7 @@ using System.Linq;
 using KdTree;
 using KdTree.Math;
 
-namespace EDDCanonn.Base
+namespace EDDCanonnPanel.Base
 {
     public class Patrols
     {

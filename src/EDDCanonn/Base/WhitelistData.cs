@@ -14,7 +14,7 @@
 
 using System.Collections.Generic;
 
-namespace EDDCanonn.Base
+namespace EDDCanonnPanel.Base
 {
     public class WhitelistData
     {

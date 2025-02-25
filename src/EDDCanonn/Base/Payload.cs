@@ -44,7 +44,7 @@ namespace EDDCanonnPanel.Base
                 ["systemName"] = je.systemname,
                 ["systemAddress"] = je.systemaddress,
                 ["systemCoordinates"] = JArray.FromObject(new double[] { je.x, je.y, je.z }),
-                ["clientVersion"] = "EDDCanonnClientV" + EDDCanonnEDDClass.V.ToString(),
+                ["clientVersion"] = "EDDCanonnClientV" + CanonnEDDClass.V.ToString(),
                 ["isBeta"] = je.beta,
                 ["platform"] = Platform,
                 ["odyssey"] = je.odyssey
