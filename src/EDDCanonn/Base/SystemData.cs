@@ -17,7 +17,7 @@ using System.Collections.Generic;
 using System.Linq;
 using QuickJSON;
 
-namespace EDDCanonn.Base
+namespace EDDCanonnPanel.Base
 {
     public class SystemData
     {
@@ -35,7 +35,7 @@ namespace EDDCanonn.Base
 
             if (data.Bodys != null)
             {
-                Bodys = new Dictionary<int, Body>();
+                Bodys = new SortedDictionary<int, Body>();
                 foreach (KeyValuePair<int,Body> kvp in data.Bodys)
                 {
                     Bodys[kvp.Key] = new Body(kvp.Value);
@@ -52,7 +52,7 @@ namespace EDDCanonn.Base
         public double Y { get; set; } = 0.0;
         public double Z { get; set; } = 0.0;
         public long SystemAddress { get; set; } = 0;
-        public Dictionary<int,Body> Bodys { get; set; } = null;
+        public SortedDictionary<int, Body> Bodys { get; set; } = null;
 
         //Global
         public int BodyCount { get; set; } = -1;
