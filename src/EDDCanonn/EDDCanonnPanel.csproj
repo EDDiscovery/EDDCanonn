@@ -50,11 +50,11 @@
     <Compile Include="Base\ActionDataHandler.cs" />
     <Compile Include="Diagnostics\CanonnLogging.cs" />
     <Compile Include="Base\Patrols.cs" />
-    <Compile Include="Base\Payload.cs" />
+    <Compile Include="Utility\Payload.cs" />
     <Compile Include="Base\SystemData.cs" />
     <Compile Include="Diagnostics\WhiteListTest.cs" />
     <Compile Include="Base\WhitelistData.cs" />
-    <Compile Include="Util\CanonnHelper.cs" />
+    <Compile Include="Utility\CanonnUtil.cs" />
     <Compile Include="CanonnEDDClass.cs" />
     <Compile Include="EDDCanonnUserControl.cs">
       <SubType>UserControl</SubType>
@@ -112,6 +112,8 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="QuickJson\QuickJSON.cs" />
+    <Compile Include="Utility\LinkUtil.cs" />
+    <Compile Include="Utility\DataUtil.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="EDDCanonnUserControl.resx">
@@ -155,7 +157,6 @@
   <ItemGroup>
     <None Include="Resources\update.png" />
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>

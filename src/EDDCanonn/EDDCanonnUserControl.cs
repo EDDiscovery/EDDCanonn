@@ -27,6 +27,7 @@ using System.Collections.Concurrent;
 using System.Threading;
 using System.Text.RegularExpressions;
 using System.Net;
+using EDDCanonnPanel.Utility;
 
 
 namespace EDDCanonnPanel
@@ -50,19 +51,20 @@ namespace EDDCanonnPanel
 
         private void StartUp() //Triggered by panel Initialize.
         {
+
             NotifyMainFields("Start Up...");
             try
             {
-                if (CanonnHelper.InstanceCount > 0)
+                if (CanonnUtil.InstanceCount > 0)
                 {
-                    CanonnHelper.InstanceCount++;
+                    CanonnUtil.InstanceCount++;
                     //Abort if a Canonn Panel already exists.
                     Abort("Only one Canonn Panel instance can be active. " +
                     "Use the main instance or close all other instances and restart EDD."); 
                     return;
                 }
                 else
-                    CanonnHelper.InstanceCount++;
+                    CanonnUtil.InstanceCount++;
 
                 linkLabelEDDCanonn.Text = "EDDCanonn v" + CanonnEDDClass.V;
 
@@ -121,7 +123,7 @@ namespace EDDCanonnPanel
 
                 ExtComboBoxPatrol.Items.Add("All"); //The 'all' KdTree-Dictionary has already been set in “Patrols.cs”.
 
-                ExtComboBoxRange.Items.AddRange(CanonnHelper.PatrolRanges.Select(x => x.ToString() + " LY").ToArray());
+                ExtComboBoxRange.Items.AddRange(DataUtil.PatrolRanges.Select(x => x.ToString() + " LY").ToArray());
 
                 ConcurrentBag<Task> _tasks = new ConcurrentBag<Task>(); //We have to make sure that all workers are finished before we update the patrols.
 
@@ -130,7 +132,7 @@ namespace EDDCanonnPanel
                 (token) =>
                 {
                     //Fetch information about available patrols.
-                    List<Dictionary<string, string>> records = CanonnHelper.ParseTsv(dataHandler.FetchData(CanonnHelper.PatrolUrl).response);
+                    List<Dictionary<string, string>> records = DataUtil.ParseTsv(dataHandler.FetchData(LinkUtil.PatrolUrl).response);
                     foreach (Dictionary<string, string> record in records)
                     {
                         token.ThrowIfCancellationRequested(); //We abort here if a cancellation was requested.
@@ -227,7 +229,7 @@ namespace EDDCanonnPanel
                 KdTree<double, Patrol> kdT = new KdTree<double, Patrol>(3, new DoubleMath(), AddDuplicateBehavior.Update);
 
                 //Fetch TSV data and parse it into a list of dictionaries.
-                List<Dictionary<string, string>> records = CanonnHelper.ParseTsv(dataHandler.FetchData(url).response);
+                List<Dictionary<string, string>> records = DataUtil.ParseTsv(dataHandler.FetchData(url).response);
 
                 foreach (Dictionary<string, string> record in records)
                 {
@@ -240,12 +242,12 @@ namespace EDDCanonnPanel
 
                         string system = record.TryGetValue("System", out string systemValue) ? systemValue : string.Empty;
 
-                        double x = CanonnHelper.GetValueOrDefault(new JToken(record["X"] ?? null),
-                            CanonnHelper.PositionFallback);
-                        double y = CanonnHelper.GetValueOrDefault(new JToken(record["Y"] ?? null),
-                            CanonnHelper.PositionFallback);
-                        double z = CanonnHelper.GetValueOrDefault(new JToken(record["Z"] ?? null),
-                            CanonnHelper.PositionFallback);
+                        double x = CanonnUtil.GetValueOrDefault(new JToken(record["X"] ?? null),
+                            DataUtil.PositionFallback);
+                        double y = CanonnUtil.GetValueOrDefault(new JToken(record["Y"] ?? null),
+                            DataUtil.PositionFallback);
+                        double z = CanonnUtil.GetValueOrDefault(new JToken(record["Z"] ?? null),
+                            DataUtil.PositionFallback);
 
                         string instructions = record.TryGetValue("Instructions", out string instructionsValue) ? instructionsValue : "none";
                         string urlp = record.TryGetValue("Url", out string urlValue) ? urlValue : string.Empty;
@@ -301,12 +303,12 @@ namespace EDDCanonnPanel
 
                         string system = record["system"]?.Value?.ToString() ?? string.Empty;
 
-                        double x = CanonnHelper.GetValueOrDefault(record["x"] ?? null,
-                            CanonnHelper.PositionFallback);
-                        double y = CanonnHelper.GetValueOrDefault(record["y"] ?? null,
-                            CanonnHelper.PositionFallback);
-                        double z = CanonnHelper.GetValueOrDefault(record["z"] ?? null,
-                            CanonnHelper.PositionFallback);
+                        double x = CanonnUtil.GetValueOrDefault(record["x"] ?? null,
+                            DataUtil.PositionFallback);
+                        double y = CanonnUtil.GetValueOrDefault(record["y"] ?? null,
+                            DataUtil.PositionFallback);
+                        double z = CanonnUtil.GetValueOrDefault(record["z"] ?? null,
+                            DataUtil.PositionFallback);
 
                         string instructions = record["instructions"]?.Value?.ToString() ?? "none";
                         string urlp = record["url"]?.Value?.ToString() ?? string.Empty;
@@ -361,10 +363,10 @@ namespace EDDCanonnPanel
                         SafeInvoke(() =>
                         {
                             type = ExtComboBoxPatrol.SelectedItem?.ToString() ?? "";
-                            range = ExtComboBoxRange.HasChildren && CanonnHelper.PatrolRanges.Length > 0
-                                ? (ExtComboBoxRange.SelectedIndex >= 0 && ExtComboBoxRange.SelectedIndex < CanonnHelper.PatrolRanges.Length
-                                    ? CanonnHelper.PatrolRanges[ExtComboBoxRange.SelectedIndex]
-                                    : CanonnHelper.PatrolRanges[0])
+                            range = ExtComboBoxRange.HasChildren && DataUtil.PatrolRanges.Length > 0
+                                ? (ExtComboBoxRange.SelectedIndex >= 0 && ExtComboBoxRange.SelectedIndex < DataUtil.PatrolRanges.Length
+                                    ? DataUtil.PatrolRanges[ExtComboBoxRange.SelectedIndex]
+                                    : DataUtil.PatrolRanges[0])
                                 : -1;
                         });
 
@@ -461,7 +463,7 @@ namespace EDDCanonnPanel
             object cellValue = selectedRow.Cells["PatrolUrl"].Value;
             if (cellValue == null) return;
 
-            CanonnHelper.OpenUrl(cellValue.ToString());
+            LinkUtil.OpenUrl(cellValue.ToString());
         }
 
 
@@ -542,7 +544,7 @@ namespace EDDCanonnPanel
             {
                 try
                 {
-                    JArray whitelistItems = dataHandler.FetchData(CanonnHelper.CanonnPostUrl + "Whitelist").response.JSONParseArray();
+                    JArray whitelistItems = dataHandler.FetchData(LinkUtil.CanonnPostUrl + "Whitelist").response.JSONParseArray();
                     if (whitelistItems == null || whitelistItems.Count == 0)
                         throw new Exception("EDDCanonn: Whitelist is null");
 
@@ -791,9 +793,9 @@ namespace EDDCanonnPanel
 
                     if (eventData["StarPos"] != null)
                     {
-                        systemData.X = CanonnHelper.GetValueOrDefault(eventData["StarPos"][0] ?? null, CanonnHelper.PositionFallback);
-                        systemData.Y = CanonnHelper.GetValueOrDefault(eventData["StarPos"][1] ?? null, CanonnHelper.PositionFallback);
-                        systemData.Z = CanonnHelper.GetValueOrDefault(eventData["StarPos"][2] ?? null, CanonnHelper.PositionFallback);
+                        systemData.X = CanonnUtil.GetValueOrDefault(eventData["StarPos"][0] ?? null, DataUtil.PositionFallback);
+                        systemData.Y = CanonnUtil.GetValueOrDefault(eventData["StarPos"][1] ?? null, DataUtil.PositionFallback);
+                        systemData.Z = CanonnUtil.GetValueOrDefault(eventData["StarPos"][2] ?? null, DataUtil.PositionFallback);
                     }
                 }
             }
@@ -818,10 +820,10 @@ namespace EDDCanonnPanel
                     BodyID = body.BodyID,
 
                     //List<JObject>  
-                    Signals = CanonnHelper.GetJObjectList(eventData, "Signals"),
-                    Rings = CanonnHelper.GetJObjectList(eventData, "Rings"),
-                    Organics = CanonnHelper.GetJObjectList(eventData, "Organics"),
-                    Genuses = CanonnHelper.GetJObjectList(eventData, "Genuses"),
+                    Signals = CanonnUtil.GetJObjectList(eventData, "Signals"),
+                    Rings = CanonnUtil.GetJObjectList(eventData, "Rings"),
+                    Organics = CanonnUtil.GetJObjectList(eventData, "Organics"),
+                    Genuses = CanonnUtil.GetJObjectList(eventData, "Genuses"),
                 };
             }
             else
@@ -830,11 +832,11 @@ namespace EDDCanonnPanel
                 body.ScanData.BodyID = body.BodyID;
 
                 //List<JObject>  
-                body.ScanData.Signals = CanonnHelper.GetUniqueEntries(eventData, "Signals", body.ScanData.Signals);
-                body.ScanData.Rings = CanonnHelper.GetUniqueEntries(eventData, "Rings", body.ScanData.Rings, "Belt");
-                body.ScanData.Organics = CanonnHelper.GetUniqueEntries(eventData, "Organics", body.ScanData.Organics);
-                body.ScanData.Genuses = CanonnHelper.GetUniqueEntries(eventData, "Genuses", body.ScanData.Genuses);
-                body.ScanData.SurfaceFeatures = CanonnHelper.GetUniqueEntries(eventData, "SurfaceFeatures", body.ScanData.SurfaceFeatures);
+                body.ScanData.Signals = CanonnUtil.GetUniqueEntries(eventData, "Signals", body.ScanData.Signals);
+                body.ScanData.Rings = CanonnUtil.GetUniqueEntries(eventData, "Rings", body.ScanData.Rings);
+                body.ScanData.Organics = CanonnUtil.GetUniqueEntries(eventData, "Organics", body.ScanData.Organics);
+                body.ScanData.Genuses = CanonnUtil.GetUniqueEntries(eventData, "Genuses", body.ScanData.Genuses);
+                body.ScanData.SurfaceFeatures = CanonnUtil.GetUniqueEntries(eventData, "SurfaceFeatures", body.ScanData.SurfaceFeatures);
             }
         }
 
@@ -863,7 +865,7 @@ namespace EDDCanonnPanel
                     systemData.Bodys = new SortedDictionary<int, Body>();
                 }
 
-                int bodyId = CanonnHelper.GetValueOrDefault(eventData["BodyID"] ?? null, -1);
+                int bodyId = CanonnUtil.GetValueOrDefault(eventData["BodyID"] ?? null, -1);
                 if (bodyId == -1) return null;
 
                 string bodyName = eventData["BodyName"]?.Value?.ToString();
@@ -883,8 +885,9 @@ namespace EDDCanonnPanel
                 else
                 {
                     body = systemData.Bodys[bodyId];
-                    //We just set the name again. In case the body was initialized without a name.
+                    //We just set the name again. In case the node was initialized without a name.
                     body.BodyName = bodyName;
+                    //Same here.
                     IdentifyNodeType(body, eventData);
                 }
 
@@ -901,7 +904,7 @@ namespace EDDCanonnPanel
 
             lock (_lockSystemData)
             {
-                systemData.BodyCount = CanonnHelper.GetValueOrDefault(eventData["BodyCount"] ?? null, -1);
+                systemData.BodyCount = CanonnUtil.GetValueOrDefault(eventData["BodyCount"] ?? null, -1);
             }
         }
 
@@ -912,12 +915,12 @@ namespace EDDCanonnPanel
 
             lock (_lockSystemData)
             {
-                int bodyId = CanonnHelper.GetValueOrDefault(eventData["BodyID"] ?? null, -1);
+                int bodyId = CanonnUtil.GetValueOrDefault(eventData["BodyID"] ?? null, -1);
                 if (bodyId == -1) return;
 
                 Body body;
                 if (!systemData.Bodys?.ContainsKey(bodyId) ?? false) //In the event that the SAA scan comes before the scan event.
-                    body = ProcessScan(eventData); //We are entering a second lock here
+                    body = ProcessScan(eventData); //We are entering a second lock here. --> Not Nice. 
                 else
                     body = systemData.Bodys[bodyId];
 
@@ -948,7 +951,7 @@ namespace EDDCanonnPanel
                     systemData.Bodys = new SortedDictionary<int, Body>();
                 }
 
-                int bodyId = CanonnHelper.GetValueOrDefault(eventData["Body"] ?? null, -1);
+                int bodyId = CanonnUtil.GetValueOrDefault(eventData["Body"] ?? null, -1);
 
                 if (bodyId == -1)
                     return;
@@ -960,7 +963,7 @@ namespace EDDCanonnPanel
                     body = new Body
                     {
                         BodyID = bodyId,
-                        BodyName = "none",
+                        BodyName = "none", //No node name in scan organic.
                         NodeType = "planet"
                     };
                     systemData.Bodys[bodyId] = body;
@@ -971,11 +974,13 @@ namespace EDDCanonnPanel
                 if (eventData["Genus"] == null)
                     return;
 
-                if (CanonnHelper.ContainsKeyValuePair(body.ScanData.Organics, "Genus", eventData["Genus"]?.Value?.ToString())
-                    || CanonnHelper.ContainsKeyValuePair(body.ScanData.Organics, null, eventData["Genus"]?.Value?.ToString()))
-                    return;
 
-                body.ScanData.Organics.Add(CanonnHelper.GetUniqueEntry(eventData, body.ScanData.Organics));
+                JObject o = new JObject
+                {
+                    ["Organics"] = new JArray { new JObject { ["Genus"] = eventData["Genus"].Value?.ToString() } }
+                };
+
+                body.ScanData.Organics = CanonnUtil.GetUniqueEntries(o, "Organics", body.ScanData.Organics);
             }
         }
         #endregion
@@ -1003,6 +1008,9 @@ namespace EDDCanonnPanel
                     if (bodyNode != null)
                         ProcessSpanshBodyNode(bodyNode);
 
+                    if(systemData.SystemAddress != -1)
+                        ProcessCanonnBiostats(systemData.SystemAddress);
+
                 }
                 catch (Exception ex)
                 {
@@ -1019,12 +1027,12 @@ namespace EDDCanonnPanel
             // Extract and populate main system details
             systemData.Name = system["name"].Value?.ToString();
 
-            systemData.X = CanonnHelper.GetValueOrDefault(system["coords"]?["x"] ?? null, CanonnHelper.PositionFallback);
-            systemData.Y = CanonnHelper.GetValueOrDefault(system["coords"]?["y"] ?? null, CanonnHelper.PositionFallback);
-            systemData.Z = CanonnHelper.GetValueOrDefault(system["coords"]?["z"] ?? null, CanonnHelper.PositionFallback);
+            systemData.X = CanonnUtil.GetValueOrDefault(system["coords"]?["x"] ?? null, DataUtil.PositionFallback);
+            systemData.Y = CanonnUtil.GetValueOrDefault(system["coords"]?["y"] ?? null, DataUtil.PositionFallback);
+            systemData.Z = CanonnUtil.GetValueOrDefault(system["coords"]?["z"] ?? null, DataUtil.PositionFallback);
 
-            systemData.SystemAddress = CanonnHelper.GetValueOrDefault(system["id64"] ?? null, -1l);
-            systemData.BodyCount = CanonnHelper.GetValueOrDefault(system["bodyCount"] ?? null, -1);
+            systemData.SystemAddress = CanonnUtil.GetValueOrDefault(system["id64"] ?? null, -1l);
+            systemData.BodyCount = CanonnUtil.GetValueOrDefault(system["bodyCount"] ?? null, -1);
         }
 
         private void ProcessSpanshBodyNode(JArray bodyNode) //wip
@@ -1041,7 +1049,7 @@ namespace EDDCanonnPanel
                 }
 
                 // Extract BodyID; skip processing if invalid
-                int bodyId = CanonnHelper.GetValueOrDefault(node["bodyId"] ?? null, -1);
+                int bodyId = CanonnUtil.GetValueOrDefault(node["bodyId"] ?? null, -1);
                 if (bodyId == -1)
                 {
                     continue;
@@ -1070,14 +1078,61 @@ namespace EDDCanonnPanel
                     //Primitives
                     BodyID = bodyId,
                     //List<JObject>    
-                    Signals = CanonnHelper.GetJObjectList(node["signals"] as JObject, "signals"),
-                    Genuses = CanonnHelper.GetJObjectList(node["signals"] as JObject, "genuses", "Genus"),
-                    Rings = CanonnHelper.GetJObjectList(node, "rings"),
+                    Signals = CanonnUtil.GetJObjectList(node["signals"] as JObject, "signals"),
+                    Genuses = CanonnUtil.GetJObjectList(node["signals"] as JObject, "genuses", "Genus"),
+                    Rings = CanonnUtil.GetJObjectList(node, "rings"),
                 };
 
                 systemData.Bodys[bodyId] = body;
             }
         }
+
+        private void ProcessCanonnBiostats(long i64)
+        {
+            JObject o = dataHandler.FetchData(LinkUtil.BioStats + i64).response.JSONParse().Object();
+            if (o?["system"]?["bodies"] == null || o["system"]["bodies"].Count == 0)
+                return;
+
+            foreach (JObject node in o["system"]["bodies"])
+            {
+                if (node == null || node.Count == 0)
+                {
+                    continue;
+                }
+
+                int bodyId = CanonnUtil.GetValueOrDefault(node["bodyId"] ?? null, -1);
+                if (bodyId == -1)
+                {
+                    continue;
+                }
+
+                Body body = systemData?.Bodys?[bodyId] ?? null;
+                if (body == null)
+                {
+                    continue;
+                }
+
+                if (body.ScanData == null)
+                {
+                    continue;
+                }
+
+                List<JObject> genuses = CanonnUtil.GetJObjectList(node["signals"] as JObject, "genuses", "Genus");
+                List<JObject> biology = CanonnUtil.GetJObjectList(node["signals"] as JObject, "biology", "Bio");
+
+                if (genuses == null || biology == null) 
+                { 
+                    continue; 
+                }
+
+                if(biology.Count == 0 || genuses.Count == 0)
+                {
+                    continue;
+                }
+                body.ScanData.Organics = genuses;
+            }
+        }
+
         #endregion
 
         //This only affects the data structure for visual feedback.
@@ -1115,7 +1170,8 @@ namespace EDDCanonnPanel
                             {
                                 this.Enabled = true;
                             });
-                            activated = true;
+                            _eventLock = true;
+                            _journalLock = true; //The plugin start process is now complete.
                         }
                         else if (rt.Equals(RequestTag.Log))
                         {
@@ -1138,7 +1194,7 @@ namespace EDDCanonnPanel
                                 ProcessSpanshDump(o);
                                 if (systemData == null) ProcessNewSystem(jb);
                             }
-                            activated = true;
+                            _eventLock = true;
                         }
                     }
                     UpdateUI(true);
@@ -1169,28 +1225,47 @@ namespace EDDCanonnPanel
 
             List<DataGridViewRow> rows = new List<DataGridViewRow>
             {
-                CanonnHelper.CreateDataGridViewRow(dataGridViewBio, new object[] { "Missing Bio Data:", null, new Bitmap(1, 1) })
+                CanonnUtil.CreateDataGridViewRow(dataGridViewBio, new object[] { "Missing Bio Data:", null, new Bitmap(1, 1) })
             };
-
             foreach (Body body in system.Bodys.Values)
             {
                 if (body?.ScanData?.Signals == null || body.ScanData.Signals.Count == 0) continue;
 
-                JObject o = CanonnHelper.FindFirstMatchingJObject(body.ScanData.Signals, "Type", "$SAA_SignalType_Biological;") ?? CanonnHelper.FindFirstMatchingJObject(body.ScanData.Signals, null, "$SAA_SignalType_Biological;");
+                JObject o = CanonnUtil.FindFirstMatchingJObject(body.ScanData.Signals, "Type", "$SAA_SignalType_Biological;") ?? CanonnUtil.FindFirstMatchingJObject(body.ScanData.Signals, null, "$SAA_SignalType_Biological;");
 
                 if (o == null) continue;
 
                 if (body.ScanData.Genuses == null || body.ScanData.Genuses.Count == 0)
                 {
-                    rows.Add(CanonnHelper.CreateDataGridViewRow(dataGridViewBio, new object[] { body.BodyName, (CanonnHelper.GetValueOrDefault(o["Count"], 0) == 0 ? CanonnHelper.GetValueOrDefault(o["$SAA_SignalType_Biological;"], 0)
-                        : CanonnHelper.GetValueOrDefault(o["Count"], 0)) + " unknown species", Properties.Resources.biology })); 
-                    continue;
+                    rows.Add(CanonnUtil.CreateDataGridViewRow(dataGridViewBio, new object[] 
+                    {
+                        body.BodyName, 
+                        (CanonnUtil.GetValueOrDefault(o["Count"], 0) == 0 ? CanonnUtil.GetValueOrDefault(o["$SAA_SignalType_Biological;"], 0)
+                        : CanonnUtil.GetValueOrDefault(o["Count"], 0)) + " unknown species", 
+                        Properties.Resources.biology 
+                    }));
                 }
+                else
+                {
+                    bool first = true;
+                    foreach (JObject genus in body.ScanData.Genuses)
+                    {
+                        if (CanonnUtil.ContainsKeyValuePair(body.ScanData.Organics, "Genus", genus["Genus"]?.Value?.ToString())) continue;
+
+                        rows.Add(CanonnUtil.CreateDataGridViewRow(dataGridViewBio, new object[]
+                        {
+                            first ? body.BodyName : null,
+                            "sample required: " + DataUtil.GenusLocalised(genus["Genus"]?.Value?.ToString()),
+                            Properties.Resources.biology
+                        }));
+                        first = false;
+                    }                  
+                }              
             }
 
             if (rows.Count <= 1)
             {
-                CanonnHelper.DisposeDataGridViewRowList(rows); return null;
+                CanonnUtil.DisposeDataGridViewRowList(rows); return null;
             }
             return rows;
         }
@@ -1201,7 +1276,7 @@ namespace EDDCanonnPanel
 
             List<DataGridViewRow> rows = new List<DataGridViewRow>
             {
-                CanonnHelper.CreateDataGridViewRow(dataGridViewRing, new object[] { "Missing Rings:", null, null, new Bitmap(1, 1) })
+                CanonnUtil.CreateDataGridViewRow(dataGridViewRing, new object[] { "Missing Rings:", null, null, new Bitmap(1, 1) })
             };
 
             Regex ringRegex = new Regex(@"([A-Z])\s+Ring$", RegexOptions.IgnoreCase);
@@ -1219,14 +1294,14 @@ namespace EDDCanonnPanel
                     if (system.GetBodyByName(ringName)?.IsMapped == true || ring.Contains("id64")) continue;
 
                     double[] values = new[] { "innerRadius", "InnerRad", "outerRadius", "OuterRad" }
-                        .Select(k => CanonnHelper.GetValueOrDefault(ring[k], 0.0) / 299792458)
+                        .Select(k => CanonnUtil.GetValueOrDefault(ring[k], 0.0) / 299792458)
                         .Select(v => Math.Round(v, 2))
                         .ToArray();
 
                     string result = $"{(values[0] == 0.0 ? values[1] : values[0])} ls - {(values[2] == 0.0 ? values[3] : values[2])} ls";
 
                     Match match = ringRegex.Match(ringName);
-                    rows.Add(CanonnHelper.CreateDataGridViewRow(dataGridViewRing, new object[]
+                    rows.Add(CanonnUtil.CreateDataGridViewRow(dataGridViewRing, new object[]
                     {
                         first ? body.BodyName : null,
                         match.Success ? match.Groups[1].Value + " Ring" : ringName,
@@ -1240,7 +1315,7 @@ namespace EDDCanonnPanel
 
             if (rows.Count <= 1)
             {
-                CanonnHelper.DisposeDataGridViewRowList(rows);
+                CanonnUtil.DisposeDataGridViewRowList(rows);
                 return null;
             }
 
@@ -1256,12 +1331,12 @@ namespace EDDCanonnPanel
             string combinedDescriptions = "Tags: " + string.Join(", ", gmos[0]?["GalMapTypes"]?.Array()
                 ?.Select(galMapType => galMapType?["Description"]?.Value?.ToString())
                 .Where(desc => !string.IsNullOrWhiteSpace(desc)) ?? Enumerable.Empty<string>());
-            rows.Add(CanonnHelper.CreateDataGridViewRow(dataGridViewGMO, new object[] { combinedDescriptions }));
+            rows.Add(CanonnUtil.CreateDataGridViewRow(dataGridViewGMO, new object[] { combinedDescriptions }));
 
-            rows.Add(CanonnHelper.CreateDataGridViewRow(dataGridViewGMO, new object[] { null }));
+            rows.Add(CanonnUtil.CreateDataGridViewRow(dataGridViewGMO, new object[] { null }));
 
-            rows.Add(CanonnHelper.CreateDataGridViewRow(dataGridViewGMO, new object[] { gmos[0]?["DescriptiveNames"]?[0]?.Value?.ToString() + ":" }));
-            rows.Add(CanonnHelper.CreateDataGridViewRow(dataGridViewGMO, new object[] { gmos[0]?["Description"]?.Value?.ToString() }));
+            rows.Add(CanonnUtil.CreateDataGridViewRow(dataGridViewGMO, new object[] { gmos[0]?["DescriptiveNames"]?[0]?.Value?.ToString() + ":" }));
+            rows.Add(CanonnUtil.CreateDataGridViewRow(dataGridViewGMO, new object[] { gmos[0]?["Description"]?.Value?.ToString() }));
 
             return rows;
         }
@@ -1280,7 +1355,7 @@ namespace EDDCanonnPanel
                 {
                     try
                     {
-                        News = dataHandler.FetchData(CanonnHelper.CanonnNews).response.JSONParseArray();
+                        News = dataHandler.FetchData(LinkUtil.CanonnNews).response.JSONParseArray();
                         if (News == null || News.Count == 0) return;
                         NewsIndexChanged(0);
                     }
@@ -1434,14 +1509,14 @@ namespace EDDCanonnPanel
                     if (ringRows?.Count > 0)
                     {
                         dataGridViewRing.Rows.AddRange(ringRows.ToArray());
-                        dataGridViewData.Rows.Add(CanonnHelper.CreateDataGridViewRow(dataGridViewData, new object[] { "There are new rings that can be scanned.", Properties.Resources.ring }));
+                        dataGridViewData.Rows.Add(CanonnUtil.CreateDataGridViewRow(dataGridViewData, new object[] { "There are new rings that can be scanned.", Properties.Resources.ring }));
                     }
 
                     List<DataGridViewRow> bioRows = CollectBioData(system);
                     if (bioRows?.Count > 0)
                     {
                         dataGridViewBio.Rows.AddRange(bioRows.ToArray());
-                        dataGridViewData.Rows.Add(CanonnHelper.CreateDataGridViewRow(dataGridViewData, new object[] { "There is new bio data available for scanning.", Properties.Resources.biology }));
+                        dataGridViewData.Rows.Add(CanonnUtil.CreateDataGridViewRow(dataGridViewData, new object[] { "There is new bio data available for scanning.", Properties.Resources.biology }));
                     }
 
                     if (jumped)
@@ -1451,11 +1526,11 @@ namespace EDDCanonnPanel
                         if (gmoRows?.Count > 0)
                         {
                             dataGridViewGMO.Rows.AddRange(gmoRows.ToArray());
-                            dataGridViewData.Rows.Add(CanonnHelper.CreateDataGridViewRow(dataGridViewData, new object[] { "A GMO is available for this system.", Properties.Resources.tourist }));
+                            dataGridViewData.Rows.Add(CanonnUtil.CreateDataGridViewRow(dataGridViewData, new object[] { "A GMO is available for this system.", Properties.Resources.tourist }));
                         }
                     }
 
-                    dataGridViewData.Rows.Add(CanonnHelper.CreateDataGridViewRow(dataGridViewData, new object[] { "There are new surveys that can be confirmed. [WIP]", Properties.Resources.other }));
+                    //dataGridViewData.Rows.Add(CanonnUtil.CreateDataGridViewRow(dataGridViewData, new object[] { "There are new surveys that can be confirmed. [WIP]", Properties.Resources.other }));
                 }
                 catch (Exception ex)
                 {
@@ -1471,27 +1546,27 @@ namespace EDDCanonnPanel
 
         private void linkLabelEDDCanonn_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            CanonnHelper.OpenUrl(CanonnHelper.EDDCanonnGitHub);
+            LinkUtil.OpenUrl(LinkUtil.EDDCanonnGitHub);
         }
 
         private void pictureBoxCanonn_Click(object sender, EventArgs e)
         {
-            CanonnHelper.OpenUrl(CanonnHelper.CanonnWebPage);
+            LinkUtil.OpenUrl(LinkUtil.CanonnWebPage);
         }
 
         private void pictureBoxEDD_Click(object sender, EventArgs e)
         {
-            CanonnHelper.OpenUrl(CanonnHelper.EDDGitHub);
+            LinkUtil.OpenUrl(LinkUtil.EDDGitHub);
         }
 
         private void textBoxNews_Click(object sender, EventArgs e)
         {
-            CanonnHelper.OpenUrl(News[NewsIndex]?["link"]?.Value?.ToString() ?? CanonnHelper.CanonnWebPage);
+            LinkUtil.OpenUrl(News[NewsIndex]?["link"]?.Value?.ToString() ?? LinkUtil.CanonnWebPage);
         }
 
         private void textBoxSystem_Click(object sender, EventArgs e)
         {
-            CanonnHelper.OpenUrl(CanonnHelper.SignalsCanonnTech + systemData?.Name?.Replace(" ", "%20"));
+            LinkUtil.OpenUrl(LinkUtil.SignalsCanonnTech + systemData?.Name?.Replace(" ", "%20"));
         }
         #endregion
 
@@ -1578,10 +1653,13 @@ namespace EDDCanonnPanel
 
         #region IEDDPanelExtension
 
-        private bool activated = false;
+        //If false, jornals are ignored. Only released after the 'OnStart' data result.
+        private bool _journalLock = false;
+        //If false, events are held back.
+        private bool _eventLock = false;
         public void NewUnfilteredJournal(JournalEntry je)
         {
-            if (isAbort)
+            if (isAbort || !_journalLock)
                 return;
 
             dataHandler.StartTaskAsync(
@@ -1592,7 +1670,7 @@ namespace EDDCanonnPanel
 
                 if (eventId.Equals("FSDJump") || eventId.Equals("Location"))
                 {
-                    activated = false; // As long as we make a callback, we hold back the events (canonn events excluded).
+                    _eventLock = false; // As long as we make a callback, we hold back the events (canonn events excluded).
                     ResetSystemData();
 
                     // The callback may take some time. That's why we give the user some feedback in an early stage.
@@ -1620,7 +1698,7 @@ namespace EDDCanonnPanel
                     });
                 }
 
-                while (!activated) // Wait until a 'DataResult' has been completed.
+                while (!_eventLock) // Wait until a 'DataResult' has been completed.
                 {
                     token.ThrowIfCancellationRequested();
                     Task.Delay(250, token).Wait();
@@ -1682,9 +1760,9 @@ namespace EDDCanonnPanel
 
         public void Closing()
         {
-            CanonnHelper.InstanceCount--;
+            CanonnUtil.InstanceCount--;
             dataHandler.Closing();
-            if (CanonnHelper.InstanceCount == 0)
+            if (CanonnUtil.InstanceCount == 0)
             {
                 CanonnLogging.Instance.StopLogging();
             }
@@ -1714,15 +1792,12 @@ namespace EDDCanonnPanel
         {
             if (isAbort)
                 return;
-            //wip
         }
 
         public void InitialDisplay()
         {
             if (isAbort)
                 return;
-
-            //wip
         }
 
         public void LoadLayout()
@@ -1732,17 +1807,12 @@ namespace EDDCanonnPanel
             PanelCallBack.LoadGridLayout(dataGridViewBio);
             PanelCallBack.LoadGridLayout(dataGridViewRing);
             PanelCallBack.LoadGridLayout(dataGridViewGMO);
-            //wip
         }
 
         public void ScreenShotCaptured(string file, Size s)
         {
             if (isAbort)
                 return;
-
-            throw new NotImplementedException();
-
-            //wip
         }
 
         public void SetTransparency(bool ison, Color curcol)
@@ -1752,38 +1822,29 @@ namespace EDDCanonnPanel
 
             this.BackColor = curcol;
 
-            //wip
         }
 
         public void TransparencyModeChanged(bool on)
         {
             if (isAbort)
                 return;
-
-            //wip
         }
 
         void IEDDPanelExtension.CursorChanged(JournalEntry je)
         {
             if (isAbort)
                 return;
-
-            //wip
         }
 
         public void ControlTextVisibleChange(bool on)
         {
             if (isAbort)
                 return;
-
-            throw new NotImplementedException();
-
-            //wip
         }
 
         public string HelpKeyOrAddress()
         {
-            return CanonnHelper.EDDCanonnGitHub;
+            return LinkUtil.EDDCanonnGitHub;
         }
         #endregion
 
@@ -1793,6 +1854,8 @@ namespace EDDCanonnPanel
         private void Abort(string msg = "default")
         {
             isAbort = true;
+            _journalLock = false;
+            _eventLock = false;
 
             NotifyMainFields("Aborted");
             DebugLog.AppendText(msg);
@@ -1801,7 +1864,7 @@ namespace EDDCanonnPanel
             dataHandler.Closing();
 
             this.Enabled = false;
-            activated = false;
+            _eventLock = false;
 
             Whitelist = null;
             patrols = null;
