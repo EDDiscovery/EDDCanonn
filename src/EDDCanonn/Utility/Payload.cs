@@ -12,7 +12,6 @@
  * governing permissions and limitations under the License.
  */
 
-using System;
 using QuickJSON;
 using static EDDDLLInterfaces.EDDDLLIF;
 
@@ -25,11 +24,12 @@ namespace EDDCanonnPanel.Base
         public static JObject BuildPayload(JournalEntry je, JObject statusJson)
         {
             if (statusJson == null) statusJson = new JObject();
-
+            JObject rawEvent = je.json.JSONParse().Object();
             JObject payload = new JObject
+
             {
-                ["gameState"] = ExtractSystemInfo(je, statusJson),
-                ["rawEvent"] = je.json.JSONParse().Object(),
+                ["gameState"] = ExtractSystemInfo(je, rawEvent, statusJson),
+                ["rawEvent"] = rawEvent,
                 ["eventType"] = je.eventid,
                 ["cmdrName"] = je.cmdrname
             };
@@ -37,7 +37,7 @@ namespace EDDCanonnPanel.Base
             return payload;
         }
 
-        private static JObject ExtractSystemInfo(JournalEntry je, JObject statusJson)
+        private static JObject ExtractSystemInfo(JournalEntry je, JObject rawEvent, JObject statusJson)
         {
             JObject gameState = new JObject
             {
@@ -50,10 +50,15 @@ namespace EDDCanonnPanel.Base
                 ["odyssey"] = je.odyssey
             };
 
-            JObject rawEvent = je.json.JSONParse().Object();
+            string bodyName = rawEvent["BodyName"]?.Value?.ToString() != null && rawEvent["BodyName"]?.Value?.ToString() != "null" ? rawEvent["BodyName"]?.Value?.ToString()
+                : je.bodyname != null && je.bodyname != "Unknown" ? je.bodyname : null;
+            if (!string.IsNullOrEmpty(bodyName))
+                gameState["bodyName"] = bodyName;
 
-            gameState["bodyName"] = GetStringValueWithFallback(rawEvent, "BodyName", je.bodyname, "Unknown");
-            gameState["station"] = GetStringValueWithFallback(rawEvent, "StationName", je.stationname, "Unknown");
+            string stationName = rawEvent["StationName"]?.Value?.ToString() != null && rawEvent["StationName"]?.Value?.ToString() != "null" ? rawEvent["StationName"]?.Value?.ToString()
+                : je.stationname != null && je.stationname != "Unknown" ? je.stationname : null;
+            if(!string.IsNullOrEmpty(stationName))
+                gameState["station"] = stationName;
 
             ExtractPositionData(gameState, statusJson);
             ExtractAdditionalStatusData(gameState, statusJson);
@@ -88,13 +93,6 @@ namespace EDDCanonnPanel.Base
             {
                 gameState["gravity"] = statusJson["Gravity"].ToObject<double>();
             }
-        }
-
-        private static string GetStringValueWithFallback(JObject rawEvent, string key, string fallback, string invalidValue)
-        {
-            string value = rawEvent[key]?.Value?.ToString();
-            return !string.IsNullOrEmpty(value) ? value :
-                   (!string.IsNullOrEmpty(fallback) && fallback != invalidValue) ? fallback : null;
         }
     }
 }

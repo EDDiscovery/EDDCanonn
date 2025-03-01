@@ -247,7 +247,7 @@ namespace ExtendedControls
 
         protected override void OnMouseLeave(EventArgs eventargs)
         {
-            //System.Diagnostics.Debug.WriteLine("CBC Leave, activated" + isActivated + " visible " + _cbsystem.Visible);
+            //System.Diagnostics.Debug.WriteLine("CBC Leave, _eventLock" + isActivated + " visible " + _cbsystem.Visible);
 
             if (!cbsystem.Visible)
             {

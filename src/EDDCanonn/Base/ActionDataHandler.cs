@@ -20,7 +20,6 @@ using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using EDDCanonnPanel;
 
 namespace EDDCanonnPanel.Base
 {

@@ -17,7 +17,7 @@ namespace EDDCanonnPanel.Base
         {
             get
             {
-                //Make sure logging is running before we return the instance.
+                //Make sure logging is _journalLock before we return the instance.
                 CanonnLogging canonnLogging = _instance.Value;
                 if (canonnLogging._logTask == null || canonnLogging._logTask.IsCompleted)
                     canonnLogging.StartLogging();

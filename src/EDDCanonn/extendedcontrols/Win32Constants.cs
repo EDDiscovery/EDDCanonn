@@ -570,10 +570,10 @@ namespace BaseUtils.Win32Constants
         public const int SIZE = 0x0005;
 
         /// <summary>
-        /// The WM_ACTIVATE message is sent to both the window being activated and the window being deactivated. If the
+        /// The WM_ACTIVATE message is sent to both the window being _eventLock and the window being deactivated. If the
         /// windows use the same input queue, the message is sent synchronously, first to the window procedure of the
-        /// top-level window being deactivated, then to the window procedure of the top-level window being activated.
-        /// If the windows use different input queues, the message is sent asynchronously, so the window is activated
+        /// top-level window being deactivated, then to the window procedure of the top-level window being _eventLock.
+        /// If the windows use different input queues, the message is sent asynchronously, so the window is _eventLock
         /// immediately.
         /// </summary>
         /// <seealso href="https://msdn.microsoft.com/en-us/library/windows/desktop/ms646274(v=vs.85).aspx"/>
