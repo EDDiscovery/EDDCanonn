@@ -11,7 +11,7 @@
     <AssemblyName>EDDCanonnPanel</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <Deterministic>true</Deterministic>
+    <Deterministic>false</Deterministic>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -128,6 +128,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="Properties\setversion.ps1" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\edd.png" />
@@ -155,7 +156,7 @@
     <None Include="Resources\anomaly.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\update.png" />
+    <None Include="Resources\spansh.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
@@ -163,5 +164,9 @@
 copy EDDCanonnPanel*.dll ..\..\..\appdata
 copy EDDCanonnPanel*.* c:\users\%25USERNAME%25\appdata\local\eddiscovery\dll
 	</PostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PreBuildEvent>powershell -ExecutionPolicy Bypass -File "$(ProjectDir)Properties\setversion.ps1" "$(ProjectDir)"
+</PreBuildEvent>
   </PropertyGroup>
 </Project>
