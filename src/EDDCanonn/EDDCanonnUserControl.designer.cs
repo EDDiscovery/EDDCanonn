@@ -1,16 +1,16 @@
 ﻿/*
- * Copyright © 2022-2022 EDDiscovery development team
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
- * file except in compliance with the License. You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- * 
- * Unless required by applicable law or agreed to in writing, software distributed under
- * the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
- * ANY KIND, either express or implied. See the License for the specific language
- * governing permissions and limitations under the License.
- */
+* Copyright © 2022-2022 EDDiscovery development team
+*
+* Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
+* file except in compliance with the License. You may obtain a copy of the License at
+*
+* http://www.apache.org/licenses/LICENSE-2.0
+* 
+* Unless required by applicable law or agreed to in writing, software distributed under
+* the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+* ANY KIND, either express or implied. See the License for the specific language
+* governing permissions and limitations under the License.
+*/
 
 using System.Drawing;
 using System.Windows.Forms;
@@ -261,11 +261,12 @@ namespace EDDCanonnPanel
         {
             this.components = new System.ComponentModel.Container();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
-            ExtendedControls.TabStyleSquare tabStyleSquare1 = new ExtendedControls.TabStyleSquare();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+            ExtendedControls.TabStyleSquare tabStyleSquare1 = new ExtendedControls.TabStyleSquare();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(EDDCanonnUserControl));
             this.textBoxSystem = new System.Windows.Forms.TextBox();
             this.labelSysName = new System.Windows.Forms.Label();
@@ -286,6 +287,12 @@ namespace EDDCanonnPanel
             this.buttonPrevNews = new ExtendedControls.ExtButton();
             this.labelNewsIndex = new System.Windows.Forms.Label();
             this.dataGridSignals = new System.Windows.Forms.DataGridView();
+            this.a = new System.Windows.Forms.DataGridViewImageColumn();
+            this.b = new System.Windows.Forms.DataGridViewImageColumn();
+            this.c = new System.Windows.Forms.DataGridViewImageColumn();
+            this.d = new System.Windows.Forms.DataGridViewImageColumn();
+            this.e = new System.Windows.Forms.DataGridViewImageColumn();
+            this.f = new System.Windows.Forms.DataGridViewImageColumn();
             this.extPanelDataGridViewScrollPatrol = new ExtendedControls.ExtPanelDataGridViewScroll();
             this.extScrollBarPatrol = new ExtendedControls.ExtScrollBar();
             this.dataGridPatrol = new System.Windows.Forms.DataGridView();
@@ -305,17 +312,10 @@ namespace EDDCanonnPanel
             this.extPanelDataGridViewScrollRing = new ExtendedControls.ExtPanelDataGridViewScroll();
             this.extScrollBarRing = new ExtendedControls.ExtScrollBar();
             this.dataGridViewRing = new System.Windows.Forms.DataGridView();
-            this.ColumnRing0 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ColumnRing1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ColumnRing2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ColumnRing3 = new System.Windows.Forms.DataGridViewImageColumn();
             this.tabBio = new System.Windows.Forms.TabPage();
             this.extPanelDataGridViewScrollBio = new ExtendedControls.ExtPanelDataGridViewScroll();
             this.extScrollBarBio = new ExtendedControls.ExtScrollBar();
             this.dataGridViewBio = new System.Windows.Forms.DataGridView();
-            this.ColumnBio0 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ColumnBio1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ColumnBio2 = new System.Windows.Forms.DataGridViewImageColumn();
             this.tabSurvey = new System.Windows.Forms.TabPage();
             this.labelSurvey = new System.Windows.Forms.Label();
             this.tabGmo = new System.Windows.Forms.TabPage();
@@ -325,12 +325,13 @@ namespace EDDCanonnPanel
             this.ColumnGMO0 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.tabPageAbout = new System.Windows.Forms.TabPage();
             this.tableLayoutAbout = new System.Windows.Forms.TableLayoutPanel();
-            this.pictureBoxEDD = new System.Windows.Forms.PictureBox();
             this.pictureBoxCanonn = new System.Windows.Forms.PictureBox();
             this.labelDev = new System.Windows.Forms.Label();
-            this.labelTest = new System.Windows.Forms.Label();
-            this.labelSpecial = new System.Windows.Forms.Label();
             this.linkLabelEDDCanonn = new System.Windows.Forms.LinkLabel();
+            this.pictureBoxEDD = new System.Windows.Forms.PictureBox();
+            this.labelSpecial = new System.Windows.Forms.Label();
+            this.labelTest = new System.Windows.Forms.Label();
+            this.label1 = new System.Windows.Forms.Label();
             this.tabDebug = new System.Windows.Forms.TabPage();
             this.CallSystem = new ExtendedControls.ExtButton();
             this.LogSystem = new ExtendedControls.ExtButton();
@@ -338,6 +339,13 @@ namespace EDDCanonnPanel
             this.TestWhitelist = new ExtendedControls.ExtButton();
             this.LogWhitelist = new ExtendedControls.ExtButton();
             this.DebugLog = new System.Windows.Forms.TextBox();
+            this.ColumnBio0 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ColumnBio1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ColumnBio2 = new System.Windows.Forms.DataGridViewImageColumn();
+            this.ColumnRing0 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ColumnRing1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ColumnRing2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ColumnRing3 = new System.Windows.Forms.DataGridViewImageColumn();
             this.tableLayoutSystem.SuspendLayout();
             this.contextMenuStrip1.SuspendLayout();
             this.tableLayoutPatrol.SuspendLayout();
@@ -361,8 +369,8 @@ namespace EDDCanonnPanel
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewGMO)).BeginInit();
             this.tabPageAbout.SuspendLayout();
             this.tableLayoutAbout.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxEDD)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxCanonn)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxEDD)).BeginInit();
             this.tabDebug.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -376,7 +384,7 @@ namespace EDDCanonnPanel
             this.textBoxSystem.ReadOnly = true;
             this.textBoxSystem.Size = new System.Drawing.Size(163, 20);
             this.textBoxSystem.TabIndex = 3;
-            this.textBoxSystem.Text = "#";
+            this.textBoxSystem.Text = "########";
             this.textBoxSystem.Click += new System.EventHandler(this.textBoxSystem_Click);
             // 
             // labelSysName
@@ -458,11 +466,11 @@ namespace EDDCanonnPanel
             this.tableLayoutPatrol.Controls.Add(this.ExtComboBoxPatrol, 0, 0);
             this.tableLayoutPatrol.Controls.Add(this.ExtComboBoxRange, 1, 0);
             this.tableLayoutPatrol.Controls.Add(this.buttonCreatePatrol, 2, 0);
-            this.tableLayoutPatrol.Location = new System.Drawing.Point(20, 270);
+            this.tableLayoutPatrol.Location = new System.Drawing.Point(20, 363);
             this.tableLayoutPatrol.Name = "tableLayoutPatrol";
             this.tableLayoutPatrol.RowCount = 1;
             this.tableLayoutPatrol.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPatrol.Size = new System.Drawing.Size(364, 37);
+            this.tableLayoutPatrol.Size = new System.Drawing.Size(364, 28);
             this.tableLayoutPatrol.TabIndex = 13;
             // 
             // ExtComboBoxPatrol
@@ -534,7 +542,7 @@ namespace EDDCanonnPanel
             this.tableLayoutNews.Controls.Add(this.buttonNextNews, 2, 1);
             this.tableLayoutNews.Controls.Add(this.buttonPrevNews, 0, 1);
             this.tableLayoutNews.Controls.Add(this.labelNewsIndex, 2, 0);
-            this.tableLayoutNews.Location = new System.Drawing.Point(21, 198);
+            this.tableLayoutNews.Location = new System.Drawing.Point(20, 294);
             this.tableLayoutNews.Name = "tableLayoutNews";
             this.tableLayoutNews.RowCount = 2;
             this.tableLayoutNews.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
@@ -563,7 +571,6 @@ namespace EDDCanonnPanel
             this.textBoxNews.ReadOnly = true;
             this.textBoxNews.Size = new System.Drawing.Size(262, 44);
             this.textBoxNews.TabIndex = 4;
-            this.textBoxNews.Text = "#";
             this.textBoxNews.Click += new System.EventHandler(this.textBoxNews_Click);
             // 
             // buttonNextNews
@@ -604,19 +611,92 @@ namespace EDDCanonnPanel
             // 
             this.dataGridSignals.AllowUserToAddRows = false;
             this.dataGridSignals.AllowUserToDeleteRows = false;
+            this.dataGridSignals.AllowUserToResizeColumns = false;
+            this.dataGridSignals.AllowUserToResizeRows = false;
+            this.dataGridSignals.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            this.dataGridSignals.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.AllCells;
             this.dataGridSignals.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridSignals.Location = new System.Drawing.Point(20, 493);
+            this.dataGridSignals.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.a,
+            this.b,
+            this.c,
+            this.d,
+            this.e,
+            this.f});
+            this.dataGridSignals.Location = new System.Drawing.Point(20, 582);
             this.dataGridSignals.Name = "dataGridSignals";
             this.dataGridSignals.ReadOnly = true;
-            this.dataGridSignals.Size = new System.Drawing.Size(360, 19);
+            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.dataGridSignals.RowsDefaultCellStyle = dataGridViewCellStyle1;
+            this.dataGridSignals.ScrollBars = System.Windows.Forms.ScrollBars.None;
+            this.dataGridSignals.ShowCellErrors = false;
+            this.dataGridSignals.ShowCellToolTips = false;
+            this.dataGridSignals.ShowEditingIcon = false;
+            this.dataGridSignals.ShowRowErrors = false;
+            this.dataGridSignals.Size = new System.Drawing.Size(365, 25);
             this.dataGridSignals.TabIndex = 16;
+            this.dataGridSignals.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.dataGridSignals_DataError);
+            // 
+            // a
+            // 
+            this.a.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.a.HeaderText = "";
+            this.a.MinimumWidth = 25;
+            this.a.Name = "a";
+            this.a.ReadOnly = true;
+            this.a.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+            // 
+            // b
+            // 
+            this.b.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.b.HeaderText = "";
+            this.b.MinimumWidth = 25;
+            this.b.Name = "b";
+            this.b.ReadOnly = true;
+            this.b.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+            // 
+            // c
+            // 
+            this.c.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.c.HeaderText = "";
+            this.c.MinimumWidth = 25;
+            this.c.Name = "c";
+            this.c.ReadOnly = true;
+            this.c.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+            // 
+            // d
+            // 
+            this.d.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.d.HeaderText = "";
+            this.d.MinimumWidth = 25;
+            this.d.Name = "d";
+            this.d.ReadOnly = true;
+            this.d.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+            // 
+            // e
+            // 
+            this.e.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.e.HeaderText = "";
+            this.e.MinimumWidth = 25;
+            this.e.Name = "e";
+            this.e.ReadOnly = true;
+            this.e.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+            // 
+            // f
+            // 
+            this.f.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.f.HeaderText = "";
+            this.f.MinimumWidth = 25;
+            this.f.Name = "f";
+            this.f.ReadOnly = true;
+            this.f.Resizable = System.Windows.Forms.DataGridViewTriState.False;
             // 
             // extPanelDataGridViewScrollPatrol
             // 
             this.extPanelDataGridViewScrollPatrol.Controls.Add(this.extScrollBarPatrol);
             this.extPanelDataGridViewScrollPatrol.Controls.Add(this.dataGridPatrol);
             this.extPanelDataGridViewScrollPatrol.InternalMargin = new System.Windows.Forms.Padding(0);
-            this.extPanelDataGridViewScrollPatrol.Location = new System.Drawing.Point(20, 313);
+            this.extPanelDataGridViewScrollPatrol.Location = new System.Drawing.Point(20, 397);
             this.extPanelDataGridViewScrollPatrol.Name = "extPanelDataGridViewScrollPatrol";
             this.extPanelDataGridViewScrollPatrol.Size = new System.Drawing.Size(365, 179);
             this.extPanelDataGridViewScrollPatrol.TabIndex = 15;
@@ -671,9 +751,9 @@ namespace EDDCanonnPanel
             this.dataGridPatrol.Location = new System.Drawing.Point(0, 0);
             this.dataGridPatrol.Name = "dataGridPatrol";
             this.dataGridPatrol.ReadOnly = true;
-            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.dataGridPatrol.RowsDefaultCellStyle = dataGridViewCellStyle1;
+            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.dataGridPatrol.RowsDefaultCellStyle = dataGridViewCellStyle2;
             this.dataGridPatrol.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.dataGridPatrol.ShowCellErrors = false;
             this.dataGridPatrol.ShowCellToolTips = false;
@@ -742,11 +822,12 @@ namespace EDDCanonnPanel
             this.extTabControlData.Controls.Add(this.tabDebug);
             this.extTabControlData.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.extTabControlData.Location = new System.Drawing.Point(20, 37);
+            this.extTabControlData.Margin = new System.Windows.Forms.Padding(0);
             this.extTabControlData.Multiline = true;
             this.extTabControlData.Name = "extTabControlData";
             this.extTabControlData.SelectedIndex = 0;
             this.extTabControlData.ShowToolTips = true;
-            this.extTabControlData.Size = new System.Drawing.Size(364, 159);
+            this.extTabControlData.Size = new System.Drawing.Size(364, 254);
             this.extTabControlData.TabBackgroundColor = System.Drawing.Color.Transparent;
             this.extTabControlData.TabColorScaling = 0.5F;
             this.extTabControlData.TabControlBorderBrightColor = System.Drawing.Color.LightGray;
@@ -767,7 +848,7 @@ namespace EDDCanonnPanel
             this.tabData.Location = new System.Drawing.Point(4, 22);
             this.tabData.Name = "tabData";
             this.tabData.Padding = new System.Windows.Forms.Padding(3);
-            this.tabData.Size = new System.Drawing.Size(356, 133);
+            this.tabData.Size = new System.Drawing.Size(356, 228);
             this.tabData.TabIndex = 1;
             this.tabData.Text = "Overview";
             this.tabData.ToolTipText = "Summary of all missing data.";
@@ -779,8 +860,9 @@ namespace EDDCanonnPanel
             this.extPanelDataGridViewScrollData.Controls.Add(this.dataGridViewData);
             this.extPanelDataGridViewScrollData.InternalMargin = new System.Windows.Forms.Padding(0);
             this.extPanelDataGridViewScrollData.Location = new System.Drawing.Point(0, 0);
+            this.extPanelDataGridViewScrollData.Margin = new System.Windows.Forms.Padding(0);
             this.extPanelDataGridViewScrollData.Name = "extPanelDataGridViewScrollData";
-            this.extPanelDataGridViewScrollData.Size = new System.Drawing.Size(358, 134);
+            this.extPanelDataGridViewScrollData.Size = new System.Drawing.Size(358, 233);
             this.extPanelDataGridViewScrollData.TabIndex = 14;
             this.extPanelDataGridViewScrollData.VerticalScrollBarDockRight = true;
             // 
@@ -802,7 +884,7 @@ namespace EDDCanonnPanel
             this.extScrollBarData.MouseOverButtonColor = System.Drawing.Color.Green;
             this.extScrollBarData.MousePressedButtonColor = System.Drawing.Color.Red;
             this.extScrollBarData.Name = "extScrollBarData";
-            this.extScrollBarData.Size = new System.Drawing.Size(19, 134);
+            this.extScrollBarData.Size = new System.Drawing.Size(19, 233);
             this.extScrollBarData.SliderColor = System.Drawing.Color.DarkGray;
             this.extScrollBarData.SmallChange = 1;
             this.extScrollBarData.TabIndex = 14;
@@ -829,14 +911,14 @@ namespace EDDCanonnPanel
             this.dataGridViewData.Location = new System.Drawing.Point(0, 0);
             this.dataGridViewData.Name = "dataGridViewData";
             this.dataGridViewData.ReadOnly = true;
-            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.dataGridViewData.RowsDefaultCellStyle = dataGridViewCellStyle2;
+            dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.dataGridViewData.RowsDefaultCellStyle = dataGridViewCellStyle3;
             this.dataGridViewData.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.dataGridViewData.ShowCellErrors = false;
             this.dataGridViewData.ShowCellToolTips = false;
             this.dataGridViewData.ShowEditingIcon = false;
             this.dataGridViewData.ShowRowErrors = false;
-            this.dataGridViewData.Size = new System.Drawing.Size(339, 134);
+            this.dataGridViewData.Size = new System.Drawing.Size(339, 233);
             this.dataGridViewData.TabIndex = 12;
             this.dataGridViewData.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.dataGridViewData_DataError);
             // 
@@ -864,7 +946,7 @@ namespace EDDCanonnPanel
             this.tabRing.Location = new System.Drawing.Point(4, 22);
             this.tabRing.Name = "tabRing";
             this.tabRing.Padding = new System.Windows.Forms.Padding(3);
-            this.tabRing.Size = new System.Drawing.Size(356, 133);
+            this.tabRing.Size = new System.Drawing.Size(356, 228);
             this.tabRing.TabIndex = 8;
             this.tabRing.Text = "Ring";
             this.tabRing.ToolTipText = "Shows missing ringdata.";
@@ -877,7 +959,7 @@ namespace EDDCanonnPanel
             this.extPanelDataGridViewScrollRing.InternalMargin = new System.Windows.Forms.Padding(0);
             this.extPanelDataGridViewScrollRing.Location = new System.Drawing.Point(0, 0);
             this.extPanelDataGridViewScrollRing.Name = "extPanelDataGridViewScrollRing";
-            this.extPanelDataGridViewScrollRing.Size = new System.Drawing.Size(358, 134);
+            this.extPanelDataGridViewScrollRing.Size = new System.Drawing.Size(358, 233);
             this.extPanelDataGridViewScrollRing.TabIndex = 15;
             this.extPanelDataGridViewScrollRing.VerticalScrollBarDockRight = true;
             // 
@@ -899,7 +981,7 @@ namespace EDDCanonnPanel
             this.extScrollBarRing.MouseOverButtonColor = System.Drawing.Color.Green;
             this.extScrollBarRing.MousePressedButtonColor = System.Drawing.Color.Red;
             this.extScrollBarRing.Name = "extScrollBarRing";
-            this.extScrollBarRing.Size = new System.Drawing.Size(19, 134);
+            this.extScrollBarRing.Size = new System.Drawing.Size(19, 233);
             this.extScrollBarRing.SliderColor = System.Drawing.Color.DarkGray;
             this.extScrollBarRing.SmallChange = 1;
             this.extScrollBarRing.TabIndex = 15;
@@ -928,56 +1010,16 @@ namespace EDDCanonnPanel
             this.dataGridViewRing.Location = new System.Drawing.Point(0, 0);
             this.dataGridViewRing.Name = "dataGridViewRing";
             this.dataGridViewRing.ReadOnly = true;
-            dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.dataGridViewRing.RowsDefaultCellStyle = dataGridViewCellStyle3;
+            dataGridViewCellStyle4.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.dataGridViewRing.RowsDefaultCellStyle = dataGridViewCellStyle4;
             this.dataGridViewRing.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.dataGridViewRing.ShowCellErrors = false;
             this.dataGridViewRing.ShowCellToolTips = false;
             this.dataGridViewRing.ShowEditingIcon = false;
             this.dataGridViewRing.ShowRowErrors = false;
-            this.dataGridViewRing.Size = new System.Drawing.Size(339, 134);
+            this.dataGridViewRing.Size = new System.Drawing.Size(339, 233);
             this.dataGridViewRing.TabIndex = 14;
             this.dataGridViewRing.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.dataGridViewRing_DataError);
-            // 
-            // ColumnRing0
-            // 
-            this.ColumnRing0.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
-            this.ColumnRing0.HeaderText = "";
-            this.ColumnRing0.MinimumWidth = 25;
-            this.ColumnRing0.Name = "ColumnRing0";
-            this.ColumnRing0.ReadOnly = true;
-            this.ColumnRing0.Resizable = System.Windows.Forms.DataGridViewTriState.False;
-            this.ColumnRing0.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.ColumnRing0.Width = 25;
-            // 
-            // ColumnRing1
-            // 
-            this.ColumnRing1.HeaderText = "";
-            this.ColumnRing1.Name = "ColumnRing1";
-            this.ColumnRing1.ReadOnly = true;
-            this.ColumnRing1.Resizable = System.Windows.Forms.DataGridViewTriState.False;
-            this.ColumnRing1.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            // 
-            // ColumnRing2
-            // 
-            this.ColumnRing2.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
-            this.ColumnRing2.HeaderText = "";
-            this.ColumnRing2.MinimumWidth = 25;
-            this.ColumnRing2.Name = "ColumnRing2";
-            this.ColumnRing2.ReadOnly = true;
-            this.ColumnRing2.Resizable = System.Windows.Forms.DataGridViewTriState.False;
-            this.ColumnRing2.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.ColumnRing2.Width = 25;
-            // 
-            // ColumnRing3
-            // 
-            this.ColumnRing3.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
-            this.ColumnRing3.HeaderText = "";
-            this.ColumnRing3.MinimumWidth = 25;
-            this.ColumnRing3.Name = "ColumnRing3";
-            this.ColumnRing3.ReadOnly = true;
-            this.ColumnRing3.Resizable = System.Windows.Forms.DataGridViewTriState.False;
-            this.ColumnRing3.Width = 25;
             // 
             // tabBio
             // 
@@ -985,7 +1027,7 @@ namespace EDDCanonnPanel
             this.tabBio.Location = new System.Drawing.Point(4, 22);
             this.tabBio.Name = "tabBio";
             this.tabBio.Padding = new System.Windows.Forms.Padding(3);
-            this.tabBio.Size = new System.Drawing.Size(356, 133);
+            this.tabBio.Size = new System.Drawing.Size(356, 228);
             this.tabBio.TabIndex = 7;
             this.tabBio.Text = "Bio";
             this.tabBio.ToolTipText = "Shows missing biodata.";
@@ -998,7 +1040,7 @@ namespace EDDCanonnPanel
             this.extPanelDataGridViewScrollBio.InternalMargin = new System.Windows.Forms.Padding(0);
             this.extPanelDataGridViewScrollBio.Location = new System.Drawing.Point(0, 0);
             this.extPanelDataGridViewScrollBio.Name = "extPanelDataGridViewScrollBio";
-            this.extPanelDataGridViewScrollBio.Size = new System.Drawing.Size(358, 134);
+            this.extPanelDataGridViewScrollBio.Size = new System.Drawing.Size(358, 233);
             this.extPanelDataGridViewScrollBio.TabIndex = 15;
             this.extPanelDataGridViewScrollBio.VerticalScrollBarDockRight = true;
             // 
@@ -1020,7 +1062,7 @@ namespace EDDCanonnPanel
             this.extScrollBarBio.MouseOverButtonColor = System.Drawing.Color.Green;
             this.extScrollBarBio.MousePressedButtonColor = System.Drawing.Color.Red;
             this.extScrollBarBio.Name = "extScrollBarBio";
-            this.extScrollBarBio.Size = new System.Drawing.Size(19, 134);
+            this.extScrollBarBio.Size = new System.Drawing.Size(19, 233);
             this.extScrollBarBio.SliderColor = System.Drawing.Color.DarkGray;
             this.extScrollBarBio.SmallChange = 1;
             this.extScrollBarBio.TabIndex = 15;
@@ -1048,45 +1090,16 @@ namespace EDDCanonnPanel
             this.dataGridViewBio.Location = new System.Drawing.Point(0, 0);
             this.dataGridViewBio.Name = "dataGridViewBio";
             this.dataGridViewBio.ReadOnly = true;
-            dataGridViewCellStyle4.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.dataGridViewBio.RowsDefaultCellStyle = dataGridViewCellStyle4;
+            dataGridViewCellStyle5.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.dataGridViewBio.RowsDefaultCellStyle = dataGridViewCellStyle5;
             this.dataGridViewBio.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.dataGridViewBio.ShowCellErrors = false;
             this.dataGridViewBio.ShowCellToolTips = false;
             this.dataGridViewBio.ShowEditingIcon = false;
             this.dataGridViewBio.ShowRowErrors = false;
-            this.dataGridViewBio.Size = new System.Drawing.Size(339, 134);
+            this.dataGridViewBio.Size = new System.Drawing.Size(339, 233);
             this.dataGridViewBio.TabIndex = 14;
             this.dataGridViewBio.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.dataGridViewBio_DataError);
-            // 
-            // ColumnBio0
-            // 
-            this.ColumnBio0.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
-            this.ColumnBio0.HeaderText = "";
-            this.ColumnBio0.MinimumWidth = 25;
-            this.ColumnBio0.Name = "ColumnBio0";
-            this.ColumnBio0.ReadOnly = true;
-            this.ColumnBio0.Resizable = System.Windows.Forms.DataGridViewTriState.False;
-            this.ColumnBio0.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.ColumnBio0.Width = 25;
-            // 
-            // ColumnBio1
-            // 
-            this.ColumnBio1.HeaderText = "";
-            this.ColumnBio1.Name = "ColumnBio1";
-            this.ColumnBio1.ReadOnly = true;
-            this.ColumnBio1.Resizable = System.Windows.Forms.DataGridViewTriState.False;
-            this.ColumnBio1.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            // 
-            // ColumnBio2
-            // 
-            this.ColumnBio2.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
-            this.ColumnBio2.HeaderText = "";
-            this.ColumnBio2.MinimumWidth = 25;
-            this.ColumnBio2.Name = "ColumnBio2";
-            this.ColumnBio2.ReadOnly = true;
-            this.ColumnBio2.Resizable = System.Windows.Forms.DataGridViewTriState.False;
-            this.ColumnBio2.Width = 25;
             // 
             // tabSurvey
             // 
@@ -1094,7 +1107,7 @@ namespace EDDCanonnPanel
             this.tabSurvey.Location = new System.Drawing.Point(4, 22);
             this.tabSurvey.Name = "tabSurvey";
             this.tabSurvey.Padding = new System.Windows.Forms.Padding(3);
-            this.tabSurvey.Size = new System.Drawing.Size(356, 133);
+            this.tabSurvey.Size = new System.Drawing.Size(356, 228);
             this.tabSurvey.TabIndex = 4;
             this.tabSurvey.Text = "Survey";
             this.tabSurvey.ToolTipText = "Confirm your surveys.";
@@ -1116,20 +1129,19 @@ namespace EDDCanonnPanel
             this.tabGmo.Location = new System.Drawing.Point(4, 22);
             this.tabGmo.Name = "tabGmo";
             this.tabGmo.Padding = new System.Windows.Forms.Padding(3);
-            this.tabGmo.Size = new System.Drawing.Size(356, 133);
+            this.tabGmo.Size = new System.Drawing.Size(356, 228);
             this.tabGmo.TabIndex = 6;
             this.tabGmo.Text = "GMO";
             this.tabGmo.UseVisualStyleBackColor = true;
             // 
             // extPanelDataGridViewScrollGMO
             // 
-            this.extPanelDataGridViewScrollGMO.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.extPanelDataGridViewScrollGMO.Controls.Add(this.extScrollBarGMO);
             this.extPanelDataGridViewScrollGMO.Controls.Add(this.dataGridViewGMO);
             this.extPanelDataGridViewScrollGMO.InternalMargin = new System.Windows.Forms.Padding(0);
-            this.extPanelDataGridViewScrollGMO.Location = new System.Drawing.Point(-1, -1);
+            this.extPanelDataGridViewScrollGMO.Location = new System.Drawing.Point(0, 0);
             this.extPanelDataGridViewScrollGMO.Name = "extPanelDataGridViewScrollGMO";
-            this.extPanelDataGridViewScrollGMO.Size = new System.Drawing.Size(358, 134);
+            this.extPanelDataGridViewScrollGMO.Size = new System.Drawing.Size(358, 233);
             this.extPanelDataGridViewScrollGMO.TabIndex = 16;
             this.extPanelDataGridViewScrollGMO.VerticalScrollBarDockRight = true;
             // 
@@ -1145,13 +1157,13 @@ namespace EDDCanonnPanel
             this.extScrollBarGMO.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.extScrollBarGMO.HideScrollBar = false;
             this.extScrollBarGMO.LargeChange = 0;
-            this.extScrollBarGMO.Location = new System.Drawing.Point(337, 0);
+            this.extScrollBarGMO.Location = new System.Drawing.Point(339, 0);
             this.extScrollBarGMO.Maximum = -1;
             this.extScrollBarGMO.Minimum = 0;
             this.extScrollBarGMO.MouseOverButtonColor = System.Drawing.Color.Green;
             this.extScrollBarGMO.MousePressedButtonColor = System.Drawing.Color.Red;
             this.extScrollBarGMO.Name = "extScrollBarGMO";
-            this.extScrollBarGMO.Size = new System.Drawing.Size(19, 132);
+            this.extScrollBarGMO.Size = new System.Drawing.Size(19, 233);
             this.extScrollBarGMO.SliderColor = System.Drawing.Color.DarkGray;
             this.extScrollBarGMO.SmallChange = 1;
             this.extScrollBarGMO.TabIndex = 15;
@@ -1177,14 +1189,14 @@ namespace EDDCanonnPanel
             this.dataGridViewGMO.Location = new System.Drawing.Point(0, 0);
             this.dataGridViewGMO.Name = "dataGridViewGMO";
             this.dataGridViewGMO.ReadOnly = true;
-            dataGridViewCellStyle5.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.dataGridViewGMO.RowsDefaultCellStyle = dataGridViewCellStyle5;
+            dataGridViewCellStyle6.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.dataGridViewGMO.RowsDefaultCellStyle = dataGridViewCellStyle6;
             this.dataGridViewGMO.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.dataGridViewGMO.ShowCellErrors = false;
             this.dataGridViewGMO.ShowCellToolTips = false;
             this.dataGridViewGMO.ShowEditingIcon = false;
             this.dataGridViewGMO.ShowRowErrors = false;
-            this.dataGridViewGMO.Size = new System.Drawing.Size(337, 132);
+            this.dataGridViewGMO.Size = new System.Drawing.Size(339, 233);
             this.dataGridViewGMO.TabIndex = 14;
             this.dataGridViewGMO.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.dataGridViewGMO_DataError);
             // 
@@ -1202,7 +1214,7 @@ namespace EDDCanonnPanel
             this.tabPageAbout.Controls.Add(this.tableLayoutAbout);
             this.tabPageAbout.Location = new System.Drawing.Point(4, 22);
             this.tabPageAbout.Name = "tabPageAbout";
-            this.tabPageAbout.Size = new System.Drawing.Size(356, 133);
+            this.tabPageAbout.Size = new System.Drawing.Size(356, 228);
             this.tabPageAbout.TabIndex = 9;
             this.tabPageAbout.Text = "About";
             this.tabPageAbout.UseVisualStyleBackColor = true;
@@ -1211,42 +1223,32 @@ namespace EDDCanonnPanel
             // 
             this.tableLayoutAbout.ColumnCount = 3;
             this.tableLayoutAbout.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutAbout.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tableLayoutAbout.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 50F));
-            this.tableLayoutAbout.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 50F));
-            this.tableLayoutAbout.Controls.Add(this.pictureBoxEDD, 2, 3);
             this.tableLayoutAbout.Controls.Add(this.pictureBoxCanonn, 2, 0);
             this.tableLayoutAbout.Controls.Add(this.labelDev, 0, 1);
-            this.tableLayoutAbout.Controls.Add(this.labelTest, 0, 2);
-            this.tableLayoutAbout.Controls.Add(this.labelSpecial, 0, 3);
             this.tableLayoutAbout.Controls.Add(this.linkLabelEDDCanonn, 0, 0);
+            this.tableLayoutAbout.Controls.Add(this.pictureBoxEDD, 2, 4);
+            this.tableLayoutAbout.Controls.Add(this.labelSpecial, 0, 4);
+            this.tableLayoutAbout.Controls.Add(this.labelTest, 0, 3);
+            this.tableLayoutAbout.Controls.Add(this.label1, 0, 2);
             this.tableLayoutAbout.Location = new System.Drawing.Point(3, 3);
             this.tableLayoutAbout.Name = "tableLayoutAbout";
-            this.tableLayoutAbout.RowCount = 4;
-            this.tableLayoutAbout.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
-            this.tableLayoutAbout.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
-            this.tableLayoutAbout.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
-            this.tableLayoutAbout.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
-            this.tableLayoutAbout.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutAbout.Size = new System.Drawing.Size(350, 127);
+            this.tableLayoutAbout.RowCount = 5;
+            this.tableLayoutAbout.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 16.21622F));
+            this.tableLayoutAbout.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 15.76577F));
+            this.tableLayoutAbout.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 14.86487F));
+            this.tableLayoutAbout.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 38.28829F));
+            this.tableLayoutAbout.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 14.41441F));
+            this.tableLayoutAbout.Size = new System.Drawing.Size(350, 222);
             this.tableLayoutAbout.TabIndex = 0;
-            // 
-            // pictureBoxEDD
-            // 
-            this.pictureBoxEDD.Image = global::EDDCanonnPanel.Properties.Resources.edd;
-            this.pictureBoxEDD.Location = new System.Drawing.Point(303, 96);
-            this.pictureBoxEDD.Name = "pictureBoxEDD";
-            this.pictureBoxEDD.Size = new System.Drawing.Size(44, 28);
-            this.pictureBoxEDD.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.pictureBoxEDD.TabIndex = 0;
-            this.pictureBoxEDD.TabStop = false;
-            this.pictureBoxEDD.Click += new System.EventHandler(this.pictureBoxEDD_Click);
             // 
             // pictureBoxCanonn
             // 
             this.pictureBoxCanonn.Image = ((System.Drawing.Image)(resources.GetObject("pictureBoxCanonn.Image")));
             this.pictureBoxCanonn.Location = new System.Drawing.Point(303, 3);
             this.pictureBoxCanonn.Name = "pictureBoxCanonn";
-            this.pictureBoxCanonn.Size = new System.Drawing.Size(44, 25);
+            this.pictureBoxCanonn.Size = new System.Drawing.Size(44, 30);
             this.pictureBoxCanonn.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureBoxCanonn.TabIndex = 1;
             this.pictureBoxCanonn.TabStop = false;
@@ -1258,43 +1260,65 @@ namespace EDDCanonnPanel
             this.labelDev.AutoSize = true;
             this.labelDev.Location = new System.Drawing.Point(3, 40);
             this.labelDev.Name = "labelDev";
-            this.labelDev.Size = new System.Drawing.Size(171, 13);
+            this.labelDev.Size = new System.Drawing.Size(171, 26);
             this.labelDev.TabIndex = 3;
-            this.labelDev.Text = "Developed by EDDiscovery Team.";
-            // 
-            // labelTest
-            // 
-            this.labelTest.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.labelTest.AutoSize = true;
-            this.labelTest.Location = new System.Drawing.Point(3, 71);
-            this.labelTest.Name = "labelTest";
-            this.labelTest.Size = new System.Drawing.Size(238, 13);
-            this.labelTest.TabIndex = 4;
-            this.labelTest.Text = "Tested by: Eahlstan, Jugom, NYZCHF, MentalFS";
-            this.labelTest.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // labelSpecial
-            // 
-            this.labelSpecial.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.labelSpecial.AutoSize = true;
-            this.labelSpecial.Location = new System.Drawing.Point(3, 103);
-            this.labelSpecial.Name = "labelSpecial";
-            this.labelSpecial.Size = new System.Drawing.Size(239, 13);
-            this.labelSpecial.TabIndex = 5;
-            this.labelSpecial.Text = "Special thanks to: Robby, LCU No Fool Like One";
+            this.labelDev.Text = "Developed by EDDiscovery Team.\r\n######################";
             // 
             // linkLabelEDDCanonn
             // 
             this.linkLabelEDDCanonn.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.linkLabelEDDCanonn.AutoSize = true;
             this.linkLabelEDDCanonn.LinkColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(128)))), ((int)(((byte)(0)))));
-            this.linkLabelEDDCanonn.Location = new System.Drawing.Point(3, 9);
+            this.linkLabelEDDCanonn.Location = new System.Drawing.Point(3, 11);
             this.linkLabelEDDCanonn.Name = "linkLabelEDDCanonn";
-            this.linkLabelEDDCanonn.Size = new System.Drawing.Size(128, 13);
+            this.linkLabelEDDCanonn.Size = new System.Drawing.Size(76, 13);
             this.linkLabelEDDCanonn.TabIndex = 6;
             this.linkLabelEDDCanonn.TabStop = true;
-            this.linkLabelEDDCanonn.Text = "EDDCanonn v1.0 | 03/25";
+            this.linkLabelEDDCanonn.Text = "EDDCanonn v";
             this.linkLabelEDDCanonn.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabelEDDCanonn_LinkClicked);
+            // 
+            // pictureBoxEDD
+            // 
+            this.pictureBoxEDD.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.pictureBoxEDD.Image = global::EDDCanonnPanel.Properties.Resources.edd;
+            this.pictureBoxEDD.Location = new System.Drawing.Point(303, 195);
+            this.pictureBoxEDD.Name = "pictureBoxEDD";
+            this.pictureBoxEDD.Size = new System.Drawing.Size(44, 24);
+            this.pictureBoxEDD.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.pictureBoxEDD.TabIndex = 0;
+            this.pictureBoxEDD.TabStop = false;
+            this.pictureBoxEDD.Click += new System.EventHandler(this.pictureBoxEDD_Click);
+            // 
+            // labelSpecial
+            // 
+            this.labelSpecial.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.labelSpecial.AutoSize = true;
+            this.labelSpecial.Location = new System.Drawing.Point(3, 199);
+            this.labelSpecial.Name = "labelSpecial";
+            this.labelSpecial.Size = new System.Drawing.Size(239, 13);
+            this.labelSpecial.TabIndex = 5;
+            this.labelSpecial.Text = "Special thanks to: Robby, LCU No Fool Like One";
+            // 
+            // labelTest
+            // 
+            this.labelTest.AutoSize = true;
+            this.labelTest.Location = new System.Drawing.Point(3, 104);
+            this.labelTest.Name = "labelTest";
+            this.labelTest.Size = new System.Drawing.Size(243, 13);
+            this.labelTest.TabIndex = 4;
+            this.labelTest.Text = "Eahlstan, Jugom, NYZCHF, MentalFS, JDM12983";
+            this.labelTest.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // label1
+            // 
+            this.label1.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(3, 74);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(57, 26);
+            this.label1.TabIndex = 7;
+            this.label1.Text = "Tested by:\r\n#######";
+            this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // tabDebug
             // 
@@ -1307,7 +1331,7 @@ namespace EDDCanonnPanel
             this.tabDebug.Location = new System.Drawing.Point(4, 22);
             this.tabDebug.Name = "tabDebug";
             this.tabDebug.Padding = new System.Windows.Forms.Padding(3);
-            this.tabDebug.Size = new System.Drawing.Size(356, 133);
+            this.tabDebug.Size = new System.Drawing.Size(356, 228);
             this.tabDebug.TabIndex = 5;
             this.tabDebug.Text = "Debug";
             this.tabDebug.UseVisualStyleBackColor = true;
@@ -1369,9 +1393,80 @@ namespace EDDCanonnPanel
             this.DebugLog.Name = "DebugLog";
             this.DebugLog.ReadOnly = true;
             this.DebugLog.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.DebugLog.Size = new System.Drawing.Size(344, 101);
+            this.DebugLog.Size = new System.Drawing.Size(344, 205);
             this.DebugLog.TabIndex = 5;
             this.DebugLog.WordWrap = false;
+            // 
+            // ColumnBio0
+            // 
+            this.ColumnBio0.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
+            this.ColumnBio0.HeaderText = "";
+            this.ColumnBio0.MinimumWidth = 25;
+            this.ColumnBio0.Name = "ColumnBio0";
+            this.ColumnBio0.ReadOnly = true;
+            this.ColumnBio0.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+            this.ColumnBio0.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.ColumnBio0.Width = 25;
+            // 
+            // ColumnBio1
+            // 
+            this.ColumnBio1.HeaderText = "";
+            this.ColumnBio1.MinimumWidth = 25;
+            this.ColumnBio1.Name = "ColumnBio1";
+            this.ColumnBio1.ReadOnly = true;
+            this.ColumnBio1.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+            this.ColumnBio1.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            // 
+            // ColumnBio2
+            // 
+            this.ColumnBio2.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
+            this.ColumnBio2.HeaderText = "";
+            this.ColumnBio2.MinimumWidth = 25;
+            this.ColumnBio2.Name = "ColumnBio2";
+            this.ColumnBio2.ReadOnly = true;
+            this.ColumnBio2.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+            this.ColumnBio2.Width = 25;
+            // 
+            // ColumnRing0
+            // 
+            this.ColumnRing0.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
+            this.ColumnRing0.HeaderText = "";
+            this.ColumnRing0.MinimumWidth = 25;
+            this.ColumnRing0.Name = "ColumnRing0";
+            this.ColumnRing0.ReadOnly = true;
+            this.ColumnRing0.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+            this.ColumnRing0.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.ColumnRing0.Width = 25;
+            // 
+            // ColumnRing1
+            // 
+            this.ColumnRing1.HeaderText = "";
+            this.ColumnRing1.MinimumWidth = 25;
+            this.ColumnRing1.Name = "ColumnRing1";
+            this.ColumnRing1.ReadOnly = true;
+            this.ColumnRing1.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+            this.ColumnRing1.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            // 
+            // ColumnRing2
+            // 
+            this.ColumnRing2.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
+            this.ColumnRing2.HeaderText = "";
+            this.ColumnRing2.MinimumWidth = 25;
+            this.ColumnRing2.Name = "ColumnRing2";
+            this.ColumnRing2.ReadOnly = true;
+            this.ColumnRing2.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+            this.ColumnRing2.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.ColumnRing2.Width = 25;
+            // 
+            // ColumnRing3
+            // 
+            this.ColumnRing3.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
+            this.ColumnRing3.HeaderText = "";
+            this.ColumnRing3.MinimumWidth = 25;
+            this.ColumnRing3.Name = "ColumnRing3";
+            this.ColumnRing3.ReadOnly = true;
+            this.ColumnRing3.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+            this.ColumnRing3.Width = 25;
             // 
             // EDDCanonnUserControl
             // 
@@ -1385,7 +1480,7 @@ namespace EDDCanonnPanel
             this.Controls.Add(this.tableLayoutSystem);
             this.Enabled = false;
             this.Name = "EDDCanonnUserControl";
-            this.Size = new System.Drawing.Size(407, 512);
+            this.Size = new System.Drawing.Size(407, 612);
             this.tableLayoutSystem.ResumeLayout(false);
             this.tableLayoutSystem.PerformLayout();
             this.contextMenuStrip1.ResumeLayout(false);
@@ -1413,8 +1508,8 @@ namespace EDDCanonnPanel
             this.tabPageAbout.ResumeLayout(false);
             this.tableLayoutAbout.ResumeLayout(false);
             this.tableLayoutAbout.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxEDD)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxCanonn)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxEDD)).EndInit();
             this.tabDebug.ResumeLayout(false);
             this.tabDebug.PerformLayout();
             this.ResumeLayout(false);
@@ -1485,12 +1580,19 @@ namespace EDDCanonnPanel
         private DataGridViewImageColumn ColumnData1;
         private DataGridView dataGridViewBio;
         private DataGridViewTextBoxColumn ColumnGMO0;
-        private DataGridViewTextBoxColumn ColumnBio0;
-        private DataGridViewTextBoxColumn ColumnBio1;
-        private DataGridViewImageColumn ColumnBio2;
+        private Label label1;
+        private DataGridViewImageColumn a;
+        private DataGridViewImageColumn b;
+        private DataGridViewImageColumn c;
+        private DataGridViewImageColumn d;
+        private DataGridViewImageColumn e;
+        private DataGridViewImageColumn f;
         private DataGridViewTextBoxColumn ColumnRing0;
         private DataGridViewTextBoxColumn ColumnRing1;
         private DataGridViewTextBoxColumn ColumnRing2;
         private DataGridViewImageColumn ColumnRing3;
+        private DataGridViewTextBoxColumn ColumnBio0;
+        private DataGridViewTextBoxColumn ColumnBio1;
+        private DataGridViewImageColumn ColumnBio2;
     }
 }

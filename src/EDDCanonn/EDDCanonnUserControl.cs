@@ -28,6 +28,7 @@ using System.Threading;
 using System.Text.RegularExpressions;
 using System.Net;
 using EDDCanonnPanel.Utility;
+using System.IO;
 
 
 namespace EDDCanonnPanel
@@ -51,7 +52,6 @@ namespace EDDCanonnPanel
 
         private void StartUp() //Triggered by panel Initialize.
         {
-
             NotifyMainFields("Start Up...");
             try
             {
@@ -690,11 +690,13 @@ namespace EDDCanonnPanel
 
         private readonly object _lockSystemData = new object();
         private SystemData _systemData; //Do not use this. Otherwise it could get bad.
-
         private void ResetSystemData() //In the event of a jump/location or if web data is not available.
         {
             lock (_lockSystemData)
+            {
                 _systemData = null;
+                CanonnUtil.DisposeDataGridViewRowList(_dataGridNotifications);
+            }
         }
 
         private SystemData DeepCopySystemData()
@@ -991,7 +993,10 @@ namespace EDDCanonnPanel
         public void ProcessSpanshDump(JObject root)
         {
             if (root == null || root.Count == 0) // If this is true after a ‘Location’ / 'Jump' event, the system is later initialised via that event.
+            {
+                DataGridNotifications.Add(CanonnUtil.CreateDataGridViewRow(dataGridViewData, new object[] { "This system is not yet known to spansh.", Properties.Resources.spansh }));
                 return;
+            }
 
             if (systemData == null)
                 systemData = new SystemData(); //Enforces encapsulation and creates a new SystemData instance internally, disregarding any parameters.
@@ -1010,6 +1015,9 @@ namespace EDDCanonnPanel
 
                     if(systemData.SystemAddress != -1)
                         ProcessCanonnBiostats(systemData.SystemAddress);
+
+                    if(systemData.BodyCount == -1 && systemData.Bodys?.Count > 0)
+                        DataGridNotifications.Add(CanonnUtil.CreateDataGridViewRow(dataGridViewData, new object[] { "Spansh data may be incorrect. FSS all bodies.", Properties.Resources.spansh }));
 
                 }
                 catch (Exception ex)
@@ -1129,7 +1137,14 @@ namespace EDDCanonnPanel
                 {
                     continue;
                 }
-                body.ScanData.Organics = genuses;
+
+                body.ScanData.Organics = genuses
+                    .Where(genus =>
+                    {
+                        string genusLocalised = DataUtil.GenusLocalised(genus["Genus"]?.Value?.ToString());
+                        return biology.Any(bio => bio["Bio"]?.Value?.ToString()?.Contains(genusLocalised) == true);
+                    })
+                    .ToList();
             }
         }
 
@@ -1146,57 +1161,49 @@ namespace EDDCanonnPanel
 
         public void DataResult(object requestTag, string data)
         {
-            if (isAbort)
-                return;
+            if (isAbort) return;
 
             try
             {
                 if (requestTag == null || data == null)
-                    return;
+                    return; //No tag or data, nothing to process.
 
                 JObject o = data.JSONParse().Object();
                 if (!(requestTag is RequestTag || requestTag is JObject))
-                    return;
+                    return; //Invalid tag format.
 
-                dataHandler.StartTaskAsync(
-                (token) =>
+                dataHandler.StartTaskAsync((token) =>
                 {
-                    if (requestTag is RequestTag rt) //Triggered by panel creation.
+                    if (requestTag is RequestTag rt)
                     {
-                        if (rt.Equals(RequestTag.OnStart))
+                        if (rt.Equals(RequestTag.OnStart)) //Triggered by panel creation.
                         {
-                            lock (_lockSystemData) ProcessSpanshDump(o);
-                            SafeInvoke(() =>
-                            {
-                                this.Enabled = true;
-                            });
-                            _eventLock = true;
-                            _journalLock = true; //The plugin start process is now complete.
+                            lock (_lockSystemData) ProcessSpanshDump(o); //I don't think the lock is necessary. But safety first.
+                            SafeInvoke(() => this.Enabled = true);
+                            _eventLock = _journalLock = true; //Plugin startup complete.
+                            if (systemData == null) lock(_lockSystemData) systemData = new SystemData();
                         }
                         else if (rt.Equals(RequestTag.Log))
                         {
                             SafeInvoke(() =>
                             {
-                                string mg = "\n" + data ?? "none" + "\n";
-                                DebugLog.AppendText(mg);
-                                CanonnLogging.Instance.LogToFile(mg);
+                                string message = $"\n{data ?? "none"}\n";
+                                DebugLog.AppendText(message);
+                                CanonnLogging.Instance.LogToFile(message);
                             });
                             return;
                         }
                     }
-                    else if (requestTag is JObject jb)
+                    else if (requestTag is JObject jb && new[] { "Location", "FSDJump" }.Contains(jb["event"]?.Value?.ToString()))
                     {
-                        string evt = jb["event"]?.Value?.ToString();
-                        if (evt == "Location" || evt == "FSDJump") //Triggered by 'jump' or 'location' Event.
+                        lock (_lockSystemData) //I still have no idea. See above.
                         {
-                            lock (_lockSystemData)
-                            {
-                                ProcessSpanshDump(o);
-                                if (systemData == null) ProcessNewSystem(jb);
-                            }
-                            _eventLock = true;
+                            ProcessSpanshDump(o);
+                            if (systemData == null) ProcessNewSystem(jb);
                         }
+                        _eventLock = true; //Process collected events.
                     }
+
                     UpdateUI(true);
                     UpdatePatrols();
                 },
@@ -1214,102 +1221,67 @@ namespace EDDCanonnPanel
                 Console.Error.WriteLine($"EDDCanonn: Unexpected error in DataResult: {ex.Message}");
             }
         }
-
         #endregion
 
         #region ProcessUpperGridViews
 
         private List<DataGridViewRow> CollectBioData(SystemData system)
         {
-            if (system?.Bodys == null) return null;
+            if (system?.Bodys?.Values == null) return null;
 
             List<DataGridViewRow> rows = new List<DataGridViewRow>
             {
                 CanonnUtil.CreateDataGridViewRow(dataGridViewBio, new object[] { "Missing Bio Data:", null, new Bitmap(1, 1) })
             };
-            foreach (Body body in system.Bodys.Values)
+
+            Regex nameRegex = new Regex(@"^[A-Za-z\s-]+\d+-\d+\s+(.+)$", RegexOptions.IgnoreCase);
+
+
+            //Filter only bodies that have biological signals.
+            IEnumerable<Body> validBodies = system.Bodys.Values
+                .Where(body => body?.ScanData?.Signals?.Any() == true);
+
+            foreach (Body body in validBodies)
             {
-                if (body?.ScanData?.Signals == null || body.ScanData.Signals.Count == 0) continue;
+                //Find the first biological signal entry.
+                JObject biologicalSignal = CanonnUtil.FindFirstMatchingJObject(body.ScanData.Signals, "Type", "$SAA_SignalType_Biological;") ??
+                                           CanonnUtil.FindFirstMatchingJObject(body.ScanData.Signals, null, "$SAA_SignalType_Biological;");
 
-                JObject o = CanonnUtil.FindFirstMatchingJObject(body.ScanData.Signals, "Type", "$SAA_SignalType_Biological;") ?? CanonnUtil.FindFirstMatchingJObject(body.ScanData.Signals, null, "$SAA_SignalType_Biological;");
+                if (biologicalSignal == null) continue;
 
-                if (o == null) continue;
+                int bioCount = CanonnUtil.GetValueOrDefault(biologicalSignal["Count"], 0);
+                bioCount = bioCount == 0
+                    ? CanonnUtil.GetValueOrDefault(biologicalSignal["$SAA_SignalType_Biological;"], 0)
+                    : bioCount;
 
-                if (body.ScanData.Genuses == null || body.ScanData.Genuses.Count == 0)
+                Match match = nameRegex.Match(body.BodyName);
+
+                //If no genus data is available, add an entry with unknown species count.
+                if (body.ScanData.Genuses?.Any() != true)
                 {
-                    rows.Add(CanonnUtil.CreateDataGridViewRow(dataGridViewBio, new object[] 
+                    rows.Add(CanonnUtil.CreateDataGridViewRow(dataGridViewBio, new object[]
                     {
-                        body.BodyName, 
-                        (CanonnUtil.GetValueOrDefault(o["Count"], 0) == 0 ? CanonnUtil.GetValueOrDefault(o["$SAA_SignalType_Biological;"], 0)
-                        : CanonnUtil.GetValueOrDefault(o["Count"], 0)) + " unknown species", 
-                        Properties.Resources.biology 
+                        match.Success ? match.Groups[1].Value : body.BodyName,
+                        $"{bioCount} unknown species",
+                        Properties.Resources.biology
                     }));
+                    continue;
                 }
-                else
+
+                //Find samples that have not been collected yet.
+                List<JObject> missingSamples = body.ScanData.Genuses
+                    .Where(genus => !CanonnUtil.ContainsKeyValuePair(body.ScanData.Organics, "Genus", genus["Genus"]?.Value?.ToString()))
+                    .ToList();
+
+                if (missingSamples.Any())
                 {
-                    bool first = true;
-                    foreach (JObject genus in body.ScanData.Genuses)
+                    rows.AddRange(missingSamples.Select((genus, index) =>
+                    CanonnUtil.CreateDataGridViewRow(dataGridViewBio, new object[]
                     {
-                        if (CanonnUtil.ContainsKeyValuePair(body.ScanData.Organics, "Genus", genus["Genus"]?.Value?.ToString())) continue;
-
-                        rows.Add(CanonnUtil.CreateDataGridViewRow(dataGridViewBio, new object[]
-                        {
-                            first ? body.BodyName : null,
-                            "sample required: " + DataUtil.GenusLocalised(genus["Genus"]?.Value?.ToString()),
-                            Properties.Resources.biology
-                        }));
-                        first = false;
-                    }                  
-                }              
-            }
-
-            if (rows.Count <= 1)
-            {
-                CanonnUtil.DisposeDataGridViewRowList(rows); return null;
-            }
-            return rows;
-        }
-
-        private List<DataGridViewRow> CollectRingData(SystemData system)
-        {
-            if (system?.Bodys == null) return null;
-
-            List<DataGridViewRow> rows = new List<DataGridViewRow>
-            {
-                CanonnUtil.CreateDataGridViewRow(dataGridViewRing, new object[] { "Missing Rings:", null, null, new Bitmap(1, 1) })
-            };
-
-            Regex ringRegex = new Regex(@"([A-Z])\s+Ring$", RegexOptions.IgnoreCase);
-
-            foreach (Body body in system.Bodys.Values)
-            {
-                if (body?.ScanData?.Rings == null) continue;
-                bool first = true;
-
-                foreach (JObject ring in body.ScanData.Rings)
-                {
-                    string ringName = ring["name"]?.Value?.ToString() ?? ring["Name"]?.Value?.ToString() ?? null;
-                    if (ringName?.Contains("Ring") != true) continue;
-
-                    if (system.GetBodyByName(ringName)?.IsMapped == true || ring.Contains("id64")) continue;
-
-                    double[] values = new[] { "innerRadius", "InnerRad", "outerRadius", "OuterRad" }
-                        .Select(k => CanonnUtil.GetValueOrDefault(ring[k], 0.0) / 299792458)
-                        .Select(v => Math.Round(v, 2))
-                        .ToArray();
-
-                    string result = $"{(values[0] == 0.0 ? values[1] : values[0])} ls - {(values[2] == 0.0 ? values[3] : values[2])} ls";
-
-                    Match match = ringRegex.Match(ringName);
-                    rows.Add(CanonnUtil.CreateDataGridViewRow(dataGridViewRing, new object[]
-                    {
-                        first ? body.BodyName : null,
-                        match.Success ? match.Groups[1].Value + " Ring" : ringName,
-                        result,
-                        Properties.Resources.ring
-                    }));
-
-                    first = false;
+                        index == 0 ? match.Success ? match.Groups[1].Value : body.BodyName : null, //Only show body name for the first missing sample.
+                        "sample required: " + DataUtil.GenusLocalised(genus["Genus"]?.Value?.ToString()),
+                        Properties.Resources.biology
+                    })));
                 }
             }
 
@@ -1321,6 +1293,70 @@ namespace EDDCanonnPanel
 
             return rows;
         }
+
+        private List<DataGridViewRow> CollectRingData(SystemData system)
+        {
+            if (system?.Bodys?.Values == null) return null;
+
+            List<DataGridViewRow> rows = new List<DataGridViewRow>
+            {
+                CanonnUtil.CreateDataGridViewRow(dataGridViewRing, new object[] { "Missing Rings:", null, null, new Bitmap(1, 1) })
+            };
+
+            Regex ringRegex = new Regex(@"([A-Z])\s+Ring$", RegexOptions.IgnoreCase); //Pattern to extract short names.
+            Regex nameRegex = new Regex(@"^[A-Za-z\s-]+\d+-\d+\s+(.+)$", RegexOptions.IgnoreCase);
+
+            //Filter only bodies that have ring data.
+            IEnumerable<Body> validBodies = system.Bodys.Values
+                .Where(body => body?.ScanData?.Rings != null);
+
+            foreach (Body body in validBodies)
+            {
+                //Find missing rings that are not mapped or do not contain an id64.
+                List<JObject> missingRings = body.ScanData.Rings
+                    .Where(ring =>
+                    {
+                        string ringName = ring["name"]?.Value?.ToString() ?? ring["Name"]?.Value?.ToString();
+                        return ringName?.Contains("Ring") == true
+                            && !(system.GetBodyByName(ringName)?.IsMapped == true || ring.Contains("id64"));
+                    })
+                    .ToList();
+
+                if (!missingRings.Any()) continue;
+
+                rows.AddRange(missingRings.Select((ring, index) =>
+                {
+                    string ringName = ring["name"]?.Value?.ToString() ?? ring["Name"]?.Value?.ToString();
+                    //Extract inner and outer radius values, converting from meters to light-seconds.
+                    double[] values = new[] { "innerRadius", "InnerRad", "outerRadius", "OuterRad" }
+                        .Select(k => CanonnUtil.GetValueOrDefault(ring[k], 0.0) / 299792458)
+                        .Select(v => Math.Round(v, 2))
+                        .ToArray();
+
+                    string result = $"{(values[0] == 0.0 ? values[1] : values[0])} ls - {(values[2] == 0.0 ? values[3] : values[2])} ls";
+
+                    Match matchRing = ringRegex.Match(ringName);
+                    Match matchName = nameRegex.Match(body.BodyName);
+
+                    return CanonnUtil.CreateDataGridViewRow(dataGridViewRing, new object[]
+                    {
+                        index == 0 ? matchName.Success ? matchName.Groups[1].Value : body.BodyName : null, //Only show the body name for the first ring.
+                        matchRing.Success ? matchRing.Groups[1].Value + " Ring" : ringName,
+                        result,
+                        Properties.Resources.ring
+                    });
+                }));
+            }
+
+            if (rows.Count <= 1)
+            {
+                CanonnUtil.DisposeDataGridViewRowList(rows);
+                return null;
+            }
+
+            return rows;
+        }
+
 
         private List<DataGridViewRow> CollectGMO(SystemData system)
         {
@@ -1492,45 +1528,79 @@ namespace EDDCanonnPanel
             });
         }
 
-        private void UpdateUpperGridViews(SystemData system, bool jumped) //This should only be called by 'UpdateMainFields'.
+        private List<DataGridViewRow> _dataGridNotifications;
+        private List<DataGridViewRow> DataGridNotifications
         {
-            if (system == null) //Safety first.
-                return;
+            get
+            {
+                lock (_lockSystemData)
+                {
+                    if (_dataGridNotifications == null)
+                        _dataGridNotifications = new List<DataGridViewRow>();
+                    return _dataGridNotifications;
+                }
+            }
+        }
+        private void UpdateUpperGridViews(SystemData system, bool jumped)
+        {
+            if (system == null) return;
 
             SafeBeginInvoke(() =>
             {
                 try
                 {
+                    //Clear all grid views before populating them with new data.
                     dataGridViewData.Rows.Clear();
                     dataGridViewRing.Rows.Clear();
                     dataGridViewBio.Rows.Clear();
+                    dataGridViewGMO.Rows.Clear();                 
 
+                    dataGridViewData.Rows.AddRange(CanonnUtil.CloneDataGridViewRowList(DataGridNotifications).ToArray());
+
+                    if (system.BodyCount == -1)
+                    {
+                        dataGridViewData.Rows.Add(CanonnUtil.CreateDataGridViewRow(dataGridViewData, new object[]
+                        { "D-Scan is required.", Properties.Resources.tourist }));
+                    }
+
+                    //Collect missing ring data and update the corresponding grid.
                     List<DataGridViewRow> ringRows = CollectRingData(system);
+                    dataGridViewRing.Rows.AddRange(ringRows?.ToArray() ??
+                        new[] { CanonnUtil.CreateDataGridViewRow(dataGridViewRing, new object[]
+                        { "No missing ring data for this system yet.", null, null, new Bitmap(1, 1) }) });
+
                     if (ringRows?.Count > 0)
                     {
-                        dataGridViewRing.Rows.AddRange(ringRows.ToArray());
-                        dataGridViewData.Rows.Add(CanonnUtil.CreateDataGridViewRow(dataGridViewData, new object[] { "There are new rings that can be scanned.", Properties.Resources.ring }));
+                        dataGridViewData.Rows.Add(CanonnUtil.CreateDataGridViewRow(dataGridViewData, new object[]
+                        { "There are new rings that can be scanned.", Properties.Resources.ring }));
                     }
 
+                    //Collect missing bio data and update the corresponding grid.
                     List<DataGridViewRow> bioRows = CollectBioData(system);
+                    dataGridViewBio.Rows.AddRange(bioRows?.ToArray() ??
+                        new[] { CanonnUtil.CreateDataGridViewRow(dataGridViewBio, new object[]
+                        { "No missing bio data for this system yet.", null, new Bitmap(1, 1) }) });
+
                     if (bioRows?.Count > 0)
                     {
-                        dataGridViewBio.Rows.AddRange(bioRows.ToArray());
-                        dataGridViewData.Rows.Add(CanonnUtil.CreateDataGridViewRow(dataGridViewData, new object[] { "There is new bio data available for scanning.", Properties.Resources.biology }));
+                        dataGridViewData.Rows.Add(CanonnUtil.CreateDataGridViewRow(dataGridViewData, new object[]
+                        { "There is new bio data available for scanning.", Properties.Resources.biology }));
                     }
 
-                    if (jumped)
+                    //If no jump occurred, no need to check.
+                    if (!jumped) return;
+
+                    //Collect GMO data and update the corresponding grid.
+                    List<DataGridViewRow> gmoRows = CollectGMO(system);
+                    dataGridViewGMO.Rows.AddRange(gmoRows?.ToArray() ??
+                        new[] { CanonnUtil.CreateDataGridViewRow(dataGridViewGMO, new object[]
+                        { "No GMO was found for this system." }) });
+
+                    if (gmoRows?.Count > 0)
                     {
-                        dataGridViewGMO.Rows.Clear();
-                        List<DataGridViewRow> gmoRows = CollectGMO(system);
-                        if (gmoRows?.Count > 0)
-                        {
-                            dataGridViewGMO.Rows.AddRange(gmoRows.ToArray());
-                            dataGridViewData.Rows.Add(CanonnUtil.CreateDataGridViewRow(dataGridViewData, new object[] { "A GMO is available for this system.", Properties.Resources.tourist }));
-                        }
+                        dataGridViewData.Rows.Add(CanonnUtil.CreateDataGridViewRow(dataGridViewData, new object[]
+                        { "A GMO is available for this system.", Properties.Resources.tourist }));
                     }
-
-                    //dataGridViewData.Rows.Add(CanonnUtil.CreateDataGridViewRow(dataGridViewData, new object[] { "There are new surveys that can be confirmed. [WIP]", Properties.Resources.other }));
                 }
                 catch (Exception ex)
                 {
@@ -1540,7 +1610,6 @@ namespace EDDCanonnPanel
                 }
             });
         }
-
 
         #region Links
 
@@ -1653,6 +1722,7 @@ namespace EDDCanonnPanel
 
         #region IEDDPanelExtension
 
+        private readonly object _canonnPushLock = new object();
         //If false, jornals are ignored. Only released after the 'OnStart' data result.
         private bool _journalLock = false;
         //If false, events are held back.
@@ -1687,15 +1757,43 @@ namespace EDDCanonnPanel
 
                 if (IsEventValid(eventId, je.json)) // Send event to canonn if valid.
                 {
-                    string msg = "\n Build payload for: " + eventId + 
-                                 "\n" + Payload.BuildPayload(je, GetStatusJson()).ToString(true, "  ") + "\n";
-                    Console.Error.WriteLine(msg);
-                    CanonnLogging.Instance.LogToFile(msg);
 
-                    SafeBeginInvoke(() =>
+                    dataHandler.StartTaskAsync( //wip
+                    (subToken) =>
                     {
-                        DebugLog.AppendText(msg);
-                    });
+                        lock (_canonnPushLock)
+                        {
+                            string payload = Payload.BuildPayload(je, GetStatusJson()).ToString(true, "  ");
+
+                            string buildMsg = $"\n Build payload for: {eventId} => \n{payload}\n";
+                            Console.Error.WriteLine(buildMsg); CanonnLogging.Instance.LogToFile(buildMsg);
+                            CanonnLogging.Instance.LogToFile(buildMsg);
+
+                            SafeBeginInvoke(() =>
+                            {
+                                DebugLog.AppendText(buildMsg);
+                            });
+
+                            (bool success, string response) = dataHandler.PushData(LinkUtil.CanonnPostUrl, payload);
+
+                            string statusMsg = $"\n Status for: {eventId} = {success} => \n {response}\n";
+                            Console.Error.WriteLine(statusMsg); CanonnLogging.Instance.LogToFile(statusMsg);
+                            CanonnLogging.Instance.LogToFile(statusMsg);
+
+                            SafeBeginInvoke(() =>
+                            {
+                                DebugLog.AppendText(statusMsg);
+                            });
+                        }
+                    },
+                    ex =>
+                    {
+                        string error = $"EDDCanonn: Unexpected error in Canonn-Push: {ex.Message}";
+                        Console.Error.WriteLine(error);
+                        CanonnLogging.Instance.LogToFile(error);
+                    },
+                        "Canonn-Push"
+                    );
                 }
 
                 while (!_eventLock) // Wait until a 'DataResult' has been completed.
@@ -1807,6 +1905,7 @@ namespace EDDCanonnPanel
             PanelCallBack.LoadGridLayout(dataGridViewBio);
             PanelCallBack.LoadGridLayout(dataGridViewRing);
             PanelCallBack.LoadGridLayout(dataGridViewGMO);
+            PanelCallBack.LoadGridLayout(dataGridSignals);
         }
 
         public void ScreenShotCaptured(string file, Size s)
@@ -1923,6 +2022,11 @@ namespace EDDCanonnPanel
         private void dataGridPatrol_DataError(object sender, DataGridViewDataErrorEventArgs e)
         {
             HandleDataGridViewError("dataGridPatrol", e);
+        }
+
+        private void dataGridSignals_DataError(object sender, DataGridViewDataErrorEventArgs e)
+        {
+            HandleDataGridViewError("dataGridSignals", e);
         }
 
         private void HandleDataGridViewError(string gridName, DataGridViewDataErrorEventArgs e)
