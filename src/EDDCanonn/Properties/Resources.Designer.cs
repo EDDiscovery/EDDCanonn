@@ -153,9 +153,9 @@ namespace EDDCanonnPanel.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap tourist {
+        internal static System.Drawing.Bitmap spansh {
             get {
-                object obj = ResourceManager.GetObject("tourist", resourceCulture);
+                object obj = ResourceManager.GetObject("spansh", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -163,9 +163,9 @@ namespace EDDCanonnPanel.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap update {
+        internal static System.Drawing.Bitmap tourist {
             get {
-                object obj = ResourceManager.GetObject("update", resourceCulture);
+                object obj = ResourceManager.GetObject("tourist", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
