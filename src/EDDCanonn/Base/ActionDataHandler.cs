@@ -152,7 +152,7 @@ namespace EDDCanonnPanel.Base
                 HttpWebRequest request = (HttpWebRequest)WebRequest.Create(fullUrl);
                 request.Method = "GET";
                 request.Accept = "application/json";
-                request.UserAgent = "EDDCanonnPanel" + CanonnEDDClass.V;
+                request.UserAgent = "EDDCanonnClientV" + CanonnEDDClass.V.ToString();
                 request.Timeout = 20000;
 
                 using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
@@ -196,7 +196,7 @@ namespace EDDCanonnPanel.Base
                 request.Method = "POST";
                 request.ContentType = contentType;
                 request.ContentLength = Encoding.UTF8.GetByteCount(postData);
-                request.UserAgent = "EDDCanonnPanel" + CanonnEDDClass.V;
+                request.UserAgent = "EDDCanonnClientV" + CanonnEDDClass.V.ToString();
                 request.Timeout = 20000;
 
                 using (StreamWriter writer = new StreamWriter(request.GetRequestStream()))
