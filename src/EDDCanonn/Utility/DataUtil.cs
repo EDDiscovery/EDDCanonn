@@ -42,6 +42,7 @@ namespace EDDCanonnPanel.Utility
         [
             { ""genus"": ""$Codex_Ent_Fonticulus_Genus_Name;"", ""genus_localised"": ""Fonticulua""         },
             { ""genus"": ""$Codex_Ent_Tubus_Genus_Name;"",      ""genus_localised"": ""Tubus""              },
+            { ""genus"": ""$Codex_Ent_Tube_Name;"",             ""genus_localised"": ""Tubers""              },
             { ""genus"": ""$Codex_Ent_Tussocks_Genus_Name;"",   ""genus_localised"": ""Tussock""            },
             { ""genus"": ""$Codex_Ent_Seed_Name;"",             ""genus_localised"": ""Roseum Brain Tree""  },
             { ""genus"": ""$Codex_Ent_Osseus_Genus_Name;"",     ""genus_localised"": ""Osseus""             },
@@ -56,7 +57,7 @@ namespace EDDCanonnPanel.Utility
             { ""genus"": ""$Codex_Ent_Fungoids_Genus_Name;"",   ""genus_localised"": ""Fungoida""           },
             { ""genus"": ""$Codex_Ent_Aleoids_Genus_Name;"",    ""genus_localised"": ""Aleoida""            },
             { ""genus"": ""$Codex_Ent_Recepta_Genus_Name;"",    ""genus_localised"": ""Recepta""            },
-            { ""genus"": ""$Codex_Ent_Bacterial_Genus_Name;"",  ""genus_localised"": ""Bacteria""           },
+            { ""genus"": ""$Codex_Ent_Bacterial_Genus_Name;"",  ""genus_localised"": ""Bacterium""          },
             { ""genus"": ""$Codex_Ent_Cone_Name;"",             ""genus_localised"": ""Bark Mounds""        },
             { ""genus"": ""$Codex_Ent_Vents_Name;"",            ""genus_localised"": ""Amphora Plant""      },
             { ""genus"": ""$Codex_Ent_Brancae_Name;"",          ""genus_localised"": ""Brain Trees""        },
