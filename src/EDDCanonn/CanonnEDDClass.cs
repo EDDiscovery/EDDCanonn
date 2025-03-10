@@ -14,30 +14,28 @@
 
 using System;
 using System.Diagnostics;
-using System.Reflection;
+using EDDCanonnPanel.Emitter;
 
 namespace EDDCanonnPanel
 {
     public class CanonnEDDClass
     {
-        public static readonly Version V = Assembly.GetExecutingAssembly().GetName().Version;
         public static EDDDLLInterfaces.EDDDLLIF.EDDCallBacks DLLCallBack;
 
         public CanonnEDDClass()
         {
-            Debug.WriteLine("EDDCanonn Made DLL instance");
+            Debug.WriteLine("EDDCanonnPanel Made DLL instance");
         }
 
         public string EDDInitialise(string vstr, string dllfolder, EDDDLLInterfaces.EDDDLLIF.EDDCallBacks cb)
         {
-            
             DLLCallBack = cb;
-            Debug.WriteLine("EDDCanonn Init func " + vstr + " " + dllfolder);
+            Debug.WriteLine("EDDCanonnPanel Init func " + vstr + " " + dllfolder);
 
 
             if (cb.ver >= 3 && cb.AddPanel != null)
             {
-                string uniqueName = "EDDCanonn";
+                string uniqueName = "EDDCanonnPanel";
                 cb.AddPanel(uniqueName, typeof(EDDCanonnUserControl), "Canonn", uniqueName, "Canonn", Properties.Resources.canonn);
             }
             else
@@ -45,8 +43,8 @@ namespace EDDCanonnPanel
                 Debug.WriteLine("Panel registration failed: Incompatible version or AddPanel is null");
             }
 
-            return V.ToString(); 
-
+            new CanonnEmitter();
+            return CanonnUtil.V.ToString(); 
         }
 
         public void EDDDataResult(object requesttag, object usertag, string data)
@@ -55,9 +53,24 @@ namespace EDDCanonnPanel
             uc.DataResult(requesttag, data);
         }
 
+        public static event Action<EDDDLLInterfaces.EDDDLLIF.JournalEntry> OnNewJournalEntry;
+        public static event Action<string> OnUIEvent;
+        public static event Action OnTermination;
+
+        public void EDDNewJournalEntry(EDDDLLInterfaces.EDDDLLIF.JournalEntry entry)
+        {
+            OnNewJournalEntry?.Invoke(entry);
+        }
+
+        public void EDDNewUIEvent(string json)
+        {
+            OnUIEvent?.Invoke(json);
+        }
+
         public void EDDTerminate()
         {
-            Debug.WriteLine("EDDCanonn Unload");
+            OnTermination?.Invoke();
+            Debug.WriteLine("EDDCanonnPanel Unload");
         }
     }
 }
