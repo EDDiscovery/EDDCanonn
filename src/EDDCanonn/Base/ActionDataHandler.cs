@@ -38,7 +38,6 @@ namespace EDDCanonnPanel.Base
         private readonly List<Task> _tasks = new List<Task>();
         private CancellationTokenSource _cts = new CancellationTokenSource();
         private readonly object _lock = new object();
-
         private Task StartTask(Action job, string name, CancellationToken token, Action finalAction = null, Action<Exception> errorCallback = null)
         {
             lock (_lock)
@@ -50,39 +49,43 @@ namespace EDDCanonnPanel.Base
                 {
                     try
                     {
+                        if (token.IsCancellationRequested)
+                            return;
+
                         job.Invoke();
                     }
                     catch (OperationCanceledException)
                     {
-                        string error = $"EDDCanonn: Task canceled. [ID: {Task.CurrentId}, Name: {name}]";
-                        Console.Error.WriteLine(error);
-                        CanonnLogging.Instance.LogToFile(error);
+                        CanonnLogging.Instance.LogToFile($"EDDCanonn: Task canceled. [ID: {Task.CurrentId}, Name: {name}]");
                     }
                     catch (Exception ex)
                     {
                         errorCallback?.Invoke(ex);
-                        string error = $"EDDCanonn: Error in job execution: {ex.Message}";
-                        Console.Error.WriteLine(error);
-                        CanonnLogging.Instance.LogToFile(error);
+                        CanonnLogging.Instance.LogToFile($"EDDCanonn: Error in job execution: {ex.Message}");
                     }
                 }, token);
 
-                _tasks.Add(task);
-                string mgReg = $"EDDCanonn: Task registered. [ID: {task.Id}, Name: {name}, Status: {task.Status}]";
-                Console.WriteLine(mgReg);
-                CanonnLogging.Instance.LogToFile(mgReg);
-
                 task.ContinueWith(t =>
                 {
-                    finalAction?.Invoke();
+                    try
+                    {
+                        finalAction?.Invoke();
+                    }
+                    catch (Exception ex)
+                    {
+                        CanonnLogging.Instance.LogToFile($"EDDCanonn: Error in final action: {ex.Message}");
+                    }
+
                     lock (_lock)
                     {
                         _tasks.Remove(t);
-                        string mgFinished = $"EDDCanonn: Task finished. [ID: {t.Id}, Name: {name}, Final Status: {t.Status}]";
-                        Console.WriteLine(mgFinished);
-                        CanonnLogging.Instance.LogToFile(mgFinished);
+                        CanonnLogging.Instance.LogToFile($"EDDCanonn: Task finished and removed. [ID: {t.Id}, Name: {name}, Final Status: {t.Status}]");
                     }
                 }, TaskContinuationOptions.ExecuteSynchronously);
+
+                _tasks.Add(task);
+
+                CanonnLogging.Instance.LogToFile($"EDDCanonn: Task registered. [ID: {task.Id}, Name: {name}, Status: {task.Status}]");
 
                 return task;
             }
@@ -95,7 +98,6 @@ namespace EDDCanonnPanel.Base
                 _cts.Cancel(); 
 
                 string mg = $"EDDCanonn: Cancelling all tasks...";
-                Console.WriteLine(mg);
                 CanonnLogging.Instance.LogToFile(mg);
             }
         }
@@ -108,7 +110,20 @@ namespace EDDCanonnPanel.Base
 
             CancelAllTasks();
 
-            Task.WaitAll(_tasks.Where(t => !t.IsCanceled).ToArray());
+            try
+            {
+                Task.WaitAll(_tasks.Where(t => !t.IsCanceled && !t.IsCompleted).ToArray(), 5000);
+            }
+            catch (AggregateException ex)
+            {
+                foreach (Exception inner in ex.InnerExceptions)
+                {
+                    if (inner is TaskCanceledException)
+                        CanonnLogging.Instance.LogToFile("EDDCanonn: Task was canceled.");
+                    else
+                        CanonnLogging.Instance.LogToFile($"EDDCanonn: Error in Closing: {inner.Message}");
+                }
+            }
         }
         #endregion
 
@@ -123,7 +138,6 @@ namespace EDDCanonnPanel.Base
             catch (Exception ex)
             {
                 string error = $"EDDCanonn: Exception in FetchData: {ex.Message}";
-                Console.Error.WriteLine(error);
                 CanonnLogging.Instance.LogToFile(error);
                 return (false, null);
             }
@@ -138,7 +152,6 @@ namespace EDDCanonnPanel.Base
             catch (Exception ex)
             {
                 string error = $"EDDCanonn: Exception in PushData: {ex.Message}";
-                Console.Error.WriteLine(error);
                 CanonnLogging.Instance.LogToFile(error);
                 return (false, null);
             }
@@ -152,7 +165,7 @@ namespace EDDCanonnPanel.Base
                 HttpWebRequest request = (HttpWebRequest)WebRequest.Create(fullUrl);
                 request.Method = "GET";
                 request.Accept = "application/json";
-                request.UserAgent = "EDDCanonnClientV" + CanonnEDDClass.V.ToString();
+                request.UserAgent = "EDDCanonnClientV" + CanonnUtil.V.ToString();
                 request.Timeout = 20000;
 
                 using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
@@ -160,7 +173,6 @@ namespace EDDCanonnPanel.Base
                     if (response.StatusCode != HttpStatusCode.OK)
                     {
                         string error = $"EDDCanonn: GET request failed. Status: {response.StatusCode}";
-                        Console.Error.WriteLine(error);
                         CanonnLogging.Instance.LogToFile(error);
                         return (false, null);
                     }
@@ -174,14 +186,12 @@ namespace EDDCanonnPanel.Base
             catch (WebException ex) when (ex.Response is HttpWebResponse httpResponse)
             {
                 string error = $"EDDCanonn: GET request failed. Status: {httpResponse.StatusCode}, Error: {ex.Message}";
-                Console.Error.WriteLine(error);
                 CanonnLogging.Instance.LogToFile(error);
                 return (false, null);
             }
             catch (Exception ex)
             {
                 string error = $"EDDCanonn: Error performing GET request: {ex.Message}";
-                Console.Error.WriteLine(error);
                 CanonnLogging.Instance.LogToFile(error);
                 return (false, null);
             }
@@ -196,7 +206,7 @@ namespace EDDCanonnPanel.Base
                 request.Method = "POST";
                 request.ContentType = contentType;
                 request.ContentLength = Encoding.UTF8.GetByteCount(postData);
-                request.UserAgent = "EDDCanonnClientV" + CanonnEDDClass.V.ToString();
+                request.UserAgent = "EDDCanonnClientV" + CanonnUtil.V.ToString();
                 request.Timeout = 20000;
 
                 using (StreamWriter writer = new StreamWriter(request.GetRequestStream()))
@@ -209,7 +219,6 @@ namespace EDDCanonnPanel.Base
                     if (response.StatusCode != HttpStatusCode.OK && response.StatusCode != HttpStatusCode.Created)
                     {
                         string error = $"EDDCanonn: POST request failed. Status: {response.StatusCode}";
-                        Console.Error.WriteLine(error);
                         CanonnLogging.Instance.LogToFile(error);
                         return (false, null);
                     }
@@ -223,14 +232,12 @@ namespace EDDCanonnPanel.Base
             catch (WebException ex) when (ex.Response is HttpWebResponse httpResponse)
             {
                 string error = $"EDDCanonn: POST request failed. Status: {httpResponse.StatusCode}, Error: {ex.Message}";
-                Console.Error.WriteLine(error);
                 CanonnLogging.Instance.LogToFile(error);
                 return (false, null);
             }
             catch (Exception ex)
             {
                 string error = $"EDDCanonn: Error performing POST request: {ex.Message}";
-                Console.Error.WriteLine(error);
                 CanonnLogging.Instance.LogToFile(error);
                 return (false, null);
             }
