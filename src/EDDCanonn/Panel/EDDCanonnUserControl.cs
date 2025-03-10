@@ -28,7 +28,6 @@ using System.Threading;
 using System.Text.RegularExpressions;
 using System.Net;
 using EDDCanonnPanel.Utility;
-using System.IO;
 
 
 namespace EDDCanonnPanel
@@ -66,10 +65,9 @@ namespace EDDCanonnPanel
                 else
                     CanonnUtil.InstanceCount++;
 
-                linkLabelEDDCanonn.Text = "EDDCanonn v" + CanonnEDDClass.V;
+                linkLabelEDDCanonn.Text = "EDDCanonn v" + CanonnUtil.V;
 
                 InitializeNews();
-                InitializeWhitelist();
                 InitializePatrols();
 
                 if (DLLCallBack.RequestHistory(1, false, out JournalEntry je) == true) //We check here if EDD has already loaded the history.
@@ -96,7 +94,6 @@ namespace EDDCanonnPanel
                     ex =>
                     {
                         string error = $"EDDCanonn: Unexpected error in \"Wait for History\" Thread: {ex.Message}";
-                        Console.Error.WriteLine(error);
                         CanonnLogging.Instance.LogToFile(error);
                     },
                         "Startup : History-Listener"
@@ -106,7 +103,6 @@ namespace EDDCanonnPanel
             catch (Exception ex)
             {
                 string error = $"EDDCanonn: Error during Startup: {ex.Message}";
-                Console.Error.WriteLine(error);
                 CanonnLogging.Instance.LogToFile(error);
             }
         }
@@ -162,7 +158,6 @@ namespace EDDCanonnPanel
                                     ex =>
                                     {
                                         string error = $"EDDCanonn: Error Initialize Patrols -> {description}: {ex.Message}";
-                                        Console.Error.WriteLine(error);
                                         CanonnLogging.Instance.LogToFile(error);
                                     },
                                         "InitializePatrol -> SubThread: " + description
@@ -178,7 +173,6 @@ namespace EDDCanonnPanel
                                     ex =>
                                     {
                                         string error = $"EDDCanonn: Error Initialize Patrols -> {description}: {ex.Message}";
-                                        Console.Error.WriteLine(error);
                                         CanonnLogging.Instance.LogToFile(error);
                                     },
                                         "InitializePatrol -> SubThread: " + description
@@ -188,7 +182,6 @@ namespace EDDCanonnPanel
                         catch (Exception ex)
                         {
                             string error = $"EDDCanonn: Error processing record category: {ex.Message}";
-                            Console.Error.WriteLine(error);
                             CanonnLogging.Instance.LogToFile(error);
                         }
                     }
@@ -196,7 +189,6 @@ namespace EDDCanonnPanel
                 ex =>
                 {
                     string error = $"EDDCanonn: Error In Patrols HeadThread: {ex.Message}";
-                    Console.Error.WriteLine(error);
                     CanonnLogging.Instance.LogToFile(error);
                 },
                     "InitializePatrol -> HeadThread",
@@ -216,7 +208,6 @@ namespace EDDCanonnPanel
             catch (Exception ex)
             {
                 string error = $"EDDCanonn: Error in InitializePatrols: {ex.Message}";
-                Console.Error.WriteLine(error);
                 CanonnLogging.Instance.LogToFile(error);
             }
         }
@@ -259,7 +250,6 @@ namespace EDDCanonnPanel
                     catch (Exception ex)
                     {
                         string error = $"EDDCanonn: Error processing record: {ex.Message}";
-                        Console.Error.WriteLine(error);
                         CanonnLogging.Instance.LogToFile(error);
                     }
                 }
@@ -277,7 +267,6 @@ namespace EDDCanonnPanel
             catch (Exception ex)
             {
                 string error = $"EDDCanonn: Error in CreateFromTSV for category {category}: {ex.Message}";
-                Console.Error.WriteLine(error);
                 CanonnLogging.Instance.LogToFile(error);
             }
         }
@@ -320,7 +309,6 @@ namespace EDDCanonnPanel
                     catch (Exception ex)
                     {
                         string error = $"EDDCanonn: Error processing JSON record: {ex.Message}";
-                        Console.Error.WriteLine(error);
                         CanonnLogging.Instance.LogToFile(error);
                     }
                 }
@@ -336,7 +324,6 @@ namespace EDDCanonnPanel
             catch (Exception ex)
             {
                 string error = $"EDDCanonn: Error in CreateFromJson for category {category}: {ex.Message}";
-                Console.Error.WriteLine(error);
                 CanonnLogging.Instance.LogToFile(error);
             }
         }
@@ -393,7 +380,6 @@ namespace EDDCanonnPanel
             ex =>
             {
                 string error = $"EDDCanonn: Error during UpdatePatrols Task: {ex.Message}";
-                Console.Error.WriteLine(error);
                 CanonnLogging.Instance.LogToFile(error);
             },
                 "UpdatePatrols",
@@ -445,7 +431,6 @@ namespace EDDCanonnPanel
             catch (Exception ex)
             {
                 string error = $"EDDCanonn: Clipboard error:: {ex.Message}";
-                Console.Error.WriteLine(error);
                 CanonnLogging.Instance.LogToFile(error);
             }
         }
@@ -480,209 +465,6 @@ namespace EDDCanonnPanel
             dataGridPatrol.Rows[hit.RowIndex].Cells[hit.ColumnIndex].Selected = true;
         }
 
-        #endregion
-
-        #region WhiteList
-
-        //this generates a data structure like this:
-
-        // Event Type: CodexEntry
-        // Event Type: ApproachSettlement
-        // Event Type: undefined
-        //   Data Block:
-        //     USSType: $USS_Type_AXShips;
-        //   Data Block:
-        //     BodyType: HyperbolicOrbiter
-        //   Data Block:
-        //     NearestDestination_Localised: Nonhuman Signature
-        //   Data Block:
-        //     NearestDestination: $POIScene_Wreckage_UA;
-        // Event Type: FSSSignalDiscovered
-        //   Data Block:
-        //     SignalName: $Fixed_Event_Life_Belt;
-        //   Data Block:
-        //     SignalName: $Fixed_Event_Life_Cloud;
-        //   Data Block:
-        //     SignalName: $Fixed_Event_Life_Ring;
-        //   Data Block:
-        //     IsStation: True
-        // Event Type: BuySuit
-        // Event Type: Docked
-        //   Data Block:
-        //     StationType: FleetCarrier
-        //   Data Block:
-        //     StationName: Hutton Orbital
-        // Event Type: CarrierJump
-        //   Data Block:
-        //     StationType: FleetCarrier
-        // Event Type: Commander
-        // Event Type: FSSBodySignals
-        // Event Type: Interdicted
-        //   Data Block:
-        //     Faction: 
-        //     IsPlayer: False
-        //   Data Block:
-        //     IsPlayer: False
-        //     IsThargoid: True
-        // Event Type: Promotion
-        // Event Type: SellOrganicData
-        // Event Type: SAASignalsFound
-        // Event Type: ScanOrganic
-        // Event Type: MaterialCollected
-        //   Data Block:
-        //     Name: tg_shipflightdata
-        //   Data Block:
-        //     Name: unknownshipsignature
-
-        private WhitelistData Whitelist;
-        private void InitializeWhitelist()
-        {
-            Whitelist = new WhitelistData();
-            // Fetch the whitelist
-            dataHandler.StartTaskAsync(
-            (token) =>
-            {
-                try
-                {
-                    JArray whitelistItems = dataHandler.FetchData(LinkUtil.CanonnPostUrl + "Whitelist").response.JSONParseArray();
-                    if (whitelistItems == null || whitelistItems.Count == 0)
-                        throw new Exception("EDDCanonn: Whitelist is null");
-
-
-                    for (int i = 0; i < whitelistItems.Count; i++)
-                    {
-                        JObject itemObject = whitelistItems[i].Object();
-
-                        AddToWhitelistItem(itemObject);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    string error = $"EDDCanonn: Error processing whitelist: {ex.Message}";
-                    Console.Error.WriteLine(error);
-                    CanonnLogging.Instance.LogToFile(error);
-                    throw;
-                }
-            },
-            ex =>
-            {
-                string error = $"EDDCanonn: Error in InitializeWhitelist Task: {ex.Message}";
-                Console.Error.WriteLine(error);
-                CanonnLogging.Instance.LogToFile(error);
-
-                Abort("It was not possible to fetch the event whitelist from Canonn. " +
-                "This is why the start of EDDCanonn was canceled.");
-            },
-            "InitializeWhitelist"
-            );
-        }
-
-        private void AddToWhitelistItem(JObject itemObject)
-        {
-            string definitionRaw = itemObject["definition"].Str();
-            if (string.IsNullOrEmpty(definitionRaw))
-                return;
-
-            JObject definitionObject = definitionRaw.JSONParse().Object();
-
-            // Default key to identify the type. Choose the most common one.
-            string typeKey = "event";
-            string typeValue = definitionObject[typeKey].Str();
-            // Everything that does not contain the default key is treated as undefined.
-            if (string.IsNullOrEmpty(typeValue))
-                typeValue = "undefined";
-
-            WhitelistEvent existingEvent = null;
-            for (int e = 0; e < Whitelist.Events.Count; e++)
-            {
-                if (Whitelist.Events[e].Type.Equals(typeValue, StringComparison.InvariantCultureIgnoreCase))
-                {
-                    existingEvent = Whitelist.Events[e];
-                    break;
-                }
-            }
-
-            if (existingEvent == null)
-            {
-                existingEvent = new WhitelistEvent { Type = typeValue };
-                Whitelist.Events.Add(existingEvent);
-            }
-
-            Dictionary<string, object> dataBlock = new Dictionary<string, object>();
-            List<string> keys = new List<string>(definitionObject.PropertyNames());
-
-            for (int kk = 0; kk < keys.Count; kk++)
-            {
-                string key = keys[kk];
-                if (!key.Equals(typeKey, StringComparison.InvariantCultureIgnoreCase))
-                {
-                    object val = definitionObject[key].Value;
-                    dataBlock[key] = val;
-                }
-            }
-            if (dataBlock.Count > 0)
-                existingEvent.DataBlocks.Add(dataBlock);
-        }
-
-        private bool IsEventValid(string eventName, string jsonString)
-        {
-            JObject jsonObject = string.IsNullOrEmpty(jsonString) ? null : jsonString.JSONParse().Object();
-
-            WhitelistEvent eventNode = Whitelist.Events.FirstOrDefault(e =>
-                e.Type.Equals(eventName, StringComparison.InvariantCultureIgnoreCase));
-
-            if (eventNode != null && IsDataBlockValid(eventNode, jsonObject))
-                return true;
-
-            if (eventNode == null)
-            {
-                eventNode = Whitelist.Events.FirstOrDefault(e =>
-                e.Type.Equals("undefined", StringComparison.InvariantCultureIgnoreCase));
-
-                if (eventNode != null && IsDataBlockValid(eventNode, jsonObject))
-                    return true;
-            }
-
-            return false;
-
-        }
-
-        private bool IsDataBlockValid(WhitelistEvent eventNode, JObject jsonObject)
-        {
-            if (eventNode.DataBlocks.Count == 0)
-                return true;
-
-            foreach (var dataBlock in eventNode.DataBlocks)
-            {
-                bool allKeyValuePairsMatch = true;
-
-                foreach (var key in dataBlock.Keys)
-                {
-                    if (!jsonObject.Contains(key))
-                    {
-                        allKeyValuePairsMatch = false;
-                        break;
-                    }
-
-                    if (!jsonObject[key].ToString().Trim('"').Equals(dataBlock[key].ToString(), StringComparison.InvariantCultureIgnoreCase))
-                    {
-                        allKeyValuePairsMatch = false;
-                        break;
-                    }
-                }
-
-                if (allKeyValuePairsMatch)
-                    return true;
-            }
-
-            return false;
-        }
-
-        private void RunWhiteListTestCases()
-        {
-            foreach (var (eventName, jsonPayload, expectedResult) in WhiteListTest.WhiteListTestCases)
-                DebugLog.AppendText($"{eventName} - ExpectedResult: {expectedResult} - Result: {IsEventValid(eventName, jsonPayload)}" + Environment.NewLine);
-        }
         #endregion
 
         //This only affects the data structure for visual feedback.
@@ -767,7 +549,6 @@ namespace EDDCanonnPanel
                 if (matched) //We only update the UI when changes are made.
                 {
                     string mg = $"EDDCanonn: Processed event for visual feedback: " + je.eventid;
-                    Console.WriteLine(mg);
                     CanonnLogging.Instance.LogToFile(mg);
                     UpdateUI();
                 }
@@ -776,7 +557,6 @@ namespace EDDCanonnPanel
             catch (Exception ex)
             {
                 string error = $"EDDCanonn: Error processing event for visual feedback: {je.eventid} : {ex.Message}";
-                Console.Error.WriteLine(error);
                 CanonnLogging.Instance.LogToFile(error);
             }
         }
@@ -805,7 +585,6 @@ namespace EDDCanonnPanel
             {
                 ResetSystemData(); //In any case, we set the system to null.
                 string error = $"EDDCanonn: Error processing NewSystem: {ex.Message}";
-                Console.WriteLine(error);
                 CanonnLogging.Instance.LogToFile(error);
             }
         }
@@ -1024,7 +803,6 @@ namespace EDDCanonnPanel
                 {
                     ResetSystemData(); //If something goes wrong here, we assume that no data is available. If this happens after a ‘Location’ / 'Jump' event, the system is initialised via that event.
                     string error = $"EDDCanonn: Error processing CallbackSystem for visual feedback: {ex.Message}";
-                    Console.Error.WriteLine(error);
                     CanonnLogging.Instance.LogToFile(error);
                 }
             }
@@ -1101,6 +879,8 @@ namespace EDDCanonnPanel
             if (o?["system"]?["bodies"] == null || o["system"]["bodies"].Count == 0)
                 return;
 
+            CanonnLogging.Instance.LogToFile(Environment.NewLine + "=== Canonn DataResult ===" + Environment.NewLine + o.ToString(true, "  ") ?? "none" + Environment.NewLine);
+
             foreach (JObject node in o["system"]["bodies"])
             {
                 if (node == null || node.Count == 0)
@@ -1155,8 +935,7 @@ namespace EDDCanonnPanel
 
         public enum RequestTag
         {
-            OnStart,
-            Log
+            OnStart
         }
 
         public void DataResult(object requestTag, string data)
@@ -1172,6 +951,8 @@ namespace EDDCanonnPanel
                 if (!(requestTag is RequestTag || requestTag is JObject))
                     return; //Invalid tag format.
 
+                CanonnLogging.Instance.LogToFile(Environment.NewLine + "=== DataResult ===" + Environment.NewLine + o.ToString(true, "  ") ?? "none" + Environment.NewLine);
+
                 dataHandler.StartTaskAsync((token) =>
                 {
                     if (requestTag is RequestTag rt)
@@ -1181,17 +962,11 @@ namespace EDDCanonnPanel
                             lock (_lockSystemData) ProcessSpanshDump(o); //I don't think the lock is necessary. But safety first.
                             SafeInvoke(() => this.Enabled = true);
                             _eventLock = _journalLock = true; //Plugin startup complete.
-                            if (systemData == null) lock(_lockSystemData) systemData = new SystemData();
+                            if (systemData == null) lock(_lockSystemData) systemData = new SystemData();                   
                         }
-                        else if (rt.Equals(RequestTag.Log))
+                        else if (false)
                         {
-                            SafeInvoke(() =>
-                            {
-                                string message = $"\n{data ?? "none"}\n";
-                                DebugLog.AppendText(message);
-                                CanonnLogging.Instance.LogToFile(message);
-                            });
-                            return;
+
                         }
                     }
                     else if (requestTag is JObject jb && new[] { "Location", "FSDJump" }.Contains(jb["event"]?.Value?.ToString()))
@@ -1210,7 +985,6 @@ namespace EDDCanonnPanel
                 ex =>
                 {
                     string error = $"EDDCanonn: Error processing Systemdata: {ex.Message}";
-                    Console.Error.WriteLine(error);
                     CanonnLogging.Instance.LogToFile(error);
                 },
                     "DataResult"
@@ -1218,7 +992,7 @@ namespace EDDCanonnPanel
             }
             catch (Exception ex)
             {
-                Console.Error.WriteLine($"EDDCanonn: Unexpected error in DataResult: {ex.Message}");
+                CanonnLogging.Instance.LogToFile($"EDDCanonn: Unexpected error in DataResult: {ex.Message}");
             }
         }
         #endregion
@@ -1398,14 +1172,12 @@ namespace EDDCanonnPanel
                     catch (Exception ex)
                     {
                         string error = $"EDDCanonn: Error in InitializeNews: {ex}";
-                        Console.Error.WriteLine(error);
                         CanonnLogging.Instance.LogToFile(error);
                     }
                 },
                 ex =>
                 {
                     string error = $"EDDCanonn: Unexpected error in InitializeNews Task: {ex}";
-                    Console.Error.WriteLine(error);
                     CanonnLogging.Instance.LogToFile(error);
                 },
                 "InitializeNews"
@@ -1438,7 +1210,6 @@ namespace EDDCanonnPanel
                     catch (Exception ex)
                     {
                         string error = $"EDDCanonn: Error processing news text: {ex.Message}";
-                        Console.Error.WriteLine(error);
                         CanonnLogging.Instance.LogToFile(error);
                     }
 
@@ -1448,7 +1219,6 @@ namespace EDDCanonnPanel
                 catch (Exception ex)
                 {
                     string error = $"EDDCanonn: Unexpected error in NewsIndexChanged: {ex.Message}";
-                    Console.Error.WriteLine(error);
                     CanonnLogging.Instance.LogToFile(error);
                 }
             });
@@ -1490,14 +1260,12 @@ namespace EDDCanonnPanel
                     catch (Exception ex)
                     {
                         string error = $"EDDCanonn: Error during UpdateUI: {ex}";
-                        Console.Error.WriteLine(error);
                         CanonnLogging.Instance.LogToFile(error);
                     }
                 },
                 ex =>
                 {
                     string error = $"EDDCanonn: Error during UpdateUI execution: {ex}";
-                    Console.Error.WriteLine(error);
                     CanonnLogging.Instance.LogToFile(error);
                 },
                 "UpdateUI"
@@ -1522,7 +1290,6 @@ namespace EDDCanonnPanel
                 catch (Exception ex)
                 {
                     string error = $"EDDCanonn: Error in UpdateMainFields: {ex}";
-                    Console.Error.WriteLine(error);
                     CanonnLogging.Instance.LogToFile(error);
                 }
             });
@@ -1605,7 +1372,6 @@ namespace EDDCanonnPanel
                 catch (Exception ex)
                 {
                     string error = $"EDDCanonn: Error in UpdateUpperGridViews: {ex}";
-                    Console.Error.WriteLine(error);
                     CanonnLogging.Instance.LogToFile(error);
                 }
             });
@@ -1676,7 +1442,6 @@ namespace EDDCanonnPanel
                         catch (Exception ex)
                         {
                             string error = $"EDDCanonn: UI update failed in invoked action (SafeBeginInvoke): {ex}";
-                            Console.Error.WriteLine(error);
                             CanonnLogging.Instance.LogToFile(error);
                         }
                     }));
@@ -1684,7 +1449,6 @@ namespace EDDCanonnPanel
                 catch (Exception ex)
                 {
                     string error = $"EDDCanonn: UI update failed in SafeBeginInvoke: {ex}";
-                    Console.Error.WriteLine(error);
                     CanonnLogging.Instance.LogToFile(error);
                 }
             }
@@ -1705,7 +1469,6 @@ namespace EDDCanonnPanel
                         catch (Exception ex)
                         {
                             string error = $"EDDCanonn: UI update failed in invoked action (SafeInvoke): {ex}";
-                            Console.Error.WriteLine(error);
                             CanonnLogging.Instance.LogToFile(error);
                         }
                     }));
@@ -1713,7 +1476,6 @@ namespace EDDCanonnPanel
                 catch (Exception ex)
                 {
                     string error = $"EDDCanonn: UI update failed in SafeInvoke: {ex}";
-                    Console.Error.WriteLine(error);
                     CanonnLogging.Instance.LogToFile(error);
                 }
             }
@@ -1731,6 +1493,8 @@ namespace EDDCanonnPanel
         {
             if (isAbort || !_journalLock)
                 return;
+
+            CanonnLogging.Instance.LogToFile("03");
 
             dataHandler.StartTaskAsync(
             (token) =>
@@ -1755,47 +1519,6 @@ namespace EDDCanonnPanel
                     return;
                 }
 
-                if (IsEventValid(eventId, je.json)) // Send event to canonn if valid.
-                {
-
-                    dataHandler.StartTaskAsync( //wip
-                    (subToken) =>
-                    {
-                        lock (_canonnPushLock)
-                        {
-                            string payload = Payload.BuildPayload(je, GetStatusJson()).ToString(true, "  ");
-
-                            string buildMsg = $"\n Build payload for: {eventId} => \n{payload}\n";
-                            Console.Error.WriteLine(buildMsg); CanonnLogging.Instance.LogToFile(buildMsg);
-                            CanonnLogging.Instance.LogToFile(buildMsg);
-
-                            SafeBeginInvoke(() =>
-                            {
-                                DebugLog.AppendText(buildMsg);
-                            });
-
-                            (bool success, string response) = dataHandler.PushData(LinkUtil.CanonnPostUrl, payload);
-
-                            string statusMsg = $"\n Status for: {eventId} = {success} => \n {response}\n";
-                            Console.Error.WriteLine(statusMsg); CanonnLogging.Instance.LogToFile(statusMsg);
-                            CanonnLogging.Instance.LogToFile(statusMsg);
-
-                            SafeBeginInvoke(() =>
-                            {
-                                DebugLog.AppendText(statusMsg);
-                            });
-                        }
-                    },
-                    ex =>
-                    {
-                        string error = $"EDDCanonn: Unexpected error in Canonn-Push: {ex.Message}";
-                        Console.Error.WriteLine(error);
-                        CanonnLogging.Instance.LogToFile(error);
-                    },
-                        "Canonn-Push"
-                    );
-                }
-
                 while (!_eventLock) // Wait until a 'DataResult' has been completed.
                 {
                     token.ThrowIfCancellationRequested();
@@ -1807,7 +1530,6 @@ namespace EDDCanonnPanel
             ex =>
             {
                 string error = $"EDDCanonn: Error processing JournalEntry: {ex.Message}";
-                Console.Error.WriteLine(error);
                 CanonnLogging.Instance.LogToFile(error);
             },
             "NewUnfilteredJournal: " + je.eventid);
@@ -1822,29 +1544,10 @@ namespace EDDCanonnPanel
                 historyset = true;
         }
 
-        private readonly object _lockStatusJson = new object();
-        private JObject _statusJson;
         public void NewUIEvent(string jsonui)
         {
             if (isAbort)
                 return;
-
-            JObject o = jsonui.JSONParse().Object();
-            if (o == null)
-                return;
-
-            string type = o["EventTypeStr"].Str();
-            if (string.IsNullOrEmpty(type))
-                return;
-
-            lock (_lockStatusJson)
-                _statusJson = o;
-        }
-
-        private JObject GetStatusJson() //Return a deep copy.
-        {
-            lock (_lockStatusJson)
-                return new JObject(_statusJson);
         }
 
         public bool SupportTransparency => false;
@@ -1860,10 +1563,6 @@ namespace EDDCanonnPanel
         {
             CanonnUtil.InstanceCount--;
             dataHandler.Closing();
-            if (CanonnUtil.InstanceCount == 0)
-            {
-                CanonnLogging.Instance.StopLogging();
-            }
         }
 
         public void Initialise(EDDPanelCallbacks callbacks, int displayid, string themeasjson, string configuration)
@@ -1957,7 +1656,6 @@ namespace EDDCanonnPanel
             _eventLock = false;
 
             NotifyMainFields("Aborted");
-            DebugLog.AppendText(msg);
             extTabControlData.SelectedIndex = extTabControlData.TabCount - 1;
 
             dataHandler.Closing();
@@ -1965,38 +1663,13 @@ namespace EDDCanonnPanel
             this.Enabled = false;
             _eventLock = false;
 
-            Whitelist = null;
             patrols = null;
             News = null;                
         }
 
-        private void LogWhitelist_Click(object sender, EventArgs e)
+        private void LSY_Click(object sender, EventArgs e)
         {
-            DebugLog.AppendText(WhiteListTest.PrintWhitelist(Whitelist));
-        }
 
-        private void TestWhitelist_Click(object sender, EventArgs e)
-        {
-            RunWhiteListTestCases();
-        }
-
-        private void ClearDebugLog_Click(object sender, EventArgs e)
-        {
-            DebugLog.Clear();
-        }
-
-        private void LogSystem_Click(object sender, EventArgs e)
-        {
-            SystemData system = DeepCopySystemData();
-            string mg = "\n LogSystem:" +
-                "\n" + system?.ToString() ?? "none" + "\n";
-            DebugLog.AppendText(mg);
-            CanonnLogging.Instance.LogToFile(mg);
-        }
-
-        private void CallSystem_Click(object sender, EventArgs e)
-        {
-            DLLCallBack.RequestSpanshDump(RequestTag.Log, this, "", 0, true, false, null);
         }
 
         private void dataGridViewBio_DataError(object sender, DataGridViewDataErrorEventArgs e)
@@ -2032,9 +1705,7 @@ namespace EDDCanonnPanel
         private void HandleDataGridViewError(string gridName, DataGridViewDataErrorEventArgs e)
         {
             string error = $"EDDCanonn: DataGridView error in {gridName} (Row: {e.RowIndex}, Column: {e.ColumnIndex}): {e.Exception}";
-            Console.Error.WriteLine(error);
             CanonnLogging.Instance.LogToFile(error);
-
             e.ThrowException = false;
         }
         #endregion
