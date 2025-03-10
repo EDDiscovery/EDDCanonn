@@ -51,7 +51,6 @@ namespace EDDCanonnPanel.Utility
             catch (Exception ex)
             {
                 string error = $"EDDCanonn: Error opening URL: {ex.Message}";
-                Console.Error.WriteLine(error);
                 CanonnLogging.Instance.LogToFile(error);
             }
         }

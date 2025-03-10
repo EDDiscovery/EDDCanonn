@@ -42,7 +42,7 @@ namespace EDDCanonnPanel.Utility
         [
             { ""genus"": ""$Codex_Ent_Fonticulus_Genus_Name;"", ""genus_localised"": ""Fonticulua""         },
             { ""genus"": ""$Codex_Ent_Tubus_Genus_Name;"",      ""genus_localised"": ""Tubus""              },
-            { ""genus"": ""$Codex_Ent_Tube_Name;"",             ""genus_localised"": ""Tubers""              },
+            { ""genus"": ""$Codex_Ent_Tube_Name;"",             ""genus_localised"": ""Tubers""             },
             { ""genus"": ""$Codex_Ent_Tussocks_Genus_Name;"",   ""genus_localised"": ""Tussock""            },
             { ""genus"": ""$Codex_Ent_Seed_Name;"",             ""genus_localised"": ""Roseum Brain Tree""  },
             { ""genus"": ""$Codex_Ent_Osseus_Genus_Name;"",     ""genus_localised"": ""Osseus""             },
@@ -100,14 +100,12 @@ namespace EDDCanonnPanel.Utility
             catch (FormatException fe)
             {
                 string error = $"EDDCanonn: TSV parsing error: {fe.Message}";
-                Console.Error.WriteLine(error);
                 CanonnLogging.Instance.LogToFile(error);
                 throw;
             }
             catch (Exception ex)
             {
                 string error = $"EDDCanonn: Unexpected error while parsing TSV: {ex.Message}";
-                Console.Error.WriteLine(error);
                 CanonnLogging.Instance.LogToFile(error);
                 throw;
             }

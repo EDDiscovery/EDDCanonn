@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Windows.Forms;
 using EDDCanonnPanel.Base;
@@ -25,6 +26,8 @@ namespace EDDCanonnPanel
     //Class for outsourced help functions.
     public static class CanonnUtil
     {
+        public static readonly Version V = Assembly.GetExecutingAssembly().GetName().Version;
+
         //Count for active canonn plugin instances.
         public static int InstanceCount = 0;
         private static int _currentId = 998;
@@ -74,7 +77,6 @@ namespace EDDCanonnPanel
             catch (Exception ex)
             {
                 string error = $"EDDCanonn: Error parsing value: {ex.Message}";
-                Console.Error.WriteLine(error);
                 CanonnLogging.Instance.LogToFile(error);
                 return fallback;
             }
