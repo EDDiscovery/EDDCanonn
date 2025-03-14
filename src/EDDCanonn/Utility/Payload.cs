@@ -50,12 +50,12 @@ namespace EDDCanonnPanel.Base
                 ["odyssey"] = je.odyssey
             };
 
-            string bodyName = rawEvent["BodyName"]?.Value?.ToString() != null && rawEvent["BodyName"]?.Value?.ToString() != "null" ? rawEvent["BodyName"]?.Value?.ToString()
+            string bodyName = rawEvent["BodyName"].StrNull() != null && rawEvent["BodyName"].StrNull() != "null" ? rawEvent["BodyName"].StrNull()
                 : je.bodyname != null && je.bodyname != "Unknown" ? je.bodyname : null;
             if (!string.IsNullOrEmpty(bodyName))
                 gameState["bodyName"] = bodyName;
 
-            string stationName = rawEvent["StationName"]?.Value?.ToString() != null && rawEvent["StationName"]?.Value?.ToString() != "null" ? rawEvent["StationName"]?.Value?.ToString()
+            string stationName = rawEvent["StationName"].StrNull() != null && rawEvent["StationName"].StrNull() != "null" ? rawEvent["StationName"].StrNull()
                 : je.stationname != null && je.stationname != "Unknown" ? je.stationname : null;
             if(!string.IsNullOrEmpty(stationName))
                 gameState["station"] = stationName;
