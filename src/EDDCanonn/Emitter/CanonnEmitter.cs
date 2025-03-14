@@ -36,7 +36,9 @@ namespace EDDCanonnPanel.Emitter
             CanonnEDDClass.OnUIEvent += ProcessUIEvent;
 
             dataHandler = new ActionDataHandler();
-            InitializeWhitelist();
+
+            lock (_canonnPushLock) //wip
+                InitializeWhitelist();
         }
 
         private readonly object _canonnPushLock = new object();
