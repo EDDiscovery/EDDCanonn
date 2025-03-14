@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace EDDCanonnPanel.Base
 {
@@ -84,7 +86,7 @@ namespace EDDCanonnPanel.Base
         {
             lock (_logLock)
             {
-                _logQueue.Enqueue($"{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff} - {message}");
+                _logQueue.Enqueue(message);
                 //Signal the logging worker that new entries exist.
                 _logSignal.Set();
             }
@@ -101,7 +103,8 @@ namespace EDDCanonnPanel.Base
                 {
                     try
                     {
-                        File.AppendAllText(_logFilePath, logEntry + Environment.NewLine);
+                        File.AppendAllText(_logFilePath, $"{DateTime.Now:yyyy-MM-dd HH:mm:ss.fff} - {logEntry}" + Environment.NewLine);
+                        Debug.WriteLine(logEntry);
                     }
                     catch (Exception ex)
                     {
