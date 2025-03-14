@@ -36,52 +36,6 @@ namespace EDDCanonnPanel
             return Interlocked.Increment(ref _currentId);
         }
 
-        //Attempts to convert a JToken to a specified value type, returning a fallback value. It is for numbers!
-        public static T GetValueOrDefault<T>(JToken obj, T fallback) where T : struct
-        {
-            if (obj == null)
-            {
-                return fallback;
-            }
-
-            try
-            {
-                Type targetType = Nullable.GetUnderlyingType(typeof(T)) ?? typeof(T);
-
-                if (obj.IsString)
-                {
-                    string value = obj.Value.ToString();
-                    if (string.IsNullOrWhiteSpace(value))
-                        return fallback;
-
-                    if (targetType == typeof(int) && int.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out int intResult))
-                        return (T)(object)intResult;
-
-                    if (targetType == typeof(double) && double.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out double doubleResult))
-                        return (T)(object)doubleResult;
-
-                    if (targetType == typeof(float) && float.TryParse(value, NumberStyles.Any, CultureInfo.InvariantCulture, out float floatResult))
-                        return (T)(object)floatResult;
-
-                    if (targetType == typeof(bool) && bool.TryParse(value, out bool boolResult))
-                        return (T)(object)boolResult;
-
-                    if (targetType == typeof(DateTime) && DateTime.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime dateResult))
-                        return (T)(object)dateResult;
-
-                    return fallback;
-                }
-
-                return obj.ToObject<T>();
-            }
-            catch (Exception ex)
-            {
-                string error = $"EDDCanonn: Error parsing value: {ex.Message}";
-                CanonnLogging.Instance.LogToFile(error);
-                return fallback;
-            }
-        }
-
         //Checks if a key value pair exists.
         // If the key is null, it checks whether any object contains the value as a standalone field.
         public static bool ContainsKeyValuePair(List<JObject> existingList, string key, string value)
@@ -92,7 +46,7 @@ namespace EDDCanonnPanel
             if (key == null)
                 return existingList.Any(obj => obj.Contains(value));
 
-            return existingList.Any(obj => obj.Contains(key) && obj[key]?.Value?.ToString() == value);
+            return existingList.Any(obj => obj.Contains(key) && obj[key].StrNull() == value);
         }
 
         //The same as above, but the JObject  is returned.
@@ -105,7 +59,7 @@ namespace EDDCanonnPanel
                 return existingList.FirstOrDefault(obj => obj.Contains(value));
 
             return existingList.FirstOrDefault(obj => obj.Contains(key) &&
-                string.Equals(obj[key]?.Value?.ToString(), value, StringComparison.OrdinalIgnoreCase));
+                string.Equals(obj[key].StrNull(), value, StringComparison.OrdinalIgnoreCase));
         }
 
         //The same as above, but for JArrays.
@@ -115,8 +69,8 @@ namespace EDDCanonnPanel
             {
                 List<JObject> result = existingList ?? new List<JObject>();
                 result.AddRange(array.OfType<JObject>().Where(item => !result.Any(existing => JToken.DeepEquals(existing, item)
-                || (existing[existing.PropertyNames()?[0]]?.Value?.ToString() ?? "none_") == (item[item.PropertyNames()?[0]]?.Value?.ToString() ?? "none")
-                || (existing.ToString() ?? "none_").Contains(item[item.PropertyNames()?[0]]?.Value?.ToString() ?? "none" ))));
+                || (existing[existing.PropertyNames()?[0]].StrNull() ?? "none_") == (item[item.PropertyNames()?[0]].StrNull() ?? "none")
+                || (existing.ToString() ?? "none_").Contains(item[item.PropertyNames()?[0]].StrNull() ?? "none" ))));
                 return result;
             }
             return existingList ?? new List<JObject>();
@@ -125,7 +79,7 @@ namespace EDDCanonnPanel
         //The same as 'GetUniqueEntries', but without duplicate check.
         public static List<JObject> GetJObjectList(JObject source, string key, string subKey = null)
         {
-            if (source == null)
+            if (source == null || source.IsNull)
                 return null;
 
             if (source[key] is JArray array)
