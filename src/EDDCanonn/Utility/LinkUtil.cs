@@ -25,6 +25,7 @@ namespace EDDCanonnPanel.Utility
         public static readonly string CanonnPostUrl = "https://us-central1-canonn-api-236217.cloudfunctions.net/postEvent";
         public static readonly string PatrolUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQsi1Vbfx4Sk2msNYiqo0PVnW3VHSrvvtIRkjT-JvH_oG9fP67TARWX2jIjehFHKLwh4VXdSh0atk3J/pub?gid=0&single=true&output=tsv";
         public static readonly string BioStats = "https://us-central1-canonn-api-236217.cloudfunctions.net/query/codex/biostats?id=";
+        public static readonly string CodexRef = "https://us-central1-canonn-api-236217.cloudfunctions.net/query/codex/ref?hierarchy=1";
         public static readonly string CanonnNews = "https://canonn.science/wp-json/wp/v2/posts";
 
         //Other urls.
