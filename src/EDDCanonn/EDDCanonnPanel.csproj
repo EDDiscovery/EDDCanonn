@@ -48,6 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Base\ActionDataHandler.cs" />
+    <Compile Include="Base\Codex.cs" />
     <Compile Include="Diagnostics\CanonnLogging.cs" />
     <Compile Include="Base\Patrols.cs" />
     <Compile Include="Emitter\CanonnEmitter.cs" />
@@ -135,6 +136,7 @@
     <None Include="Resources\edd.png" />
     <None Include="Resources\geology.png" />
     <None Include="Resources\biology.png" />
+    <EmbeddedResource Include="Resources\codex_ref.json" />
     <None Include="Resources\ring.png" />
     <None Include="Resources\ring.bmp" />
   </ItemGroup>

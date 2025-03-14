@@ -51,7 +51,7 @@ namespace EDDCanonnPanel
 
         private void StartUp() //Triggered by panel Initialize.
         {
-            NotifyMainFields("Start Up...");
+            NotifyMainFields("Start Up...");                            
             try
             {
                 if (CanonnUtil.InstanceCount > 0)
@@ -68,6 +68,7 @@ namespace EDDCanonnPanel
                 linkLabelEDDCanonn.Text = "EDDCanonn v" + CanonnUtil.V;
 
                 InitializeNews();
+                InitializeCodex();
                 InitializePatrols();
 
                 if (DLLCallBack.RequestHistory(1, false, out JournalEntry je) == true) //We check here if EDD has already loaded the history.
@@ -104,6 +105,7 @@ namespace EDDCanonnPanel
             {
                 string error = $"EDDCanonn: Error during Startup: {ex.Message}";
                 CanonnLogging.Instance.LogToFile(error);
+                Abort();
             }
         }
         #endregion
@@ -233,12 +235,9 @@ namespace EDDCanonnPanel
 
                         string system = record.TryGetValue("System", out string systemValue) ? systemValue : string.Empty;
 
-                        double x = CanonnUtil.GetValueOrDefault(new JToken(record["X"] ?? null),
-                            DataUtil.PositionFallback);
-                        double y = CanonnUtil.GetValueOrDefault(new JToken(record["Y"] ?? null),
-                            DataUtil.PositionFallback);
-                        double z = CanonnUtil.GetValueOrDefault(new JToken(record["Z"] ?? null),
-                            DataUtil.PositionFallback);
+                        double x = new JToken(record["X"]).Double(DataUtil.PositionFallback);
+                        double y = new JToken(record["Y"]).Double(DataUtil.PositionFallback);
+                        double z = new JToken(record["Z"]).Double(DataUtil.PositionFallback);
 
                         string instructions = record.TryGetValue("Instructions", out string instructionsValue) ? instructionsValue : "none";
                         string urlp = record.TryGetValue("Url", out string urlValue) ? urlValue : string.Empty;
@@ -290,17 +289,14 @@ namespace EDDCanonnPanel
                         if (record == null || record.Count == 0)
                             continue;
 
-                        string system = record["system"]?.Value?.ToString() ?? string.Empty;
+                        string system = record["system"].StrNull() ?? string.Empty;
 
-                        double x = CanonnUtil.GetValueOrDefault(record["x"] ?? null,
-                            DataUtil.PositionFallback);
-                        double y = CanonnUtil.GetValueOrDefault(record["y"] ?? null,
-                            DataUtil.PositionFallback);
-                        double z = CanonnUtil.GetValueOrDefault(record["z"] ?? null,
-                            DataUtil.PositionFallback);
+                        double x = record["x"].Double(DataUtil.PositionFallback);
+                        double y = record["y"].Double(DataUtil.PositionFallback);
+                        double z = record["z"].Double(DataUtil.PositionFallback);
 
-                        string instructions = record["instructions"]?.Value?.ToString() ?? "none";
-                        string urlp = record["url"]?.Value?.ToString() ?? string.Empty;
+                        string instructions = record["instructions"].StrNull() ?? "none";
+                        string urlp = record["url"].StrNull() ?? string.Empty;
 
                         //Construct a new Patrol object and insert it into the KdTree.
                         Patrol patrol = new Patrol(category, system, x, y, z, instructions, urlp);
@@ -467,7 +463,54 @@ namespace EDDCanonnPanel
 
         #endregion
 
-        //This only affects the data structure for visual feedback.
+        #region Codex
+        private CodexDatabase CodexDatabase;
+        private void InitializeCodex()
+        {
+            CodexDatabase = new CodexDatabase();
+
+            dataHandler.StartTaskAsync(
+            (token) =>
+            {
+                JObject o = dataHandler.FetchData(LinkUtil.CodexRef).response?.JSONParse().Object()
+                    ?? DataUtil.ReadEmbeddedTextFile("EDDCanonnPanel.Resources.codex_ref.json")?.JSONParse().Object();
+
+                if (o == null)
+                    return;
+
+                o.PropertyNames()
+                    .SelectMany(type => o[type] is JObject typeObj
+                        ? typeObj.PropertyNames()
+                            .SelectMany(subType => typeObj[subType] is JObject subTypeObj
+                                ? subTypeObj.PropertyNames()
+                                    .Select(entryKey => subTypeObj[entryKey] is JObject obj ? new CodexEntry(
+                                        type,
+                                        subType,
+                                        entryKey ?? CanonnUtil.GenerateId().ToString(),
+                                        obj["entryid"].Int(CanonnUtil.GenerateId()),
+                                        obj["name"].Str(CanonnUtil.GenerateId().ToString()),
+                                        obj["category"].StrNull(),
+                                        obj["sub_category"].StrNull(),
+                                        obj["platform"].StrNull(),
+                                        obj["reward"].Int(-1)
+                                    ) : null)
+                                : Enumerable.Empty<CodexEntry>())
+                        : Enumerable.Empty<CodexEntry>())
+                    .Where(entry => entry != null)
+                    .ToList()
+                    .ForEach(CodexDatabase.Add);
+            },
+            ex =>
+            {
+                string error = $"EDDCanonn: Unexpected error in InitializeCodex: {ex.Message}";
+                CanonnLogging.Instance.LogToFile(error);
+            },
+                "InitializeCodex"
+            );
+        }
+
+        #endregion
+
         #region SystemData
 
         private readonly object _lockSystemData = new object();
@@ -516,7 +559,6 @@ namespace EDDCanonnPanel
         }
         #endregion
 
-        //This only affects the data structure for visual feedback.
         #region ProcessEvents
 
         private void ProcessEvent(JournalEntry je)
@@ -541,6 +583,9 @@ namespace EDDCanonnPanel
                         break;
                     case "SAAScanComplete":
                         ProcessSAAScan(eventData);
+                        break;
+                    case "CodexEntry":
+                        ProcessCodex(eventData);
                         break;
                     default:
                         matched = false;
@@ -570,14 +615,13 @@ namespace EDDCanonnPanel
 
                 lock (_lockSystemData)
                 {
-                    systemData.Name = eventData["StarSystem"].Value?.ToString();
-                    systemData.SystemAddress = eventData["SystemAddress"]?.ToObject<long>() ?? -1;
-
+                    systemData.Name = eventData["StarSystem"].StrNull() ?? eventData["System"].StrNull() ?? "none";
+                    systemData.SystemAddress = eventData["SystemAddress"].Long(-1);
                     if (eventData["StarPos"] != null)
                     {
-                        systemData.X = CanonnUtil.GetValueOrDefault(eventData["StarPos"][0] ?? null, DataUtil.PositionFallback);
-                        systemData.Y = CanonnUtil.GetValueOrDefault(eventData["StarPos"][1] ?? null, DataUtil.PositionFallback);
-                        systemData.Z = CanonnUtil.GetValueOrDefault(eventData["StarPos"][2] ?? null, DataUtil.PositionFallback);
+                        systemData.X = eventData["StarPos"][0].Double(DataUtil.PositionFallback);
+                        systemData.Y = eventData["StarPos"][1].Double(DataUtil.PositionFallback);
+                        systemData.Z = eventData["StarPos"][2].Double(DataUtil.PositionFallback);
                     }
                 }
             }
@@ -588,8 +632,6 @@ namespace EDDCanonnPanel
                 CanonnLogging.Instance.LogToFile(error);
             }
         }
-
-
 
         private void FetchScanData(JObject eventData, Body body) //Call this method only via the '_lockSystemData' lock. Otherwise it could get bad.
         {
@@ -637,7 +679,9 @@ namespace EDDCanonnPanel
         private Body ProcessScan(JObject eventData) //We can use this for most scan events.
         {
             if (systemData == null)
-                systemData = new SystemData(); //Enforces encapsulation.
+                ProcessNewSystem(eventData);
+            if(systemData == null)
+                return null;
 
             lock (_lockSystemData)
             {
@@ -646,10 +690,10 @@ namespace EDDCanonnPanel
                     systemData.Bodys = new SortedDictionary<int, Body>();
                 }
 
-                int bodyId = CanonnUtil.GetValueOrDefault(eventData["BodyID"] ?? null, -1);
+                int bodyId = eventData["BodyID"].Int(eventData["Body"].Int(-1));
                 if (bodyId == -1) return null;
 
-                string bodyName = eventData["BodyName"]?.Value?.ToString();
+                string bodyName = eventData["BodyName"].StrNull() ?? "none";
 
                 Body body;
 
@@ -685,88 +729,117 @@ namespace EDDCanonnPanel
 
             lock (_lockSystemData)
             {
-                systemData.BodyCount = CanonnUtil.GetValueOrDefault(eventData["BodyCount"] ?? null, -1);
+                systemData.BodyCount = eventData["BodyCount"].Int(-1);
             }
         }
 
         private void ProcessSAAScan(JObject eventData)
         {
-            if (systemData == null)
-                systemData = new SystemData(); //Enforces encapsulation.
-
             lock (_lockSystemData)
             {
-                int bodyId = CanonnUtil.GetValueOrDefault(eventData["BodyID"] ?? null, -1);
+                int bodyId = eventData["BodyID"].Int(-1);
                 if (bodyId == -1) return;
 
                 Body body;
-                if (!systemData.Bodys?.ContainsKey(bodyId) ?? false) //In the event that the SAA scan comes before the scan event.
+                if (!systemData?.Bodys?.ContainsKey(bodyId) ?? true) //In the event that the SAA scan comes before the scan event.
                     body = ProcessScan(eventData); //We are entering a second lock here. --> Not Nice. 
                 else
                     body = systemData.Bodys[bodyId];
+
+                if (body == null) return;
 
                 body.IsMapped = true;
             }
         }
 
-        /*
-        Sample 'ScanOrganic' event
-        {
-        "timestamp":"2025-02-06T20:51:14Z",
-        "event":"ScanOrganic",
-        "Genus":"$Codex_Ent_Tussocks_Genus_Name;",
-        "Species":"$Codex_Ent_Tussocks_09_Name;",
-        "Body":14
-        }
-        */
-
         private void ProcessOrganic(JObject eventData) //The 'ScanOrganic' event is special. We cannot treat it as a 'ProcessScan' (although similar) because the keys are named differently.
-        { //wip
-            if (systemData == null)
-                systemData = new SystemData(); //Enforces encapsulation.
-
+        {
             lock (_lockSystemData)
             {
-                if (systemData.Bodys == null)
-                {
-                    systemData.Bodys = new SortedDictionary<int, Body>();
-                }
-
-                int bodyId = CanonnUtil.GetValueOrDefault(eventData["Body"] ?? null, -1);
-
-                if (bodyId == -1)
-                    return;
+                int bodyId = eventData["Body"].Int(-1);
+                if (bodyId == -1) return;
 
                 Body body;
-
-                if (!systemData.Bodys.ContainsKey(bodyId)) //We have to take consider here if someone freshly installs EDD and then directly scans an organic on a planet he has already been on.
-                {
-                    body = new Body
-                    {
-                        BodyID = bodyId,
-                        BodyName = "none", //No node name in scan organic.
-                        NodeType = "planet"
-                    };
-                    systemData.Bodys[bodyId] = body;
-                }
+                if (!systemData?.Bodys?.ContainsKey(bodyId) ?? true)
+                    body = ProcessScan(eventData);
                 else
                     body = systemData.Bodys[bodyId];
 
-                if (eventData["Genus"] == null)
-                    return;
+                if (body == null) return;
 
+                if (eventData["Genus"] == null) return;
+
+                string variant = eventData["Variant"].Value?.ToString();
+                string genus = eventData["Genus"].Value?.ToString();
 
                 JObject o = new JObject
                 {
-                    ["Organics"] = new JArray { new JObject { ["Genus"] = eventData["Genus"].Value?.ToString() } }
+                    ["Organics"] = new JArray 
+                    { 
+                        new JObject 
+                        {
+                            ["Variant"] = variant,                                                  //$Codex_Ent_Tussocks_09_F_Name;
+                            ["Variant_Localised"] = CodexDatabase.GetByName(variant).LocalisedName, //Tussock Propagito - Yellow
+                            ["Genus"] = genus                                                       //$Codex_Ent_Tussocks_Genus_Name;
+                        }
+                    }
                 };
 
                 body.ScanData.Organics = CanonnUtil.GetUniqueEntries(o, "Organics", body.ScanData.Organics);
             }
         }
+
+        private void ProcessCodex(JObject eventData)
+        {
+            lock (_lockSystemData)
+            {
+                string category = eventData["Category"].StrNull();
+                if(category == null) return;
+
+                if (category.Equals("$Codex_Category_Biology;"))
+                {
+                    int bodyId = eventData["BodyID"].Int(-1);
+                    if (bodyId == -1) return;
+
+                    Body body;
+                    if (!systemData?.Bodys?.ContainsKey(bodyId) ?? true)
+                        body = ProcessScan(eventData);
+                    else
+                        body = systemData.Bodys[bodyId];
+
+                    if (body == null) return;
+
+                    string variant = eventData["Name"].StrNull();
+                    CodexEntry entry = CodexDatabase.GetByName(variant);
+
+                    JObject o = new JObject
+                    {
+                        ["Organics"] = new JArray
+                        {
+                            new JObject
+                            {
+                                ["Variant"] = variant,                                  //$Codex_Ent_Tussocks_09_F_Name;  
+                                ["Variant_Localised"] = entry?.LocalisedName,           //Tussock Propagito - Yellow
+                                ["Genus"] = DataUtil.BiologyGenuses(entry.CodexSubType) //$Codex_Ent_Tussocks_Genus_Name;                                                                                      
+                            }
+                        }
+                    };
+
+                    body.ScanData.Organics = CanonnUtil.GetUniqueEntries(o, "Organics", body.ScanData.Organics);
+                }
+                else if (false)
+                {
+
+                }
+                else if (false)
+                {
+
+                }
+            }
+        }
+
         #endregion
 
-        //This only affects the data structure for visual feedback.
         #region ProcessSpanshDump
 
         public void ProcessSpanshDump(JObject root)
@@ -802,7 +875,7 @@ namespace EDDCanonnPanel
                 catch (Exception ex)
                 {
                     ResetSystemData(); //If something goes wrong here, we assume that no data is available. If this happens after a ‘Location’ / 'Jump' event, the system is initialised via that event.
-                    string error = $"EDDCanonn: Error processing CallbackSystem for visual feedback: {ex.Message}";
+                    string error = $"EDDCanonn: Error processing CallbackSystem: {ex.Message}";
                     CanonnLogging.Instance.LogToFile(error);
                 }
             }
@@ -813,12 +886,12 @@ namespace EDDCanonnPanel
             // Extract and populate main system details
             systemData.Name = system["name"].Value?.ToString();
 
-            systemData.X = CanonnUtil.GetValueOrDefault(system["coords"]?["x"] ?? null, DataUtil.PositionFallback);
-            systemData.Y = CanonnUtil.GetValueOrDefault(system["coords"]?["y"] ?? null, DataUtil.PositionFallback);
-            systemData.Z = CanonnUtil.GetValueOrDefault(system["coords"]?["z"] ?? null, DataUtil.PositionFallback);
+            systemData.X = system["coords"]["x"].Double(DataUtil.PositionFallback);
+            systemData.Y = system["coords"]["y"].Double(DataUtil.PositionFallback);
+            systemData.Z = system["coords"]["z"].Double(DataUtil.PositionFallback);
 
-            systemData.SystemAddress = CanonnUtil.GetValueOrDefault(system["id64"] ?? null, -1l);
-            systemData.BodyCount = CanonnUtil.GetValueOrDefault(system["bodyCount"] ?? null, -1);
+            systemData.SystemAddress = system["id64"].Long(-1);
+            systemData.BodyCount = system["bodyCount"].Int(-1);
         }
 
         private void ProcessSpanshBodyNode(JArray bodyNode) //wip
@@ -835,7 +908,7 @@ namespace EDDCanonnPanel
                 }
 
                 // Extract BodyID; skip processing if invalid
-                int bodyId = CanonnUtil.GetValueOrDefault(node["bodyId"] ?? null, -1);
+                int bodyId = node["bodyId"].Int(-1);
                 if (bodyId == -1)
                 {
                     continue;
@@ -888,7 +961,7 @@ namespace EDDCanonnPanel
                     continue;
                 }
 
-                int bodyId = CanonnUtil.GetValueOrDefault(node["bodyId"] ?? null, -1);
+                int bodyId = node["bodyId"].Int(-1);
                 if (bodyId == -1)
                 {
                     continue;
@@ -905,24 +978,25 @@ namespace EDDCanonnPanel
                     continue;
                 }
 
-                List<JObject> genuses = CanonnUtil.GetJObjectList(node["signals"] as JObject, "genuses", "Genus");
                 List<JObject> biology = CanonnUtil.GetJObjectList(node["signals"] as JObject, "biology", "Bio");
 
-                if (genuses == null || biology == null) 
+                if (biology == null || biology.Count == 0) 
                 { 
                     continue; 
                 }
 
-                if(biology.Count == 0 || genuses.Count == 0)
-                {
-                    continue;
-                }
-
-                body.ScanData.Organics = genuses
-                    .Where(genus =>
+                body.ScanData.Organics = biology
+                    .Select(b =>
                     {
-                        string genusLocalised = DataUtil.GenusLocalised(genus["Genus"]?.Value?.ToString());
-                        return biology.Any(bio => bio["Bio"]?.Value?.ToString()?.Contains(genusLocalised) == true);
+                        string variantLocalised = b["Bio"].StrNull();
+                        CodexEntry entry = CodexDatabase?.GetByLocalisedName(variantLocalised);
+
+                        return new JObject
+                        {
+                            ["Variant"] = entry?.Name,
+                            ["Variant_Localised"] = variantLocalised,
+                            ["Genus"] = DataUtil.BiologyGenuses(entry?.CodexSubType)
+                        };
                     })
                     .ToList();
             }
@@ -930,7 +1004,6 @@ namespace EDDCanonnPanel
 
         #endregion
 
-        //This only affects the data structure for visual feedback.
         #region ProcessData
 
         public enum RequestTag
@@ -969,7 +1042,7 @@ namespace EDDCanonnPanel
 
                         }
                     }
-                    else if (requestTag is JObject jb && new[] { "Location", "FSDJump" }.Contains(jb["event"]?.Value?.ToString()))
+                    else if (requestTag is JObject jb && new[] { "Location", "FSDJump" }.Contains(jb["event"].StrNull()))
                     {
                         lock (_lockSystemData) //I still have no idea. See above.
                         {
@@ -1008,9 +1081,6 @@ namespace EDDCanonnPanel
                 CanonnUtil.CreateDataGridViewRow(dataGridViewBio, new object[] { "Missing Bio Data:", null, new Bitmap(1, 1) })
             };
 
-            Regex nameRegex = new Regex(@"^[A-Za-z\s-]+\d+-\d+\s+(.+)$", RegexOptions.IgnoreCase);
-
-
             //Filter only bodies that have biological signals.
             IEnumerable<Body> validBodies = system.Bodys.Values
                 .Where(body => body?.ScanData?.Signals?.Any() == true);
@@ -1023,19 +1093,17 @@ namespace EDDCanonnPanel
 
                 if (biologicalSignal == null) continue;
 
-                int bioCount = CanonnUtil.GetValueOrDefault(biologicalSignal["Count"], 0);
+                int bioCount = biologicalSignal["Count"].Int(-1);
                 bioCount = bioCount == 0
-                    ? CanonnUtil.GetValueOrDefault(biologicalSignal["$SAA_SignalType_Biological;"], 0)
+                    ? biologicalSignal["$SAA_SignalType_Biological;"].Int(-1)
                     : bioCount;
-
-                Match match = nameRegex.Match(body.BodyName);
 
                 //If no genus data is available, add an entry with unknown species count.
                 if (body.ScanData.Genuses?.Any() != true)
                 {
                     rows.Add(CanonnUtil.CreateDataGridViewRow(dataGridViewBio, new object[]
                     {
-                        match.Success ? match.Groups[1].Value : body.BodyName,
+                        body.BodyName?.Replace(system.Name, "") ?? "none",
                         $"{bioCount} unknown species",
                         Properties.Resources.biology
                     }));
@@ -1044,7 +1112,7 @@ namespace EDDCanonnPanel
 
                 //Find samples that have not been collected yet.
                 List<JObject> missingSamples = body.ScanData.Genuses
-                    .Where(genus => !CanonnUtil.ContainsKeyValuePair(body.ScanData.Organics, "Genus", genus["Genus"]?.Value?.ToString()))
+                    .Where(genus => !CanonnUtil.ContainsKeyValuePair(body.ScanData.Organics, "Genus", genus["Genus"].StrNull()))
                     .ToList();
 
                 if (missingSamples.Any())
@@ -1052,8 +1120,8 @@ namespace EDDCanonnPanel
                     rows.AddRange(missingSamples.Select((genus, index) =>
                     CanonnUtil.CreateDataGridViewRow(dataGridViewBio, new object[]
                     {
-                        index == 0 ? match.Success ? match.Groups[1].Value : body.BodyName : null, //Only show body name for the first missing sample.
-                        "sample required: " + DataUtil.GenusLocalised(genus["Genus"]?.Value?.ToString()),
+                        index == 0 ? body.BodyName?.Replace(system.Name, "") : null, //Only show body name for the first missing sample.
+                        "Data required: " + DataUtil.BiologyGenuses(genus["Genus"].StrNull()),
                         Properties.Resources.biology
                     })));
                 }
@@ -1078,7 +1146,6 @@ namespace EDDCanonnPanel
             };
 
             Regex ringRegex = new Regex(@"([A-Z])\s+Ring$", RegexOptions.IgnoreCase); //Pattern to extract short names.
-            Regex nameRegex = new Regex(@"^[A-Za-z\s-]+\d+-\d+\s+(.+)$", RegexOptions.IgnoreCase);
 
             //Filter only bodies that have ring data.
             IEnumerable<Body> validBodies = system.Bodys.Values
@@ -1090,7 +1157,7 @@ namespace EDDCanonnPanel
                 List<JObject> missingRings = body.ScanData.Rings
                     .Where(ring =>
                     {
-                        string ringName = ring["name"]?.Value?.ToString() ?? ring["Name"]?.Value?.ToString();
+                        string ringName = ring["name"].StrNull() ?? ring["Name"].StrNull();
                         return ringName?.Contains("Ring") == true
                             && !(system.GetBodyByName(ringName)?.IsMapped == true || ring.Contains("id64"));
                     })
@@ -1100,21 +1167,20 @@ namespace EDDCanonnPanel
 
                 rows.AddRange(missingRings.Select((ring, index) =>
                 {
-                    string ringName = ring["name"]?.Value?.ToString() ?? ring["Name"]?.Value?.ToString();
+                    string ringName = ring["name"].StrNull() ?? ring["Name"].StrNull();
                     //Extract inner and outer radius values, converting from meters to light-seconds.
                     double[] values = new[] { "innerRadius", "InnerRad", "outerRadius", "OuterRad" }
-                        .Select(k => CanonnUtil.GetValueOrDefault(ring[k], 0.0) / 299792458)
+                        .Select(k => ring[k].Double(0.0) / 299792458)
                         .Select(v => Math.Round(v, 2))
                         .ToArray();
 
                     string result = $"{(values[0] == 0.0 ? values[1] : values[0])} ls - {(values[2] == 0.0 ? values[3] : values[2])} ls";
 
                     Match matchRing = ringRegex.Match(ringName);
-                    Match matchName = nameRegex.Match(body.BodyName);
 
                     return CanonnUtil.CreateDataGridViewRow(dataGridViewRing, new object[]
                     {
-                        index == 0 ? matchName.Success ? matchName.Groups[1].Value : body.BodyName : null, //Only show the body name for the first ring.
+                        index == 0 ? body.BodyName?.Replace(system.Name, "") : null, //Only show the body name for the first ring.
                         matchRing.Success ? matchRing.Groups[1].Value + " Ring" : ringName,
                         result,
                         Properties.Resources.ring
@@ -1139,14 +1205,14 @@ namespace EDDCanonnPanel
             List<DataGridViewRow> rows = new List<DataGridViewRow>();
 
             string combinedDescriptions = "Tags: " + string.Join(", ", gmos[0]?["GalMapTypes"]?.Array()
-                ?.Select(galMapType => galMapType?["Description"]?.Value?.ToString())
+                ?.Select(galMapType => galMapType?["Description"].StrNull())
                 .Where(desc => !string.IsNullOrWhiteSpace(desc)) ?? Enumerable.Empty<string>());
             rows.Add(CanonnUtil.CreateDataGridViewRow(dataGridViewGMO, new object[] { combinedDescriptions }));
 
             rows.Add(CanonnUtil.CreateDataGridViewRow(dataGridViewGMO, new object[] { null }));
 
-            rows.Add(CanonnUtil.CreateDataGridViewRow(dataGridViewGMO, new object[] { gmos[0]?["DescriptiveNames"]?[0]?.Value?.ToString() + ":" }));
-            rows.Add(CanonnUtil.CreateDataGridViewRow(dataGridViewGMO, new object[] { gmos[0]?["Description"]?.Value?.ToString() }));
+            rows.Add(CanonnUtil.CreateDataGridViewRow(dataGridViewGMO, new object[] { gmos[0]?["DescriptiveNames"]?[0].StrNull() + ":" }));
+            rows.Add(CanonnUtil.CreateDataGridViewRow(dataGridViewGMO, new object[] { gmos[0]?["Description"].StrNull() }));
 
             return rows;
         }
@@ -1201,7 +1267,7 @@ namespace EDDCanonnPanel
                 {
                     textBoxNews.Clear();
 
-                    string decoded = News[NewsIndex]?["excerpt"]?["rendered"]?.Value?.ToString() ?? "none";
+                    string decoded = News[NewsIndex]?["excerpt"]?["rendered"].StrNull() ?? "none";
 
                     try
                     {
@@ -1396,7 +1462,7 @@ namespace EDDCanonnPanel
 
         private void textBoxNews_Click(object sender, EventArgs e)
         {
-            LinkUtil.OpenUrl(News[NewsIndex]?["link"]?.Value?.ToString() ?? LinkUtil.CanonnWebPage);
+            LinkUtil.OpenUrl(News[NewsIndex]?["link"].StrNull() ?? LinkUtil.CanonnWebPage);
         }
 
         private void textBoxSystem_Click(object sender, EventArgs e)
@@ -1493,8 +1559,6 @@ namespace EDDCanonnPanel
         {
             if (isAbort || !_journalLock)
                 return;
-
-            CanonnLogging.Instance.LogToFile("03");
 
             dataHandler.StartTaskAsync(
             (token) =>
@@ -1656,7 +1720,10 @@ namespace EDDCanonnPanel
             _eventLock = false;
 
             NotifyMainFields("Aborted");
-            extTabControlData.SelectedIndex = extTabControlData.TabCount - 1;
+            extTabControlData.SelectedIndex = 0;
+
+            dataGridViewData.Rows.Add(CanonnUtil.CreateDataGridViewRow(dataGridViewData, new object[]
+                        { msg, Properties.Resources.tourist }));
 
             dataHandler.Closing();
 
@@ -1667,9 +1734,16 @@ namespace EDDCanonnPanel
             News = null;                
         }
 
+        private void EDDCanonnUserControl_Resize(object sender, EventArgs e)
+        {
+            this.Refresh();
+        }
+
         private void LSY_Click(object sender, EventArgs e)
         {
+            SystemData system = DeepCopySystemData();
 
+            CanonnLogging.Instance.LogToFile(Environment.NewLine + "=== System ToString ===" + Environment.NewLine + system.ToString() ?? "none" + Environment.NewLine);
         }
 
         private void dataGridViewBio_DataError(object sender, DataGridViewDataErrorEventArgs e)

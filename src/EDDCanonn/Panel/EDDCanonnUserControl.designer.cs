@@ -210,13 +210,13 @@ namespace EDDCanonnPanel
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
+            ExtendedControls.TabStyleSquare tabStyleSquare2 = new ExtendedControls.TabStyleSquare();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
-            ExtendedControls.TabStyleSquare tabStyleSquare1 = new ExtendedControls.TabStyleSquare();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle9 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle10 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle11 = new System.Windows.Forms.DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(EDDCanonnUserControl));
             this.textBoxSystem = new System.Windows.Forms.TextBox();
             this.labelSysName = new System.Windows.Forms.Label();
@@ -285,10 +285,10 @@ namespace EDDCanonnPanel
             this.pictureBoxCanonn = new System.Windows.Forms.PictureBox();
             this.labelDev = new System.Windows.Forms.Label();
             this.linkLabelEDDCanonn = new System.Windows.Forms.LinkLabel();
-            this.pictureBoxEDD = new System.Windows.Forms.PictureBox();
             this.labelSpecial = new System.Windows.Forms.Label();
             this.labelTest = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
+            this.pictureBoxEDD = new System.Windows.Forms.PictureBox();
             this.LSY = new System.Windows.Forms.Button();
             this.tableLayoutSystem.SuspendLayout();
             this.contextMenuStrip1.SuspendLayout();
@@ -569,8 +569,8 @@ namespace EDDCanonnPanel
             this.dataGridSignals.Location = new System.Drawing.Point(20, 582);
             this.dataGridSignals.Name = "dataGridSignals";
             this.dataGridSignals.ReadOnly = true;
-            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.dataGridSignals.RowsDefaultCellStyle = dataGridViewCellStyle1;
+            dataGridViewCellStyle7.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.dataGridSignals.RowsDefaultCellStyle = dataGridViewCellStyle7;
             this.dataGridSignals.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.dataGridSignals.ShowCellErrors = false;
             this.dataGridSignals.ShowCellToolTips = false;
@@ -694,9 +694,9 @@ namespace EDDCanonnPanel
             this.dataGridPatrol.Location = new System.Drawing.Point(0, 0);
             this.dataGridPatrol.Name = "dataGridPatrol";
             this.dataGridPatrol.ReadOnly = true;
-            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.dataGridPatrol.RowsDefaultCellStyle = dataGridViewCellStyle2;
+            dataGridViewCellStyle8.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle8.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.dataGridPatrol.RowsDefaultCellStyle = dataGridViewCellStyle8;
             this.dataGridPatrol.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.dataGridPatrol.ShowCellErrors = false;
             this.dataGridPatrol.ShowCellToolTips = false;
@@ -780,7 +780,7 @@ namespace EDDCanonnPanel
             this.extTabControlData.TabNotSelectedBorderColor = System.Drawing.Color.Gray;
             this.extTabControlData.TabNotSelectedColor = System.Drawing.Color.Gray;
             this.extTabControlData.TabSelectedColor = System.Drawing.Color.LightGray;
-            this.extTabControlData.TabStyle = tabStyleSquare1;
+            this.extTabControlData.TabStyle = tabStyleSquare2;
             this.extTabControlData.TextNotSelectedColor = System.Drawing.SystemColors.ControlText;
             this.extTabControlData.TextSelectedColor = System.Drawing.SystemColors.ControlText;
             // 
@@ -853,8 +853,8 @@ namespace EDDCanonnPanel
             this.dataGridViewData.Location = new System.Drawing.Point(0, 0);
             this.dataGridViewData.Name = "dataGridViewData";
             this.dataGridViewData.ReadOnly = true;
-            dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.dataGridViewData.RowsDefaultCellStyle = dataGridViewCellStyle3;
+            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.dataGridViewData.RowsDefaultCellStyle = dataGridViewCellStyle2;
             this.dataGridViewData.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.dataGridViewData.ShowCellErrors = false;
             this.dataGridViewData.ShowCellToolTips = false;
@@ -952,8 +952,8 @@ namespace EDDCanonnPanel
             this.dataGridViewRing.Location = new System.Drawing.Point(0, 0);
             this.dataGridViewRing.Name = "dataGridViewRing";
             this.dataGridViewRing.ReadOnly = true;
-            dataGridViewCellStyle4.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.dataGridViewRing.RowsDefaultCellStyle = dataGridViewCellStyle4;
+            dataGridViewCellStyle9.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.dataGridViewRing.RowsDefaultCellStyle = dataGridViewCellStyle9;
             this.dataGridViewRing.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.dataGridViewRing.ShowCellErrors = false;
             this.dataGridViewRing.ShowCellToolTips = false;
@@ -1073,8 +1073,8 @@ namespace EDDCanonnPanel
             this.dataGridViewBio.Location = new System.Drawing.Point(0, 0);
             this.dataGridViewBio.Name = "dataGridViewBio";
             this.dataGridViewBio.ReadOnly = true;
-            dataGridViewCellStyle5.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.dataGridViewBio.RowsDefaultCellStyle = dataGridViewCellStyle5;
+            dataGridViewCellStyle10.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.dataGridViewBio.RowsDefaultCellStyle = dataGridViewCellStyle10;
             this.dataGridViewBio.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.dataGridViewBio.ShowCellErrors = false;
             this.dataGridViewBio.ShowCellToolTips = false;
@@ -1202,8 +1202,8 @@ namespace EDDCanonnPanel
             this.dataGridViewGMO.Location = new System.Drawing.Point(0, 0);
             this.dataGridViewGMO.Name = "dataGridViewGMO";
             this.dataGridViewGMO.ReadOnly = true;
-            dataGridViewCellStyle6.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.dataGridViewGMO.RowsDefaultCellStyle = dataGridViewCellStyle6;
+            dataGridViewCellStyle11.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.dataGridViewGMO.RowsDefaultCellStyle = dataGridViewCellStyle11;
             this.dataGridViewGMO.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.dataGridViewGMO.ShowCellErrors = false;
             this.dataGridViewGMO.ShowCellToolTips = false;
@@ -1236,16 +1236,16 @@ namespace EDDCanonnPanel
             // 
             this.tableLayoutAbout.ColumnCount = 3;
             this.tableLayoutAbout.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutAbout.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableLayoutAbout.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 48F));
             this.tableLayoutAbout.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 50F));
             this.tableLayoutAbout.Controls.Add(this.pictureBoxCanonn, 2, 0);
             this.tableLayoutAbout.Controls.Add(this.labelDev, 0, 1);
             this.tableLayoutAbout.Controls.Add(this.linkLabelEDDCanonn, 0, 0);
-            this.tableLayoutAbout.Controls.Add(this.pictureBoxEDD, 2, 4);
             this.tableLayoutAbout.Controls.Add(this.labelSpecial, 0, 4);
             this.tableLayoutAbout.Controls.Add(this.labelTest, 0, 3);
             this.tableLayoutAbout.Controls.Add(this.label1, 0, 2);
-            this.tableLayoutAbout.Controls.Add(this.LSY, 2, 2);
+            this.tableLayoutAbout.Controls.Add(this.pictureBoxEDD, 1, 0);
+            this.tableLayoutAbout.Controls.Add(this.LSY, 2, 4);
             this.tableLayoutAbout.Location = new System.Drawing.Point(3, 3);
             this.tableLayoutAbout.Name = "tableLayoutAbout";
             this.tableLayoutAbout.RowCount = 5;
@@ -1291,18 +1291,6 @@ namespace EDDCanonnPanel
             this.linkLabelEDDCanonn.Text = "EDDCanonn v";
             this.linkLabelEDDCanonn.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.linkLabelEDDCanonn_LinkClicked);
             // 
-            // pictureBoxEDD
-            // 
-            this.pictureBoxEDD.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.pictureBoxEDD.Image = global::EDDCanonnPanel.Properties.Resources.edd;
-            this.pictureBoxEDD.Location = new System.Drawing.Point(303, 195);
-            this.pictureBoxEDD.Name = "pictureBoxEDD";
-            this.pictureBoxEDD.Size = new System.Drawing.Size(44, 24);
-            this.pictureBoxEDD.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.pictureBoxEDD.TabIndex = 0;
-            this.pictureBoxEDD.TabStop = false;
-            this.pictureBoxEDD.Click += new System.EventHandler(this.pictureBoxEDD_Click);
-            // 
             // labelSpecial
             // 
             this.labelSpecial.Anchor = System.Windows.Forms.AnchorStyles.Left;
@@ -1334,9 +1322,21 @@ namespace EDDCanonnPanel
             this.label1.Text = "Tested by:\r\n#######";
             this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
+            // pictureBoxEDD
+            // 
+            this.pictureBoxEDD.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.pictureBoxEDD.Image = global::EDDCanonnPanel.Properties.Resources.edd;
+            this.pictureBoxEDD.Location = new System.Drawing.Point(255, 3);
+            this.pictureBoxEDD.Name = "pictureBoxEDD";
+            this.pictureBoxEDD.Size = new System.Drawing.Size(42, 30);
+            this.pictureBoxEDD.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.pictureBoxEDD.TabIndex = 0;
+            this.pictureBoxEDD.TabStop = false;
+            this.pictureBoxEDD.Click += new System.EventHandler(this.pictureBoxEDD_Click);
+            // 
             // LSY
             // 
-            this.LSY.Location = new System.Drawing.Point(303, 74);
+            this.LSY.Location = new System.Drawing.Point(303, 192);
             this.LSY.Name = "LSY";
             this.LSY.Size = new System.Drawing.Size(44, 27);
             this.LSY.TabIndex = 8;
@@ -1357,6 +1357,7 @@ namespace EDDCanonnPanel
             this.Enabled = false;
             this.Name = "EDDCanonnUserControl";
             this.Size = new System.Drawing.Size(407, 612);
+            this.Resize += new System.EventHandler(this.EDDCanonnUserControl_Resize);
             this.tableLayoutSystem.ResumeLayout(false);
             this.tableLayoutSystem.PerformLayout();
             this.contextMenuStrip1.ResumeLayout(false);
