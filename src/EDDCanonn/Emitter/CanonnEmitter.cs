@@ -1,4 +1,18 @@
-﻿using System;
+﻿/*
+ * Copyright © 2022-2022 EDDiscovery development team
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software distributed under
+ * the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+ * ANY KIND, either express or implied. See the License for the specific language
+ * governing permissions and limitations under the License.
+ */
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -45,12 +59,12 @@ namespace EDDCanonnPanel.Emitter
                     lock (_canonnPushLock)
                     {
                         string payload = Payload.BuildPayload(entry, GetStatusJson()).ToString(true, "  ");
-                        string buildMsg = Environment.NewLine + $"Build payload for: {eventId} => " + Environment.NewLine + "{payload}" + Environment.NewLine;
+                        string buildMsg = Environment.NewLine + $"Build payload for: {eventId} => " + Environment.NewLine + $" {payload} " + Environment.NewLine;
                         CanonnLogging.Instance.LogToFile(buildMsg);
 
                         (bool success, string response) = dataHandler.PushData(LinkUtil.CanonnPostUrl, payload);
 
-                        string statusMsg = Environment.NewLine + $"Status: =>" + Environment.NewLine + "{payload}" + Environment.NewLine;
+                        string statusMsg = Environment.NewLine + $"Status: =>" + Environment.NewLine + $" {success} : {response} " + Environment.NewLine;
                         CanonnLogging.Instance.LogToFile(statusMsg);
                     }
                 },
@@ -59,7 +73,7 @@ namespace EDDCanonnPanel.Emitter
                     string error = $"EDDCanonn: Unexpected error in Canonn-Push: {ex.Message}";
                     CanonnLogging.Instance.LogToFile(error);
                 },
-                    "Emitter - Canonn-Push"
+                    $"Emitter - Canonn-Push : Event => {eventId}"
                 );
             }
         }
@@ -93,56 +107,6 @@ namespace EDDCanonnPanel.Emitter
 
         #region WhiteList
 
-        //this generates a data structure like this:
-
-        // Event Type: CodexEntry
-        // Event Type: ApproachSettlement
-        // Event Type: undefined
-        //   Data Block:
-        //     USSType: $USS_Type_AXShips;
-        //   Data Block:
-        //     BodyType: HyperbolicOrbiter
-        //   Data Block:
-        //     NearestDestination_Localised: Nonhuman Signature
-        //   Data Block:
-        //     NearestDestination: $POIScene_Wreckage_UA;
-        // Event Type: FSSSignalDiscovered
-        //   Data Block:
-        //     SignalName: $Fixed_Event_Life_Belt;
-        //   Data Block:
-        //     SignalName: $Fixed_Event_Life_Cloud;
-        //   Data Block:
-        //     SignalName: $Fixed_Event_Life_Ring;
-        //   Data Block:
-        //     IsStation: True
-        // Event Type: BuySuit
-        // Event Type: Docked
-        //   Data Block:
-        //     StationType: FleetCarrier
-        //   Data Block:
-        //     StationName: Hutton Orbital
-        // Event Type: CarrierJump
-        //   Data Block:
-        //     StationType: FleetCarrier
-        // Event Type: Commander
-        // Event Type: FSSBodySignals
-        // Event Type: Interdicted
-        //   Data Block:
-        //     Faction: 
-        //     IsPlayer: False
-        //   Data Block:
-        //     IsPlayer: False
-        //     IsThargoid: True
-        // Event Type: Promotion
-        // Event Type: SellOrganicData
-        // Event Type: SAASignalsFound
-        // Event Type: ScanOrganic
-        // Event Type: MaterialCollected
-        //   Data Block:
-        //     Name: tg_shipflightdata
-        //   Data Block:
-        //     Name: unknownshipsignature
-
         private WhitelistData Whitelist;
         private void InitializeWhitelist()
         {
@@ -153,21 +117,18 @@ namespace EDDCanonnPanel.Emitter
             {
                 try
                 {
-                    JArray whitelistItems = dataHandler.FetchData(LinkUtil.CanonnPostUrl + "Whitelist").response.JSONParseArray();
+                    JArray whitelistItems = dataHandler.FetchData(LinkUtil.CanonnPostUrl + "Whitelist")
+                    .response.JSONParseArray();
                     if (whitelistItems == null || whitelistItems.Count == 0)
                         throw new Exception("EDDCanonn: Whitelist is null");
 
-
                     for (int i = 0; i < whitelistItems.Count; i++)
                     {
-                        JObject itemObject = whitelistItems[i].Object();
-
-                        AddToWhitelistItem(itemObject);
+                        AddToWhitelistItem(whitelistItems[i].Object());
                     }
 
                     CanonnLogging.Instance.LogToFile("=== Whitelist Entries ===" + Environment.NewLine +
                         WhiteListTest.PrintWhitelist(Whitelist) + Environment.NewLine);
-
                 }
                 catch (Exception ex)
                 {
@@ -270,7 +231,8 @@ namespace EDDCanonnPanel.Emitter
                         break;
                     }
 
-                    if (!jsonObject[key].ToString().Trim('"').Equals(dataBlock[key].ToString(), StringComparison.InvariantCultureIgnoreCase))
+                    if (!jsonObject[key].ToString().Trim('"').Equals(dataBlock[key].ToString()
+                        , StringComparison.InvariantCultureIgnoreCase))
                     {
                         allKeyValuePairsMatch = false;
                         break;
