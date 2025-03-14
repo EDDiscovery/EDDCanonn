@@ -14,7 +14,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using EDDCanonnPanel.Base;
 using QuickJSON;
 
@@ -26,45 +28,87 @@ namespace EDDCanonnPanel.Utility
         public static readonly int[] PatrolRanges = { 6, 24, 120, 720, 5040 };
         //Default fallback for galactic coords.
         public static readonly double PositionFallback = -99999.99;
-
-        private static JArray _genusLocalised;
-        public static String GenusLocalised(string genus)
+        public static String BiologyGenuses(string input)
         {
-            if (_genusLocalised == null)
-                _genusLocalised = genusLocalisedJson.JSONParseArray();
+            if (_biologyGenuses == null || _biologyGenuses.Count == 0) return input;
 
-            if (_genusLocalised.Count == 0) return genus;
-
-            return _genusLocalised.FirstOrDefault(obj => obj is JObject o && o["genus"]?.Value?.ToString() == genus)?["genus_localised"]?.Value?.ToString() ?? genus;
+            return _biologyGenuses
+                .OfType<JObject>()
+                .FirstOrDefault(o => o["Type"].StrNull() == input || o["Genus"].StrNull() == input)
+                is JObject match
+                ? (match["Type"].StrNull() == input ? match["Genus"].StrNull() ?? input : match["Type"].StrNull() ?? input)
+                : input;
         }
 
-        private static readonly string genusLocalisedJson = @"
+        private static JArray _biologyGenuses =
+        @"
         [
-            { ""genus"": ""$Codex_Ent_Fonticulus_Genus_Name;"", ""genus_localised"": ""Fonticulua""         },
-            { ""genus"": ""$Codex_Ent_Tubus_Genus_Name;"",      ""genus_localised"": ""Tubus""              },
-            { ""genus"": ""$Codex_Ent_Tube_Name;"",             ""genus_localised"": ""Tubers""             },
-            { ""genus"": ""$Codex_Ent_Tussocks_Genus_Name;"",   ""genus_localised"": ""Tussock""            },
-            { ""genus"": ""$Codex_Ent_Seed_Name;"",             ""genus_localised"": ""Roseum Brain Tree""  },
-            { ""genus"": ""$Codex_Ent_Osseus_Genus_Name;"",     ""genus_localised"": ""Osseus""             },
-            { ""genus"": ""$Codex_Ent_Shrubs_Genus_Name;"",     ""genus_localised"": ""Frutexa""            },
-            { ""genus"": ""$Codex_Ent_Stratum_Genus_Name;"",    ""genus_localised"": ""Stratum""            },
-            { ""genus"": ""$Codex_Ent_Fumerolas_Genus_Name;"",  ""genus_localised"": ""Fumerola""           },
-            { ""genus"": ""$Codex_Ent_Conchas_Genus_Name;"",    ""genus_localised"": ""Concha""             },
-            { ""genus"": ""$Codex_Ent_Electricae_Genus_Name;"", ""genus_localised"": ""Electricae""         },
-            { ""genus"": ""$Codex_Ent_Ground_Struct_Ice_Name;"",""genus_localised"": ""Crystalline Shards"" },
-            { ""genus"": ""$Codex_Ent_Sphere_Name;"",           ""genus_localised"": ""Luteolum Anemone""   },
-            { ""genus"": ""$Codex_Ent_Cactoid_Genus_Name;"",    ""genus_localised"": ""Cactoida""           },
-            { ""genus"": ""$Codex_Ent_Fungoids_Genus_Name;"",   ""genus_localised"": ""Fungoida""           },
-            { ""genus"": ""$Codex_Ent_Aleoids_Genus_Name;"",    ""genus_localised"": ""Aleoida""            },
-            { ""genus"": ""$Codex_Ent_Recepta_Genus_Name;"",    ""genus_localised"": ""Recepta""            },
-            { ""genus"": ""$Codex_Ent_Bacterial_Genus_Name;"",  ""genus_localised"": ""Bacterium""          },
-            { ""genus"": ""$Codex_Ent_Cone_Name;"",             ""genus_localised"": ""Bark Mounds""        },
-            { ""genus"": ""$Codex_Ent_Vents_Name;"",            ""genus_localised"": ""Amphora Plant""      },
-            { ""genus"": ""$Codex_Ent_Brancae_Name;"",          ""genus_localised"": ""Brain Trees""        },
-            { ""genus"": ""$Codex_Ent_Barnacles_Name;"",        ""genus_localised"": ""Thargoid Barnacles"" },
-            { ""genus"": ""$Codex_Ent_Thargoid_Coral_Name;"",   ""genus_localised"": ""Coral Structures""   },
-            { ""genus"": ""$Codex_Ent_Thargoid_Tower_Name;"",   ""genus_localised"": ""Thargoid Spires""    }
-        ]";
+            { ""Type"": ""Fonticulus"",         ""Genus"": ""$Codex_Ent_Fonticulus_Genus_Name;"" },
+            { ""Type"": ""Tubus"",              ""Genus"": ""$Codex_Ent_Tubus_Genus_Name;"" },
+            { ""Type"": ""Tussocks"",           ""Genus"": ""$Codex_Ent_Tussocks_Genus_Name;"" },
+            { ""Type"": ""Osseus"",             ""Genus"": ""$Codex_Ent_Osseus_Genus_Name;"" },
+            { ""Type"": ""Shrubs"",             ""Genus"": ""$Codex_Ent_Shrubs_Genus_Name;"" },
+            { ""Type"": ""Stratum"",            ""Genus"": ""$Codex_Ent_Stratum_Genus_Name;"" },
+            { ""Type"": ""Fumerolas"",          ""Genus"": ""$Codex_Ent_Fumerolas_Genus_Name;"" },
+            { ""Type"": ""Conchas"",            ""Genus"": ""$Codex_Ent_Conchas_Genus_Name;"" },
+            { ""Type"": ""Electricae"",         ""Genus"": ""$Codex_Ent_Electricae_Genus_Name;"" },
+            { ""Type"": ""Cactoid"",            ""Genus"": ""$Codex_Ent_Cactoid_Genus_Name;"" },
+            { ""Type"": ""Fungoids"",           ""Genus"": ""$Codex_Ent_Fungoids_Genus_Name;"" },
+            { ""Type"": ""Aleoids"",            ""Genus"": ""$Codex_Ent_Aleoids_Genus_Name;"" },
+            { ""Type"": ""Recepta"",            ""Genus"": ""$Codex_Ent_Recepta_Genus_Name;"" },
+            { ""Type"": ""Bacterial"",          ""Genus"": ""$Codex_Ent_Bacterial_Genus_Name;"" },
+            { ""Type"": ""Clypeus"",            ""Genus"": ""$Codex_Ent_Clypeus_Genus_Name;"" },
+            { ""Type"": ""Shards"",             ""Genus"": ""$Codex_Ent_Ground_Struct_Ice_Name;"" },
+
+            { ""Type"": ""Tubers"",             ""Genus"": ""$Codex_Ent_Tube_Name;"" },
+            { ""Type"": ""Brain Tree"",         ""Genus"": ""$Codex_Ent_Seed_Name;"" },
+            { ""Type"": ""Anemone"",            ""Genus"": ""$Codex_Ent_Sphere_Name;"" },
+            { ""Type"": ""Bark Mounds"",        ""Genus"": ""$Codex_Ent_Cone_Name;"" },
+            { ""Type"": ""Amphora Plant"",      ""Genus"": ""$Codex_Ent_Vents_Name;"" }
+        ]".JSONParseArray() ?? null; 
+
+        public static string ReadEmbeddedTextFile(string resourceName)
+        {
+            if (string.IsNullOrWhiteSpace(resourceName))
+                throw new ArgumentException("EDDCanonn: The resource name is empty or null.");
+
+            try
+            {
+                using (Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName))
+                {
+                    if (stream == null)
+                        throw new FileNotFoundException($"EDDCanonn: Resource '{resourceName}' not found in assembly.");
+
+                    using (StreamReader reader = new StreamReader(stream))
+                    {
+                        string content = reader.ReadToEnd();
+
+                        if (string.IsNullOrWhiteSpace(content))
+                            throw new ArgumentException($"EDDCanonn: The file '{resourceName}' is empty or contains only whitespace.");
+
+                        return content;
+                    }
+                }
+            }
+            catch (FileNotFoundException fnfEx)
+            {
+                string error = $"EDDCanonn: File not found: {fnfEx.Message}";
+                CanonnLogging.Instance.LogToFile(error);
+                throw;
+            }
+            catch (ArgumentException argEx)
+            {
+                string error = $"EDDCanonn: Invalid file content: {argEx.Message}";
+                CanonnLogging.Instance.LogToFile(error);
+                throw;
+            }
+            catch (Exception ex)
+            {
+                string error = $"EDDCanonn: Unexpected error while reading resource '{resourceName}': {ex.Message}";
+                CanonnLogging.Instance.LogToFile(error);
+                throw;
+            }
+        }
 
 
         //Parses TSV content into a list of dictionaries.
