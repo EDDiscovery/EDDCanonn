@@ -1637,23 +1637,6 @@ namespace EDDCanonnPanel
                     Task.Delay(250, token).Wait();
                 }
 
-                if (systemData?.Name != je.systemname) //wip
-                {
-                    lock (_lockSystemData)
-                    {
-                        if (_eventLock)
-                        {
-                            _eventLock = false;
-                            SafeBeginInvoke(() =>
-                            {
-                                CanonnLogging.Instance.Log($"EDDCanonn: system name does not match. Fetch again.");
-                                ResetSystemData();
-                                DLLCallBack.RequestSpanshDump(RequestTag.ReFetch, this, je.systemname, je.systemaddress, true, false, null);
-                            });
-                        }
-                    }
-                }
-
                 ProcessEvent(je);
             },
             ex =>
