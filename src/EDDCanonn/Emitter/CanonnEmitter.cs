@@ -62,18 +62,18 @@ namespace EDDCanonnPanel.Emitter
                     {
                         string payload = Payload.BuildPayload(entry, GetStatusJson()).ToString(true, "  ");
                         string buildMsg = Environment.NewLine + $"Build payload for: {eventId} => " + Environment.NewLine + $" {payload} " + Environment.NewLine;
-                        CanonnLogging.Instance.LogToFile(buildMsg);
+                        CanonnLogging.Instance.Log(buildMsg);
 
                         (bool success, string response) = dataHandler.PushData(LinkUtil.CanonnPostUrl, payload);
 
                         string statusMsg = Environment.NewLine + $"Status: =>" + Environment.NewLine + $" {success} : {response} " + Environment.NewLine;
-                        CanonnLogging.Instance.LogToFile(statusMsg);
+                        CanonnLogging.Instance.Log(statusMsg);
                     }
                 },
                 ex =>
                 {
-                    string error = $"EDDCanonn: Unexpected error in Canonn-Push: {ex.Message}";
-                    CanonnLogging.Instance.LogToFile(error);
+                    string error = $"EDDCanonn: Unexpected error in Canonn-Push: {ex}";
+                    CanonnLogging.Instance.Log(error);
                 },
                     $"Emitter - Canonn-Push : Event => {eventId}"
                 );
@@ -129,21 +129,21 @@ namespace EDDCanonnPanel.Emitter
                         AddToWhitelistItem(whitelistItems[i].Object());
                     }
 
-                    CanonnLogging.Instance.LogToFile("=== Whitelist Entries ===" + Environment.NewLine +
+                    CanonnLogging.Instance.Log("=== Whitelist Entries ===" + Environment.NewLine +
                         WhiteListTest.PrintWhitelist(Whitelist) + Environment.NewLine);
                 }
                 catch (Exception ex)
                 {
-                    string error = $"EDDCanonn: Error processing whitelist: {ex.Message}";
-                    CanonnLogging.Instance.LogToFile(error);
+                    string error = $"EDDCanonn: Error processing whitelist: {ex}";
+                    CanonnLogging.Instance.Log(error);
                     throw;
                 }
             },
             ex =>
             {
                 Whitelist = null;
-                string error = $"EDDCanonn: Error in InitializeWhitelist Task: {ex.Message}";
-                CanonnLogging.Instance.LogToFile(error);
+                string error = $"EDDCanonn: Error in InitializeWhitelist Task: {ex}";
+                CanonnLogging.Instance.Log(error);
             },
             "Emitter - InitializeWhitelist"
             );

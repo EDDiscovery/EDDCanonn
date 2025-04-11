@@ -14,6 +14,7 @@
 
 using System;
 using System.Diagnostics;
+using System.IO;
 using EDDCanonnPanel.Emitter;
 
 namespace EDDCanonnPanel
@@ -21,6 +22,7 @@ namespace EDDCanonnPanel
     public class CanonnEDDClass
     {
         public static EDDDLLInterfaces.EDDDLLIF.EDDCallBacks DLLCallBack;
+        public static string DLLPath;
 
         public CanonnEDDClass()
         {
@@ -32,6 +34,7 @@ namespace EDDCanonnPanel
             DLLCallBack = cb;
             Debug.WriteLine("EDDCanonnPanel Init func " + vstr + " " + dllfolder);
 
+            DLLPath = Path.GetDirectoryName(dllfolder);
 
             if (cb.ver >= 3 && cb.AddPanel != null)
             {
