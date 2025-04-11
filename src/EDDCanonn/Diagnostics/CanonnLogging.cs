@@ -6,7 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Forms;
+
 
 namespace EDDCanonnPanel.Base
 {
@@ -44,7 +44,7 @@ namespace EDDCanonnPanel.Base
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Logging Error: {ex.Message}");
+                Debug.WriteLine($"Logging Error: {ex}");
             }
         }
 
@@ -56,36 +56,47 @@ namespace EDDCanonnPanel.Base
         private CancellationTokenSource _logCTS;
         private string _logDirectory;
         private string _logFilePath;
-
-        public CanonnLogging()
-        {
-            //Logging should start right away. No delays.
-            StartLogging();
-        }
+        private string _currentLogDate = string.Empty;
 
         private void StartLogging()
         {
             //Log directory setup. This will be the default location.
-            _logDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "EDDiscovery", "AddonFiles", "Canonn", "Log");
+            _logDirectory = Path.Combine(CanonnEDDClass.DLLPath, "AddonFiles", "Canonn", "Log");
             Directory.CreateDirectory(_logDirectory);
 
-            CleanLogs(10);
+            _currentLogDate = DateTime.Now.ToString("yyyy-MM-dd");
 
-            //Creating a timestamped log file. Avoids overwriting.
-            string timestamp = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
-            _logFilePath = Path.Combine(_logDirectory, $"CanonnLog_{timestamp}.log");
+            //Check if a log file for today already exists
+            string existingLog = Directory.GetFiles(_logDirectory, $"CanonnLog_{_currentLogDate}_*.log").FirstOrDefault();
+
+            if (!string.IsNullOrEmpty(existingLog))
+            {
+                _logFilePath = existingLog;
+            }
+            else
+            {
+                _logFilePath = Path.Combine(_logDirectory, $"CanonnLog_{_currentLogDate}.log");
+            }
+
+            CleanLogs(10);
 
             _logSignal.Reset();
             _logCTS = new CancellationTokenSource();
 
             //Start the log processing worker.
             _logTask = Task.Run(ProcessLogQueue, _logCTS.Token);
+
+            Logging = true;
         }
 
-        public void LogToFile(string message)
+        private bool Logging = false;
+
+        public void Log(string message)
         {
             lock (_logLock)
             {
+                if(!Logging)
+                    StartLogging();
                 _logQueue.Enqueue(message);
                 //Signal the logging worker that new entries exist.
                 _logSignal.Set();
@@ -108,7 +119,7 @@ namespace EDDCanonnPanel.Base
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine($"Logging Error: {ex.Message}");
+                        Debug.WriteLine($"Logging Error: {ex}");
                     }
                 }
             }
