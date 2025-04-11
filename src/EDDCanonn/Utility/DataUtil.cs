@@ -43,29 +43,28 @@ namespace EDDCanonnPanel.Utility
         private static JArray _biologyGenuses =
         @"
         [
-            { ""Type"": ""Fonticulus"",         ""Genus"": ""$Codex_Ent_Fonticulus_Genus_Name;"" },
-            { ""Type"": ""Tubus"",              ""Genus"": ""$Codex_Ent_Tubus_Genus_Name;"" },
-            { ""Type"": ""Tussocks"",           ""Genus"": ""$Codex_Ent_Tussocks_Genus_Name;"" },
-            { ""Type"": ""Osseus"",             ""Genus"": ""$Codex_Ent_Osseus_Genus_Name;"" },
-            { ""Type"": ""Shrubs"",             ""Genus"": ""$Codex_Ent_Shrubs_Genus_Name;"" },
-            { ""Type"": ""Stratum"",            ""Genus"": ""$Codex_Ent_Stratum_Genus_Name;"" },
-            { ""Type"": ""Fumerolas"",          ""Genus"": ""$Codex_Ent_Fumerolas_Genus_Name;"" },
-            { ""Type"": ""Conchas"",            ""Genus"": ""$Codex_Ent_Conchas_Genus_Name;"" },
-            { ""Type"": ""Electricae"",         ""Genus"": ""$Codex_Ent_Electricae_Genus_Name;"" },
-            { ""Type"": ""Cactoid"",            ""Genus"": ""$Codex_Ent_Cactoid_Genus_Name;"" },
-            { ""Type"": ""Fungoids"",           ""Genus"": ""$Codex_Ent_Fungoids_Genus_Name;"" },
-            { ""Type"": ""Aleoids"",            ""Genus"": ""$Codex_Ent_Aleoids_Genus_Name;"" },
-            { ""Type"": ""Recepta"",            ""Genus"": ""$Codex_Ent_Recepta_Genus_Name;"" },
-            { ""Type"": ""Bacterial"",          ""Genus"": ""$Codex_Ent_Bacterial_Genus_Name;"" },
-            { ""Type"": ""Clypeus"",            ""Genus"": ""$Codex_Ent_Clypeus_Genus_Name;"" },
-            { ""Type"": ""Shards"",             ""Genus"": ""$Codex_Ent_Ground_Struct_Ice_Name;"" },
+            { ""Type"": ""Fonticulus"",         ""Genus"": ""$Codex_Ent_Fonticulus_Genus_Name;""    },
+            { ""Type"": ""Tubus"",              ""Genus"": ""$Codex_Ent_Tubus_Genus_Name;""         },
+            { ""Type"": ""Tussocks"",           ""Genus"": ""$Codex_Ent_Tussocks_Genus_Name;""      },
+            { ""Type"": ""Osseus"",             ""Genus"": ""$Codex_Ent_Osseus_Genus_Name;""        },
+            { ""Type"": ""Shrubs"",             ""Genus"": ""$Codex_Ent_Shrubs_Genus_Name;""        },
+            { ""Type"": ""Stratum"",            ""Genus"": ""$Codex_Ent_Stratum_Genus_Name;""       },
+            { ""Type"": ""Fumerolas"",          ""Genus"": ""$Codex_Ent_Fumerolas_Genus_Name;""     },
+            { ""Type"": ""Conchas"",            ""Genus"": ""$Codex_Ent_Conchas_Genus_Name;""       },
+            { ""Type"": ""Electricae"",         ""Genus"": ""$Codex_Ent_Electricae_Genus_Name;""    },
+            { ""Type"": ""Cactoid"",            ""Genus"": ""$Codex_Ent_Cactoid_Genus_Name;""       },
+            { ""Type"": ""Fungoids"",           ""Genus"": ""$Codex_Ent_Fungoids_Genus_Name;""      },
+            { ""Type"": ""Aleoids"",            ""Genus"": ""$Codex_Ent_Aleoids_Genus_Name;""       },
+            { ""Type"": ""Recepta"",            ""Genus"": ""$Codex_Ent_Recepta_Genus_Name;""       },
+            { ""Type"": ""Bacterial"",          ""Genus"": ""$Codex_Ent_Bacterial_Genus_Name;""     },
+            { ""Type"": ""Clypeus"",            ""Genus"": ""$Codex_Ent_Clypeus_Genus_Name;""       },
+            { ""Type"": ""Shards"",             ""Genus"": ""$Codex_Ent_Ground_Struct_Ice_Name;""   },
 
-            { ""Type"": ""Tubers"",             ""Genus"": ""$Codex_Ent_Tube_Name;"" },
-            { ""Type"": ""Brain Tree"",         ""Genus"": ""$Codex_Ent_Seed_Name;"" },
-            { ""Type"": ""Anemone"",            ""Genus"": ""$Codex_Ent_Sphere_Name;"" },
-            { ""Type"": ""Bark Mounds"",        ""Genus"": ""$Codex_Ent_Cone_Name;"" },
-            { ""Type"": ""Amphora Plant"",      ""Genus"": ""$Codex_Ent_Vents_Name;"" }
-        ]".JSONParseArray() ?? null; 
+            { ""Type"": ""Tubers"",             ""Genus"": ""$Codex_Ent_Tube_Name;""                },
+            { ""Type"": ""Brain Tree"",         ""Genus"": ""$Codex_Ent_Brancae_Name;""             },
+            { ""Type"": ""Anemone"",            ""Genus"": ""$Codex_Ent_Sphere_Name;""              },
+            { ""Type"": ""Bark Mounds"",        ""Genus"": ""$Codex_Ent_Cone_Name;""                },
+            { ""Type"": ""Amphora Plant"",      ""Genus"": ""$Codex_Ent_Vents_Name;""               }]".JSONParseArray() ?? null; 
 
         public static string ReadEmbeddedTextFile(string resourceName)
         {
@@ -90,22 +89,22 @@ namespace EDDCanonnPanel.Utility
                     }
                 }
             }
-            catch (FileNotFoundException fnfEx)
+            catch (FileNotFoundException ex)
             {
-                string error = $"EDDCanonn: File not found: {fnfEx.Message}";
-                CanonnLogging.Instance.LogToFile(error);
+                string error = $"EDDCanonn: File not found: {ex}";
+                CanonnLogging.Instance.Log(error);
                 throw;
             }
-            catch (ArgumentException argEx)
+            catch (ArgumentException ex)
             {
-                string error = $"EDDCanonn: Invalid file content: {argEx.Message}";
-                CanonnLogging.Instance.LogToFile(error);
+                string error = $"EDDCanonn: Invalid file content: {ex}";
+                CanonnLogging.Instance.Log(error);
                 throw;
             }
             catch (Exception ex)
             {
-                string error = $"EDDCanonn: Unexpected error while reading resource '{resourceName}': {ex.Message}";
-                CanonnLogging.Instance.LogToFile(error);
+                string error = $"EDDCanonn: Unexpected error while reading resource '{resourceName}': {ex}";
+                CanonnLogging.Instance.Log(error);
                 throw;
             }
         }
@@ -144,13 +143,13 @@ namespace EDDCanonnPanel.Utility
             catch (FormatException fe)
             {
                 string error = $"EDDCanonn: TSV parsing error: {fe.Message}";
-                CanonnLogging.Instance.LogToFile(error);
+                CanonnLogging.Instance.Log(error);
                 throw;
             }
             catch (Exception ex)
             {
-                string error = $"EDDCanonn: Unexpected error while parsing TSV: {ex.Message}";
-                CanonnLogging.Instance.LogToFile(error);
+                string error = $"EDDCanonn: Unexpected error while parsing TSV: {ex}";
+                CanonnLogging.Instance.Log(error);
                 throw;
             }
 
