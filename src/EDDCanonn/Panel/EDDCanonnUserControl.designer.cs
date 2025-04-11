@@ -210,13 +210,13 @@ namespace EDDCanonnPanel
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
-            ExtendedControls.TabStyleSquare tabStyleSquare2 = new ExtendedControls.TabStyleSquare();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle9 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle10 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle11 = new System.Windows.Forms.DataGridViewCellStyle();
+            ExtendedControls.TabStyleSquare tabStyleSquare1 = new ExtendedControls.TabStyleSquare();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(EDDCanonnUserControl));
             this.textBoxSystem = new System.Windows.Forms.TextBox();
             this.labelSysName = new System.Windows.Forms.Label();
@@ -569,8 +569,8 @@ namespace EDDCanonnPanel
             this.dataGridSignals.Location = new System.Drawing.Point(20, 582);
             this.dataGridSignals.Name = "dataGridSignals";
             this.dataGridSignals.ReadOnly = true;
-            dataGridViewCellStyle7.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.dataGridSignals.RowsDefaultCellStyle = dataGridViewCellStyle7;
+            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.dataGridSignals.RowsDefaultCellStyle = dataGridViewCellStyle1;
             this.dataGridSignals.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.dataGridSignals.ShowCellErrors = false;
             this.dataGridSignals.ShowCellToolTips = false;
@@ -694,9 +694,9 @@ namespace EDDCanonnPanel
             this.dataGridPatrol.Location = new System.Drawing.Point(0, 0);
             this.dataGridPatrol.Name = "dataGridPatrol";
             this.dataGridPatrol.ReadOnly = true;
-            dataGridViewCellStyle8.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle8.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.dataGridPatrol.RowsDefaultCellStyle = dataGridViewCellStyle8;
+            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.dataGridPatrol.RowsDefaultCellStyle = dataGridViewCellStyle2;
             this.dataGridPatrol.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.dataGridPatrol.ShowCellErrors = false;
             this.dataGridPatrol.ShowCellToolTips = false;
@@ -780,7 +780,7 @@ namespace EDDCanonnPanel
             this.extTabControlData.TabNotSelectedBorderColor = System.Drawing.Color.Gray;
             this.extTabControlData.TabNotSelectedColor = System.Drawing.Color.Gray;
             this.extTabControlData.TabSelectedColor = System.Drawing.Color.LightGray;
-            this.extTabControlData.TabStyle = tabStyleSquare2;
+            this.extTabControlData.TabStyle = tabStyleSquare1;
             this.extTabControlData.TextNotSelectedColor = System.Drawing.SystemColors.ControlText;
             this.extTabControlData.TextSelectedColor = System.Drawing.SystemColors.ControlText;
             // 
@@ -793,7 +793,7 @@ namespace EDDCanonnPanel
             this.tabData.Size = new System.Drawing.Size(356, 228);
             this.tabData.TabIndex = 1;
             this.tabData.Text = "Overview";
-            this.tabData.ToolTipText = "Summary of all missing data.";
+            this.tabData.ToolTipText = "Summary of all system data.";
             this.tabData.UseVisualStyleBackColor = true;
             // 
             // extPanelDataGridViewScrollData
@@ -853,8 +853,8 @@ namespace EDDCanonnPanel
             this.dataGridViewData.Location = new System.Drawing.Point(0, 0);
             this.dataGridViewData.Name = "dataGridViewData";
             this.dataGridViewData.ReadOnly = true;
-            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.dataGridViewData.RowsDefaultCellStyle = dataGridViewCellStyle2;
+            dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.dataGridViewData.RowsDefaultCellStyle = dataGridViewCellStyle3;
             this.dataGridViewData.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.dataGridViewData.ShowCellErrors = false;
             this.dataGridViewData.ShowCellToolTips = false;
@@ -952,8 +952,8 @@ namespace EDDCanonnPanel
             this.dataGridViewRing.Location = new System.Drawing.Point(0, 0);
             this.dataGridViewRing.Name = "dataGridViewRing";
             this.dataGridViewRing.ReadOnly = true;
-            dataGridViewCellStyle9.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.dataGridViewRing.RowsDefaultCellStyle = dataGridViewCellStyle9;
+            dataGridViewCellStyle4.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.dataGridViewRing.RowsDefaultCellStyle = dataGridViewCellStyle4;
             this.dataGridViewRing.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.dataGridViewRing.ShowCellErrors = false;
             this.dataGridViewRing.ShowCellToolTips = false;
@@ -1013,7 +1013,7 @@ namespace EDDCanonnPanel
             this.tabBio.Size = new System.Drawing.Size(356, 228);
             this.tabBio.TabIndex = 7;
             this.tabBio.Text = "Biological";
-            this.tabBio.ToolTipText = "Shows missing biodata.";
+            this.tabBio.ToolTipText = "Shows biodata for this system.";
             this.tabBio.UseVisualStyleBackColor = true;
             // 
             // extPanelDataGridViewScrollBio
@@ -1073,8 +1073,8 @@ namespace EDDCanonnPanel
             this.dataGridViewBio.Location = new System.Drawing.Point(0, 0);
             this.dataGridViewBio.Name = "dataGridViewBio";
             this.dataGridViewBio.ReadOnly = true;
-            dataGridViewCellStyle10.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.dataGridViewBio.RowsDefaultCellStyle = dataGridViewCellStyle10;
+            dataGridViewCellStyle5.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.dataGridViewBio.RowsDefaultCellStyle = dataGridViewCellStyle5;
             this.dataGridViewBio.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.dataGridViewBio.ShowCellErrors = false;
             this.dataGridViewBio.ShowCellToolTips = false;
@@ -1202,8 +1202,8 @@ namespace EDDCanonnPanel
             this.dataGridViewGMO.Location = new System.Drawing.Point(0, 0);
             this.dataGridViewGMO.Name = "dataGridViewGMO";
             this.dataGridViewGMO.ReadOnly = true;
-            dataGridViewCellStyle11.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.dataGridViewGMO.RowsDefaultCellStyle = dataGridViewCellStyle11;
+            dataGridViewCellStyle6.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.dataGridViewGMO.RowsDefaultCellStyle = dataGridViewCellStyle6;
             this.dataGridViewGMO.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.dataGridViewGMO.ShowCellErrors = false;
             this.dataGridViewGMO.ShowCellToolTips = false;
@@ -1306,9 +1306,9 @@ namespace EDDCanonnPanel
             this.labelTest.AutoSize = true;
             this.labelTest.Location = new System.Drawing.Point(3, 104);
             this.labelTest.Name = "labelTest";
-            this.labelTest.Size = new System.Drawing.Size(243, 13);
+            this.labelTest.Size = new System.Drawing.Size(246, 26);
             this.labelTest.TabIndex = 4;
-            this.labelTest.Text = "Eahlstan, Jugom, NYZCHF, MentalFS, JDM12983";
+            this.labelTest.Text = "Eahlstan, Jugom, NYZCHF, MentalFS, JDM12983, Recluso";
             this.labelTest.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // label1
