@@ -1,4 +1,22 @@
-﻿using System;
+﻿/******************************************************************************
+ * 
+ * Copyright © 2022-2022 EDDiscovery development team
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at:
+ * 
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * 
+ ******************************************************************************/
+
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -107,7 +125,7 @@ namespace EDDCanonnPanel.Base
         {
             while (!_logCTS.Token.IsCancellationRequested)
             {
-                //Blocks the thread. No unnecessary CPU usage.
+                //Blocks the thread.
                 _logSignal.WaitOne();
 
                 while (_logQueue.TryDequeue(out string logEntry))
@@ -132,7 +150,7 @@ namespace EDDCanonnPanel.Base
                 //Ensure we properly shut down the logging task.
                 _logCTS.Cancel();
                 _logSignal.Set();
-                _logTask.Wait(); //Don't leave unfinished work behind.
+                _logTask.Wait();
             }
         }
     }

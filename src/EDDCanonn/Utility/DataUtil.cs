@@ -1,16 +1,20 @@
-﻿/*
- * Copyright © 2022-2022 EDDiscovery development team
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
- * file except in compliance with the License. You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
+﻿/******************************************************************************
  * 
- * Unless required by applicable law or agreed to in writing, software distributed under
- * the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
- * ANY KIND, either express or implied. See the License for the specific language
- * governing permissions and limitations under the License.
- */
+ * Copyright © 2022-2022 EDDiscovery development team
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at:
+ * 
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * 
+ ******************************************************************************/
 
 using System;
 using System.Collections.Generic;
@@ -28,6 +32,9 @@ namespace EDDCanonnPanel.Utility
         public static readonly int[] PatrolRanges = { 6, 24, 120, 720, 5040 };
         //Default fallback for galactic coords.
         public static readonly double PositionFallback = -99999.99;
+
+        //Resolves a biological type or genus name to its corresponding genus or type,
+        //depending on the input match found in the _biologyGenuses list.
         public static String BiologyGenuses(string input)
         {
             if (_biologyGenuses == null || _biologyGenuses.Count == 0) return input;

@@ -1,34 +1,37 @@
-﻿/*
- * Copyright © 2022-2022 EDDiscovery development team
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
- * file except in compliance with the License. You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
+﻿/******************************************************************************
  * 
- * Unless required by applicable law or agreed to in writing, software distributed under
- * the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
- * ANY KIND, either express or implied. See the License for the specific language
- * governing permissions and limitations under the License.
- */
+ * Copyright © 2022-2022 EDDiscovery development team
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at:
+ * 
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * 
+ ******************************************************************************/
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Windows.Forms;
-using EDDCanonnPanel.Base;
 using QuickJSON;
 namespace EDDCanonnPanel
 {
-    //Class for outsourced help functions.
+    //Utility class for shared helper functions used in the Canonn plugin.
     public static class CanonnUtil
     {
+        //Tracks the version of the currently running plugin assembly.
         public static readonly Version V = Assembly.GetExecutingAssembly().GetName().Version;
 
-        //Count for active canonn plugin instances.
+        //Tracks the number of active Canonn plugin instances.
         public static int InstanceCount = 0;
         private static int _currentId = 998;
         public static int GenerateId()
@@ -36,8 +39,8 @@ namespace EDDCanonnPanel
             return Interlocked.Increment(ref _currentId);
         }
 
-        //Checks if a key value pair exists.
-        // If the key is null, it checks whether any object contains the value as a standalone field.
+        //Checks whether a key-value pair exists in the provided list.
+        //If key is null, checks if the value appears in any object fields.
         public static bool ContainsKeyValuePair(List<JObject> existingList, string key, string value)
         {
             if (existingList == null || value == null)
@@ -49,7 +52,8 @@ namespace EDDCanonnPanel
             return existingList.Any(obj => obj.Contains(key) && obj[key].StrNull() == value);
         }
 
-        //The same as above, but the JObject  is returned.
+        //Finds and returns the first JObject that matches the given key-value pair.
+        //If key is null, matches based on value presence alone.
         public static JObject FindFirstMatchingJObject(List<JObject> existingList, string key, string value)
         {
             if (existingList == null || value == null)
@@ -62,21 +66,23 @@ namespace EDDCanonnPanel
                 string.Equals(obj[key].StrNull(), value, StringComparison.OrdinalIgnoreCase));
         }
 
-        //The same as above, but for JArrays.
+        //Returns a merged list of unique JObject entries from the source array and existing list.
+        //Entries are considered duplicates if they match by structure or key content.
         public static List<JObject> GetUniqueEntries(JObject eventData, string key, List<JObject> existingList)
         {
             if (eventData[key] is JArray array)
             {
                 List<JObject> result = existingList ?? new List<JObject>();
                 result.AddRange(array.OfType<JObject>().Where(item => !result.Any(existing => JToken.DeepEquals(existing, item)
-                || (existing[existing.PropertyNames()?[0]].StrNull() ?? "none_") == (item[item.PropertyNames()?[0]].StrNull() ?? "none")
-                || (existing.ToString() ?? "none_").Contains(item[item.PropertyNames()?[0]].StrNull() ?? "none" ))));
+                || (existing[existing.PropertyNames()?[0]].Str("none_")) == (item[item.PropertyNames()?[0]].Str("none"))
+                || (existing.Str("none_")).Contains(item[item.PropertyNames()?[0]].Str("none")))));
                 return result;
             }
             return existingList ?? new List<JObject>();
         }
 
-        //The same as 'GetUniqueEntries', but without duplicate check.
+        //Returns all JObject items from a source object under the given key.
+        //Optionally wraps primitive values into JObject using subKey if needed.
         public static List<JObject> GetJObjectList(JObject source, string key, string subKey = null)
         {
             if (source == null || source.IsNull)
@@ -93,7 +99,7 @@ namespace EDDCanonnPanel
             return null;
         }
 
-        //Returns a filled row for the passed GridView.
+        //Creates and returns a fully initialized DataGridViewRow, including optional tooltips.
         public static DataGridViewRow CreateDataGridViewRow(DataGridView dataGridView, object[] objects, string[] tooltips = null)
         {
             DataGridViewRow row = new DataGridViewRow();
@@ -109,7 +115,7 @@ namespace EDDCanonnPanel
             return row;
         }
 
-        //Frees all contents of a rowlist. Makes sense if this rows has not been passed to any controls.
+        //Disposes all rows in the given list and clears it.
         public static void DisposeDataGridViewRowList(List<DataGridViewRow> rows)
         {
             if (rows == null || rows.Count == 0)
@@ -123,7 +129,7 @@ namespace EDDCanonnPanel
             rows.Clear();
         }
 
-        //Makes a deepclone because a row can only have one parent.
+        //Clones a list of DataGridViewRows to allow reuse, since rows can’t belong to multiple views.
         public static List<DataGridViewRow> CloneDataGridViewRowList(List<DataGridViewRow> rows)
         {
             return rows.Select((DataGridViewRow row) =>
