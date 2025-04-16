@@ -1,16 +1,20 @@
-﻿/*
- * Copyright © 2022-2022 EDDiscovery development team
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
- * file except in compliance with the License. You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
+﻿/******************************************************************************
  * 
- * Unless required by applicable law or agreed to in writing, software distributed under
- * the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
- * ANY KIND, either express or implied. See the License for the specific language
- * governing permissions and limitations under the License.
- */
+ * Copyright © 2022-2022 EDDiscovery development team
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at:
+ * 
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * 
+ ******************************************************************************/
 
 using System;
 using System.Collections.Generic;
@@ -33,7 +37,6 @@ namespace EDDCanonnPanel.Emitter
 
             CanonnEDDClass.OnNewJournalEntry += ProcessJournalEntry;
             CanonnEDDClass.OnTermination += Closing;
-            CanonnEDDClass.OnUIEvent += ProcessUIEvent;
 
             dataHandler = new ActionDataHandler();
 
@@ -60,7 +63,7 @@ namespace EDDCanonnPanel.Emitter
                 {
                     lock (_canonnPushLock)
                     {
-                        string payload = Payload.BuildPayload(entry, GetStatusJson()).ToString(true, "  ");
+                        string payload = Payload.BuildPayload(entry, CanonnEDDClass.GetStatusJson()).ToString(true, "  ");
                         string buildMsg = Environment.NewLine + $"Build payload for: {eventId} => " + Environment.NewLine + $" {payload} " + Environment.NewLine;
                         CanonnLogging.Instance.Log(buildMsg);
 
@@ -78,28 +81,6 @@ namespace EDDCanonnPanel.Emitter
                     $"Emitter - Canonn-Push : Event => {eventId}"
                 );
             }
-        }
-
-        private readonly object _lockStatusJson = new object();
-        private JObject _statusJson;
-        private void ProcessUIEvent(string jsonui)
-        {
-            JObject o = jsonui.JSONParse().Object();
-            if (o == null)
-                return;
-
-            string type = o["EventTypeStr"].Str();
-            if (string.IsNullOrEmpty(type))
-                return;
-
-            lock (_lockStatusJson)
-                _statusJson = o;
-        }
-
-        private JObject GetStatusJson() //Return a deep copy.
-        {
-            lock (_lockStatusJson)
-                return new JObject(_statusJson);
         }
 
         public void Closing()
