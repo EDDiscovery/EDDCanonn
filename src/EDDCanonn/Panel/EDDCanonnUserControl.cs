@@ -1,16 +1,20 @@
-﻿/*
- * Copyright © 2022-2022 EDDiscovery development team
- *
- * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
- * file except in compliance with the License. You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
+﻿/******************************************************************************
  * 
- * Unless required by applicable law or agreed to in writing, software distributed under
- * the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
- * ANY KIND, either express or implied. See the License for the specific language
- * governing permissions and limitations under the License.
- */
+ * Copyright © 2022-2022 EDDiscovery development team
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at:
+ * 
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * 
+ ******************************************************************************/
 
 using System;
 using static EDDDLLInterfaces.EDDDLLIF;
@@ -53,7 +57,7 @@ namespace EDDCanonnPanel
 
         private void StartUp() //Triggered by panel Initialize.
         {
-            NotifyMainFields("Start Up...");                            
+            NotifyMainFields("Start Up...");
             try
             {
                 if (CanonnUtil.InstanceCount > 0)
@@ -61,7 +65,7 @@ namespace EDDCanonnPanel
                     CanonnUtil.InstanceCount++;
                     //Abort if a Canonn Panel already exists.
                     Abort("Only one Canonn Panel instance can be active. " +
-                    "Use the main instance or close all other instances and restart EDD."); 
+                    "Use the main instance or close all other instances and restart EDD.");
                     return;
                 }
                 else
@@ -291,14 +295,14 @@ namespace EDDCanonnPanel
                         if (record == null || record.Count == 0)
                             continue;
 
-                        string system = record["system"].StrNull() ?? string.Empty;
+                        string system = record["system"].Str();
 
                         double x = record["x"].Double(DataUtil.PositionFallback);
                         double y = record["y"].Double(DataUtil.PositionFallback);
                         double z = record["z"].Double(DataUtil.PositionFallback);
 
-                        string instructions = record["instructions"].StrNull() ?? "none";
-                        string urlp = record["url"].StrNull() ?? string.Empty;
+                        string instructions = record["instructions"].Str("none");
+                        string urlp = record["url"].Str();
 
                         //Construct a new Patrol object and insert it into the KdTree.
                         Patrol patrol = new Patrol(category, system, x, y, z, instructions, urlp);
@@ -355,23 +359,15 @@ namespace EDDCanonnPanel
                                 : -1;
                         });
 
-                        if(string.IsNullOrEmpty(type) || range == -1)
+                        if (string.IsNullOrEmpty(type) || range == -1)
                             return;
 
                         List<(string category, Patrol patrol, double distance)> patrolList = patrols.FindPatrolsInRange(type, system.X, system.Y, system.Z, range);
 
                         List<DataGridViewRow> result = new List<DataGridViewRow>();
                         foreach (var (category, patrol, distance) in patrolList)
-                        {
-                            var row = new DataGridViewRow();
-                            row.Cells.Add(new DataGridViewTextBoxCell { Value = patrol.category });
-                            row.Cells.Add(new DataGridViewTextBoxCell { Value = patrol.instructions });
-                            row.Cells.Add(new DataGridViewTextBoxCell { Value = distance.ToString() });
-                            row.Cells.Add(new DataGridViewTextBoxCell { Value = patrol.system });
-                            row.Cells.Add(new DataGridViewTextBoxCell { Value = patrol.url });
+                            result.Add(CanonnUtil.CreateDataGridViewRow(dataGridPatrol,new object[] { patrol.category, patrol.instructions , distance.ToString(), patrol.system, patrol.url }));
 
-                            result.Add(row);
-                        }
                         UpdateDataGridPatrol(result); // Update UI with new patrol list.
                     }
                 },
@@ -403,7 +399,7 @@ namespace EDDCanonnPanel
 
         private void toolStripPatrol_IndexChanged(object sender, EventArgs e)
         {
-            if(patrolToolStripLock)
+            if (patrolToolStripLock)
                 return;
             else patrolToolStripLock = true;
             UpdatePatrols();
@@ -517,7 +513,7 @@ namespace EDDCanonnPanel
 
         private readonly object _lockSystemData = new object();
         private SystemData _systemData; //Do not use this. Otherwise it could get bad.
-        private void ResetSystemData() //In the event of a jump/location or if web data is not available.
+        private void ResetSystemData()
         {
             lock (_lockSystemData)
             {
@@ -579,29 +575,50 @@ namespace EDDCanonnPanel
                     case "Scan":
                     case "FSSBodySignals":
                     case "SAASignalsFound":
-                        ProcessScan(eventData);
+                        lock (_lockSystemData) ProcessScan(eventData);
                         break;
                     case "ScanOrganic":
-                        ProcessOrganic(eventData);
+                        lock (_lockSystemData) ProcessOrganic(eventData);
                         break;
                     case "FSSDiscoveryScan":
-                        ProcessFSSDiscoveryScan(eventData);
+                        lock (_lockSystemData) ProcessFSSDiscoveryScan(eventData);
                         break;
                     case "FSSAllBodiesFound":
-                        ProcessFSSAllBodiesFound(eventData);
+                        lock (_lockSystemData) ProcessFSSAllBodiesFound(eventData);
                         break;
                     case "SAAScanComplete":
-                        ProcessSAAScan(eventData);
+                        lock (_lockSystemData) ProcessSAAScan(eventData);
                         break;
                     case "CodexEntry":
-                        ProcessCodex(eventData);
+                        lock (_lockSystemData) ProcessCodex(eventData);
                         break;
                     default:
                         matched = false;
                         break;
                 }
+
                 if (matched) //We only update the UI when changes are made.
                 {
+                    if (systemData?.Name != je.systemname && _eventLock)
+                    {
+                        /************************************************************************************
+                        * There is a possibility that the plugin does not start from the correct system,
+                        * especially if it was launched during an FSD jump. To correct such cases,
+                        * a check is performed for each valid event.                         
+                        ************************************************************************************/
+                        lock (_lockSystemData)
+                        {
+                            _eventLock = false;
+                            SafeBeginInvoke(() =>
+                            {
+                                CanonnLogging.Instance.Log($"EDDCanonn: system name does not match. Fetch again: {systemData?.Name} <--Plugin | Journal--> {je.systemname}");
+                                ResetSystemData();
+                                DLLCallBack.RequestSpanshDump(RequestTag.ReFetch, this, je.systemname, je.systemaddress, true, false, null);
+                            });
+                            return;
+                        }
+                    }
+
                     string mg = $"EDDCanonn: Processed event for visual feedback: " + je.eventid;
                     CanonnLogging.Instance.Log(mg);
                     UpdateUI();
@@ -615,6 +632,12 @@ namespace EDDCanonnPanel
             }
         }
 
+        /************************************************************************************
+         * CRITICAL NOTICE:
+         * Always call event-related methods exclusively within the '_lockSystemData' lock.
+         * DO NOT IGNORE THIS.
+         ************************************************************************************/
+
         private void ProcessNewSystem(JObject eventData)
         {
             try
@@ -622,16 +645,13 @@ namespace EDDCanonnPanel
                 if (systemData == null)
                     systemData = new SystemData(); //Enforces encapsulation and creates a new SystemData instance internally, disregarding any parameters.
 
-                lock (_lockSystemData)
+                systemData.Name = eventData["StarSystem"].StrNull() ?? eventData["System"].Str("none");
+                systemData.SystemAddress = eventData["SystemAddress"].Long(-1);
+                if (eventData["StarPos"] != null)
                 {
-                    systemData.Name = eventData["StarSystem"].StrNull() ?? eventData["System"].StrNull() ?? "none";
-                    systemData.SystemAddress = eventData["SystemAddress"].Long(-1);
-                    if (eventData["StarPos"] != null)
-                    {
-                        systemData.X = eventData["StarPos"][0].Double(DataUtil.PositionFallback);
-                        systemData.Y = eventData["StarPos"][1].Double(DataUtil.PositionFallback);
-                        systemData.Z = eventData["StarPos"][2].Double(DataUtil.PositionFallback);
-                    }
+                    systemData.X = eventData["StarPos"][0].Double(DataUtil.PositionFallback);
+                    systemData.Y = eventData["StarPos"][1].Double(DataUtil.PositionFallback);
+                    systemData.Z = eventData["StarPos"][2].Double(DataUtil.PositionFallback);
                 }
             }
             catch (Exception ex) //If we end up here. We have a problem.
@@ -642,7 +662,7 @@ namespace EDDCanonnPanel
             }
         }
 
-        private void FetchScanData(JObject eventData, Body body) //Call this method only via the '_lockSystemData' lock. Otherwise it could get bad.
+        private void FetchScanData(JObject eventData, Body body)
         {
             if (body.ScanData == null)
             {
@@ -654,7 +674,6 @@ namespace EDDCanonnPanel
                     //List<JObject>  
                     Signals = CanonnUtil.GetJObjectList(eventData, "Signals"),
                     Rings = CanonnUtil.GetJObjectList(eventData, "Rings"),
-                    Organics = CanonnUtil.GetJObjectList(eventData, "Organics"),
                     Genuses = CanonnUtil.GetJObjectList(eventData, "Genuses"),
                 };
             }
@@ -666,13 +685,11 @@ namespace EDDCanonnPanel
                 //List<JObject>  
                 body.ScanData.Signals = CanonnUtil.GetUniqueEntries(eventData, "Signals", body.ScanData.Signals);
                 body.ScanData.Rings = CanonnUtil.GetUniqueEntries(eventData, "Rings", body.ScanData.Rings);
-                body.ScanData.Organics = CanonnUtil.GetUniqueEntries(eventData, "Organics", body.ScanData.Organics);
                 body.ScanData.Genuses = CanonnUtil.GetUniqueEntries(eventData, "Genuses", body.ScanData.Genuses);
-                body.ScanData.SurfaceFeatures = CanonnUtil.GetUniqueEntries(eventData, "SurfaceFeatures", body.ScanData.SurfaceFeatures);
             }
         }
 
-        private void IdentifyNodeType(Body body, JObject eventData) //Call this method only via the '_lockSystemData' lock. Otherwise it could get bad.
+        private void IdentifyNodeType(Body body, JObject eventData)
         {
             if (body.NodeType != null) return;
             if (eventData.Contains("PlanetClass") && !eventData["PlanetClass"].IsNull)
@@ -685,50 +702,47 @@ namespace EDDCanonnPanel
                 body.NodeType = "Ring";
         }
 
-        private Body ProcessScan(JObject eventData) //We can use this for most scan events.
+        private Body ProcessScan(JObject eventData)
         {
             if (systemData == null)
                 ProcessNewSystem(eventData);
-            if(systemData == null)
+            if (systemData == null)
                 return null;
 
-            lock (_lockSystemData)
+            if (systemData.Bodys == null)
             {
-                if (systemData.Bodys == null)
-                {
-                    systemData.Bodys = new SortedDictionary<int, Body>();
-                }
-
-                int bodyId = eventData["BodyID"].Int(eventData["Body"].Int(-1));
-                if (bodyId == -1) return null;
-
-                string bodyName = eventData["BodyName"].StrNull() ?? "none";
-
-                Body body;
-
-                if (!systemData.Bodys.ContainsKey(bodyId))
-                {
-                    body = new Body
-                    {
-                        BodyID = bodyId,
-                        BodyName = bodyName,
-                    };
-                    IdentifyNodeType(body, eventData);
-                    systemData.Bodys[bodyId] = body;
-                }
-                else
-                {
-                    body = systemData.Bodys[bodyId];
-                    //We just set the name again. In case the node was initialized without a name.
-                    body.BodyName = bodyName;
-                    //Same here.
-                    IdentifyNodeType(body, eventData);
-                }
-
-                FetchScanData(eventData, body);
-
-                return body;
+                systemData.Bodys = new SortedDictionary<int, Body>();
             }
+
+            int bodyId = eventData["BodyID"].Int(eventData["Body"].Int(-1));
+            if (bodyId == -1) return null;
+
+            string bodyName = eventData["BodyName"].Str("none");
+
+            Body body;
+
+            if (!systemData.Bodys.ContainsKey(bodyId))
+            {
+                body = new Body
+                {
+                    BodyID = bodyId,
+                    BodyName = bodyName,
+                };
+                IdentifyNodeType(body, eventData);
+                systemData.Bodys[bodyId] = body;
+            }
+            else
+            {
+                body = systemData.Bodys[bodyId];
+                //We just set the name again. In case the node was initialized without a name.
+                body.BodyName = bodyName;
+                //Same here.
+                IdentifyNodeType(body, eventData);
+            }
+
+            FetchScanData(eventData, body);
+
+            return body;
         }
 
         private void ProcessFSSDiscoveryScan(JObject eventData)
@@ -736,46 +750,74 @@ namespace EDDCanonnPanel
             if (systemData == null)
                 systemData = new SystemData(); //Enforces encapsulation.
 
-            lock (_lockSystemData)
-            {
-                systemData.BodyCount = eventData["BodyCount"].Int(-1);
-                DataGridNotifications.Remove(NType.dscanRequired);
-            }
+            systemData.BodyCount = eventData["BodyCount"].Int(-1);
+            DataGridNotifications.Remove(NType.dscanRequired);
         }
 
         private void ProcessFSSAllBodiesFound(JObject eventData)
         {
-            lock (_lockSystemData)
-            {
-                DataGridNotifications.Remove(NType.spanshIncorrect);
-                DataGridNotifications.Remove(NType.systemNotKnown);
-            }
+            DataGridNotifications.Remove(NType.spanshIncorrect);
+            DataGridNotifications.Remove(NType.systemNotKnown);
         }
 
         private void ProcessSAAScan(JObject eventData)
         {
-            lock (_lockSystemData)
-            {
-                int bodyId = eventData["BodyID"].Int(-1);
-                if (bodyId == -1) return;
+            int bodyId = eventData["BodyID"].Int(-1);
+            if (bodyId == -1) return;
 
-                Body body;
-                if (!systemData?.Bodys?.ContainsKey(bodyId) ?? true) //In the event that the SAA scan comes before the scan event.
-                    body = ProcessScan(eventData); //We are entering a second lock here. --> Not Nice. 
-                else
-                    body = systemData.Bodys[bodyId];
+            Body body;
+            if (!systemData?.Bodys?.ContainsKey(bodyId) ?? true) //In the event that the SAA scan comes before the scan event.
+                body = ProcessScan(eventData);
+            else
+                body = systemData.Bodys[bodyId];
 
-                if (body == null) return;
+            if (body == null) return;
 
-                body.IsMapped = true;
-            }
+            body.IsMapped = true;
         }
 
-        private void ProcessOrganic(JObject eventData) //The 'ScanOrganic' event is special. We cannot treat it as a 'ProcessScan' (although similar) because the keys are named differently.
+        private void ProcessOrganic(JObject eventData)
         {
-            lock (_lockSystemData)
+            int bodyId = eventData["Body"].Int(-1);
+            if (bodyId == -1) return;
+
+            Body body;
+            if (!systemData?.Bodys?.ContainsKey(bodyId) ?? true)
+                body = ProcessScan(eventData);
+            else
+                body = systemData.Bodys[bodyId];
+
+            if (body == null) return;
+
+            if (eventData["Genus"] == null) return;
+
+            string variant = eventData["Variant"].Value?.ToString();
+            string genus = eventData["Genus"].Value?.ToString();
+
+            JObject o = new JObject
             {
-                int bodyId = eventData["Body"].Int(-1);
+                ["Organics"] = new JArray
+                    {
+                        new JObject
+                        {
+                            ["Variant"] = variant,                                                  //$Codex_Ent_Tussocks_09_F_Name;
+                            ["Variant_Localised"] = CodexDatabase.GetByName(variant).LocalisedName, //Tussock Propagito - Yellow
+                            ["Genus"] = genus                                                       //$Codex_Ent_Tussocks_Genus_Name;
+                        }
+                    }
+            };
+
+            body.ScanData.Organics = CanonnUtil.GetUniqueEntries(o, "Organics", body.ScanData.Organics);
+        }
+
+        private void ProcessCodex(JObject eventData)
+        {
+            string category = eventData["Category"].StrNull();
+            if (category == null) return;
+
+            if (category.Equals("$Codex_Category_Biology;"))
+            {
+                int bodyId = eventData["BodyID"].Int(-1);
                 if (bodyId == -1) return;
 
                 Body body;
@@ -786,54 +828,12 @@ namespace EDDCanonnPanel
 
                 if (body == null) return;
 
-                if (eventData["Genus"] == null) return;
-
-                string variant = eventData["Variant"].Value?.ToString();
-                string genus = eventData["Genus"].Value?.ToString();
+                string variant = eventData["Name"].StrNull();
+                CodexEntry entry = CodexDatabase.GetByName(variant);
 
                 JObject o = new JObject
                 {
-                    ["Organics"] = new JArray 
-                    { 
-                        new JObject 
-                        {
-                            ["Variant"] = variant,                                                  //$Codex_Ent_Tussocks_09_F_Name;
-                            ["Variant_Localised"] = CodexDatabase.GetByName(variant).LocalisedName, //Tussock Propagito - Yellow
-                            ["Genus"] = genus                                                       //$Codex_Ent_Tussocks_Genus_Name;
-                        }
-                    }
-                };
-
-                body.ScanData.Organics = CanonnUtil.GetUniqueEntries(o, "Organics", body.ScanData.Organics);
-            }
-        }
-
-        private void ProcessCodex(JObject eventData)
-        {
-            lock (_lockSystemData)
-            {
-                string category = eventData["Category"].StrNull();
-                if(category == null) return;
-
-                if (category.Equals("$Codex_Category_Biology;"))
-                {
-                    int bodyId = eventData["BodyID"].Int(-1);
-                    if (bodyId == -1) return;
-
-                    Body body;
-                    if (!systemData?.Bodys?.ContainsKey(bodyId) ?? true)
-                        body = ProcessScan(eventData);
-                    else
-                        body = systemData.Bodys[bodyId];
-
-                    if (body == null) return;
-
-                    string variant = eventData["Name"].StrNull();
-                    CodexEntry entry = CodexDatabase.GetByName(variant);
-
-                    JObject o = new JObject
-                    {
-                        ["Organics"] = new JArray
+                    ["Organics"] = new JArray
                         {
                             new JObject
                             {
@@ -842,18 +842,17 @@ namespace EDDCanonnPanel
                                 ["Genus"] = DataUtil.BiologyGenuses(entry.CodexSubType) //$Codex_Ent_Tussocks_Genus_Name;                                                                                      
                             }
                         }
-                    };
+                };
 
-                    body.ScanData.Organics = CanonnUtil.GetUniqueEntries(o, "Organics", body.ScanData.Organics);
-                }
-                else if (false)
-                {
-
-                }
-                else if (false)
-                {
-
-                }
+                body.ScanData.Organics = CanonnUtil.GetUniqueEntries(o, "Organics", body.ScanData.Organics);
+            }
+            else if (false)
+            {
+                //...
+            }
+            else if (false)
+            {
+                //...
             }
         }
 
@@ -861,12 +860,18 @@ namespace EDDCanonnPanel
 
         #region ProcessSpanshDump
 
+        /*********************************************************************************************************
+         * CRITICAL NOTICE:
+         * ProcessSpanshDump and the underlying methods should also only be called via the '_lockSystemData' lock.
+         * DO NOT IGNORE THIS.
+         *********************************************************************************************************/
+
         public void ProcessSpanshDump(JObject root)
         {
             if (root == null || root.Count == 0) // If this is true after a ‘Location’ / 'Jump' event, the system is later initialised via that event.
             {
                 DataGridNotifications[NType.systemNotKnown] = CanonnUtil.CreateDataGridViewRow(dataGridViewData, new object[] {
-                    NTypeDescription(NType.systemNotKnown), 
+                    NTypeDescription(NType.systemNotKnown),
                     Properties.Resources.spansh });
                 return;
             }
@@ -874,41 +879,38 @@ namespace EDDCanonnPanel
             if (systemData == null)
                 systemData = new SystemData(); //Enforces encapsulation and creates a new SystemData instance internally, disregarding any parameters.
 
-            lock (_lockSystemData)
+            try
             {
-                try
-                {
-                    JObject systemDataNode = root["system"]?.Object() ?? null;
-                    if (systemDataNode != null)
-                        ProcessSpanshSystemData(systemDataNode);
-                    else
-                        throw new Exception($"EDDCanonn: systemDataNode is null");
+                JObject systemDataNode = root["system"]?.Object() ?? null;
+                if (systemDataNode != null)
+                    ProcessSpanshSystemData(systemDataNode);
+                else
+                    throw new Exception($"EDDCanonn: systemDataNode is null");
 
-                    JArray bodyNode = systemDataNode?["bodies"]?.Array() ?? null;
-                    if (bodyNode != null)
-                        ProcessSpanshBodyNode(bodyNode);
+                JArray bodyNode = systemDataNode?["bodies"]?.Array() ?? null;
+                if (bodyNode != null)
+                    ProcessSpanshBodyNode(bodyNode);
 
-                    if(systemData.SystemAddress != -1)
-                        ProcessCanonnBiostats(systemData.SystemAddress);
+                if (systemData.SystemAddress != -1)
+                    ProcessCanonnBiostats(systemData.SystemAddress);
 
-                    if(systemData.BodyCount == -1 && systemData.Bodys?.Count > 0)
-                        DataGridNotifications[NType.spanshIncorrect] = CanonnUtil.CreateDataGridViewRow(dataGridViewData, new object[] {
+                if (systemData.BodyCount == -1 && systemData.Bodys?.Count > 0)
+                    DataGridNotifications[NType.spanshIncorrect] = CanonnUtil.CreateDataGridViewRow(dataGridViewData, new object[] {
                             NTypeDescription(NType.spanshIncorrect),
                             Properties.Resources.spansh });
-                }
-                catch (Exception ex)
-                {
-                    ResetSystemData(); //If something goes wrong here, we assume that no data is available. If this happens after a ‘Location’ / 'Jump' event, the system is initialised via that event.
-                    string error = $"EDDCanonn: Error processing CallbackSystem: {ex}";
-                    CanonnLogging.Instance.Log(error);
-                }
+            }
+            catch (Exception ex)
+            {
+                ResetSystemData(); //If something goes wrong here, we assume that no data is available. If this happens after a ‘Location’ / 'Jump' event, the system is initialised via that event.
+                string error = $"EDDCanonn: Error processing CallbackSystem: {ex}";
+                CanonnLogging.Instance.Log(error);
             }
         }
 
         private void ProcessSpanshSystemData(JObject system)
         {
             // Extract and populate main system details
-            systemData.Name = system["name"].Value?.ToString();
+            systemData.Name = system["name"].Str("none");
 
             systemData.X = system["coords"]["x"].Double(DataUtil.PositionFallback);
             systemData.Y = system["coords"]["y"].Double(DataUtil.PositionFallback);
@@ -952,8 +954,8 @@ namespace EDDCanonnPanel
                 {
                     //Primitives
                     BodyID = bodyId,
-                    BodyName = node["name"].Value?.ToString(),
-                    NodeType = node["type"].Value?.ToString(),
+                    BodyName = node["name"].StrNull(),
+                    NodeType = node["type"].StrNull(),
                 };
 
                 body.ScanData = new ScanData
@@ -1004,9 +1006,9 @@ namespace EDDCanonnPanel
 
                 List<JObject> biology = CanonnUtil.GetJObjectList(node["signals"] as JObject, "biology", "Bio");
 
-                if (biology == null || biology.Count == 0) 
-                { 
-                    continue; 
+                if (biology == null || biology.Count == 0)
+                {
+                    continue;
                 }
 
                 body.ScanData.Organics = biology
@@ -1057,19 +1059,19 @@ namespace EDDCanonnPanel
                     {
                         if (rt.Equals(RequestTag.OnStart) || rt.Equals(RequestTag.ReFetch)) //Triggered by panel creation.
                         {
-                            lock (_lockSystemData) ProcessSpanshDump(o); //I don't think the lock is necessary. But safety first.
+                            lock (_lockSystemData) ProcessSpanshDump(o);
                             SafeInvoke(() => this.Enabled = true);
                             _eventLock = _journalLock = true; //Plugin startup complete.
-                            if (systemData == null) lock(_lockSystemData) systemData = new SystemData();                   
+                            if (systemData == null) lock (_lockSystemData) systemData = new SystemData();
                         }
                         else if (false)
                         {
-
+                            //...
                         }
                     }
                     else if (requestTag is JObject jb && new[] { "Location", "FSDJump" }.Contains(jb["event"].StrNull()))
                     {
-                        lock (_lockSystemData) //I still have no idea. See above.
+                        lock (_lockSystemData)
                         {
                             ProcessSpanshDump(o);
                             if (systemData == null) ProcessNewSystem(jb);
@@ -1103,7 +1105,7 @@ namespace EDDCanonnPanel
 
             List<DataGridViewRow> rows = new List<DataGridViewRow>
             {
-                CanonnUtil.CreateDataGridViewRow(dataGridViewBio, new object[] { "Missing Bio Data:", null, new Bitmap(1, 1) })
+                CanonnUtil.CreateDataGridViewRow(dataGridViewBio, new object[] { "Available Bio Data:", null, new Bitmap(1, 1) })
             };
 
             //Filter only bodies that have biological signals.
@@ -1182,7 +1184,7 @@ namespace EDDCanonnPanel
                 List<JObject> missingRings = body.ScanData.Rings
                     .Where(ring =>
                     {
-                        string ringName = ring["name"].StrNull() ?? ring["Name"].StrNull();
+                        string ringName = ring["name"].Str(ring["Name"].StrNull()) ?? "none";
                         return ringName?.Contains("Ring") == true
                             && !(system.GetBodyByName(ringName)?.IsMapped == true || ring.Contains("id64"));
                     })
@@ -1192,7 +1194,7 @@ namespace EDDCanonnPanel
 
                 rows.AddRange(missingRings.Select((ring, index) =>
                 {
-                    string ringName = ring["name"].StrNull() ?? ring["Name"].StrNull();
+                    string ringName = ring["name"].Str(ring["Name"].StrNull()) ?? "none";
                     //Extract inner and outer radius values, converting from meters to light-seconds.
                     double[] values = new[] { "innerRadius", "InnerRad", "outerRadius", "OuterRad" }
                         .Select(k => ring[k].Double(0.0) / 299792458)
@@ -1275,7 +1277,6 @@ namespace EDDCanonnPanel
             );
         }
 
-
         private void NewsIndexChanged(int n)
         {
             if (News == null || News.Count == 0) return;
@@ -1292,7 +1293,7 @@ namespace EDDCanonnPanel
                 {
                     textBoxNews.Clear();
 
-                    string decoded = News[NewsIndex]?["excerpt"]?["rendered"].StrNull() ?? "none";
+                    string decoded = News[NewsIndex]?["excerpt"]?["rendered"].Str("none");
 
                     try
                     {
@@ -1346,7 +1347,7 @@ namespace EDDCanonnPanel
                         if (system == null) //Ensure system data is valid before updating UI.
                             return;
                         UpdateMainFields(system, jumped);
-                        UpdateUpperGridViews(system, jumped);                     
+                        UpdateUpperGridViews(system, jumped);
                     }
                     catch (Exception ex)
                     {
@@ -1432,7 +1433,7 @@ namespace EDDCanonnPanel
                     //Clear all grid views before populating them with new data.
                     dataGridViewData.Rows.Clear();
                     dataGridViewRing.Rows.Clear();
-                    dataGridViewBio.Rows.Clear();                                              
+                    dataGridViewBio.Rows.Clear();
 
                     //Collect missing ring data and update the corresponding grid.
                     List<DataGridViewRow> ringRows = CollectRingData(system);
@@ -1580,7 +1581,7 @@ namespace EDDCanonnPanel
                     {
                         try
                         {
-                            action(); 
+                            action();
                         }
                         catch (Exception ex)
                         {
@@ -1616,7 +1617,7 @@ namespace EDDCanonnPanel
                 string eventId = je.eventid;
 
                 if (eventId.Equals("FSDJump") || eventId.Equals("Location"))
-                {               
+                {
                     SafeBeginInvoke(() =>
                     {
                         _eventLock = false; // As long as we make a callback, we hold back the events (canonn events excluded).
@@ -1779,7 +1780,7 @@ namespace EDDCanonnPanel
             _eventLock = false;
 
             patrols = null;
-            News = null;                
+            News = null;
         }
 
         private void EDDCanonnUserControl_Resize(object sender, EventArgs e)
