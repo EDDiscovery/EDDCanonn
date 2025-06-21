@@ -22,6 +22,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Windows.Forms;
+using ExtendedControls;
 using QuickJSON;
 namespace EDDCanonnPanel
 {
@@ -30,6 +31,8 @@ namespace EDDCanonnPanel
     {
         //Tracks the version of the currently running plugin assembly.
         public static readonly Version V = Assembly.GetExecutingAssembly().GetName().Version;
+
+        public static string UserName = "";
 
         //Tracks the number of active Canonn plugin instances.
         public static int InstanceCount = 0;
@@ -141,6 +144,19 @@ namespace EDDCanonnPanel
                 }
                 return clonedRow;
             }).ToList();
+        }
+
+        public static void SwapDGVs(DataGridView dgv1, DataGridView dgv2, ExtPanelDataGridViewScroll dgvScroll, Control control)
+        {
+            if (dgv1 == null || dgv2 == null || dgvScroll == null)
+                return;
+
+            dgv2.Visible = false;
+            dgv2.Parent = control;
+
+            dgv1.Visible = true;
+
+            dgvScroll.SwapDGV(dgv1);
         }
     }
 }

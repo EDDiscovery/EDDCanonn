@@ -37,6 +37,7 @@ namespace EDDCanonnPanel
             base.Dispose(disposing);
         }
 
+
         private void setTheme(string themeasjson)
         {
             JObject theme = themeasjson.JSONParse().Object();
@@ -216,11 +217,13 @@ namespace EDDCanonnPanel
             this.components = new System.ComponentModel.Container();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
-            ExtendedControls.TabStyleSquare tabStyleSquare1 = new ExtendedControls.TabStyleSquare();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
+            ExtendedControls.TabStyleSquare tabStyleSquare1 = new ExtendedControls.TabStyleSquare();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(EDDCanonnUserControl));
             this.textBoxSystem = new System.Windows.Forms.TextBox();
             this.labelSysName = new System.Windows.Forms.Label();
@@ -231,22 +234,16 @@ namespace EDDCanonnPanel
             this.CopySystem = new System.Windows.Forms.ToolStripMenuItem();
             this.OpenUrl = new System.Windows.Forms.ToolStripMenuItem();
             this.tableLayoutPatrol = new System.Windows.Forms.TableLayoutPanel();
-            this.ExtComboBoxPatrol = new ExtendedControls.ExtComboBox();
-            this.ExtComboBoxRange = new ExtendedControls.ExtComboBox();
-            this.buttonCreatePatrol = new ExtendedControls.ExtButton();
             this.tableLayoutNews = new System.Windows.Forms.TableLayoutPanel();
             this.labelNews = new System.Windows.Forms.Label();
             this.textBoxNews = new System.Windows.Forms.TextBox();
-            this.buttonNextNews = new ExtendedControls.ExtButton();
-            this.buttonPrevNews = new ExtendedControls.ExtButton();
             this.labelNewsIndex = new System.Windows.Forms.Label();
             this.dataGridSignals = new System.Windows.Forms.DataGridView();
-            this.a = new System.Windows.Forms.DataGridViewImageColumn();
-            this.b = new System.Windows.Forms.DataGridViewImageColumn();
-            this.c = new System.Windows.Forms.DataGridViewImageColumn();
-            this.d = new System.Windows.Forms.DataGridViewImageColumn();
-            this.e = new System.Windows.Forms.DataGridViewImageColumn();
-            this.f = new System.Windows.Forms.DataGridViewImageColumn();
+            this.dataGridViewBioInfo = new System.Windows.Forms.DataGridView();
+            this.ColumnBioInfo0 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ColumnBioInfo1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ColumnBioInfo2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.clickableBioInfo = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.extPanelDataGridViewScrollPatrol = new ExtendedControls.ExtPanelDataGridViewScroll();
             this.extScrollBarPatrol = new ExtendedControls.ExtScrollBar();
             this.dataGridPatrol = new System.Windows.Forms.DataGridView();
@@ -255,6 +252,11 @@ namespace EDDCanonnPanel
             this.Distance = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Sysname = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.PatrolUrl = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.buttonNextNews = new ExtendedControls.ExtButton();
+            this.buttonPrevNews = new ExtendedControls.ExtButton();
+            this.ExtComboBoxPatrol = new ExtendedControls.ExtComboBox();
+            this.ExtComboBoxRange = new ExtendedControls.ExtComboBox();
+            this.buttonCreatePatrol = new ExtendedControls.ExtButton();
             this.extTabControlData = new ExtendedControls.ExtTabControl();
             this.tabData = new System.Windows.Forms.TabPage();
             this.extPanelDataGridViewScrollData = new ExtendedControls.ExtPanelDataGridViewScroll();
@@ -277,6 +279,15 @@ namespace EDDCanonnPanel
             this.ColumnBio0 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ColumnBio1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ColumnBio2 = new System.Windows.Forms.DataGridViewImageColumn();
+            this.clickable = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.tabGeo = new System.Windows.Forms.TabPage();
+            this.extPanelDataGridViewScroll1 = new ExtendedControls.ExtPanelDataGridViewScroll();
+            this.extScrollBar1 = new ExtendedControls.ExtScrollBar();
+            this.dataGridView1 = new System.Windows.Forms.DataGridView();
+            this.dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewImageColumn2 = new System.Windows.Forms.DataGridViewImageColumn();
+            this.dataGridViewTextBoxColumn5 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.tabSurvey = new System.Windows.Forms.TabPage();
             this.labelSurvey = new System.Windows.Forms.Label();
             this.tabGmo = new System.Windows.Forms.TabPage();
@@ -294,11 +305,17 @@ namespace EDDCanonnPanel
             this.label1 = new System.Windows.Forms.Label();
             this.pictureBoxEDD = new System.Windows.Forms.PictureBox();
             this.LSY = new System.Windows.Forms.Button();
+            this.b = new System.Windows.Forms.DataGridViewImageColumn();
+            this.c = new System.Windows.Forms.DataGridViewImageColumn();
+            this.d = new System.Windows.Forms.DataGridViewImageColumn();
+            this.e = new System.Windows.Forms.DataGridViewImageColumn();
+            this.f = new System.Windows.Forms.DataGridViewImageColumn();
             this.tableLayoutSystem.SuspendLayout();
             this.contextMenuStrip1.SuspendLayout();
             this.tableLayoutPatrol.SuspendLayout();
             this.tableLayoutNews.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridSignals)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridViewBioInfo)).BeginInit();
             this.extPanelDataGridViewScrollPatrol.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridPatrol)).BeginInit();
             this.extTabControlData.SuspendLayout();
@@ -311,6 +328,9 @@ namespace EDDCanonnPanel
             this.tabBio.SuspendLayout();
             this.extPanelDataGridViewScrollBio.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewBio)).BeginInit();
+            this.tabGeo.SuspendLayout();
+            this.extPanelDataGridViewScroll1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.tabSurvey.SuspendLayout();
             this.tabGmo.SuspendLayout();
             this.extPanelDataGridViewScrollGMO.SuspendLayout();
@@ -420,64 +440,6 @@ namespace EDDCanonnPanel
             this.tableLayoutPatrol.Size = new System.Drawing.Size(364, 28);
             this.tableLayoutPatrol.TabIndex = 13;
             // 
-            // ExtComboBoxPatrol
-            // 
-            this.ExtComboBoxPatrol.BorderColor = System.Drawing.Color.White;
-            this.ExtComboBoxPatrol.ButtonColorScaling = 0.5F;
-            this.ExtComboBoxPatrol.DataSource = null;
-            this.ExtComboBoxPatrol.DisableBackgroundDisabledShadingGradient = false;
-            this.ExtComboBoxPatrol.DisplayMember = "";
-            this.ExtComboBoxPatrol.DropDownBackgroundColor = System.Drawing.Color.Gray;
-            this.ExtComboBoxPatrol.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.ExtComboBoxPatrol.Location = new System.Drawing.Point(3, 3);
-            this.ExtComboBoxPatrol.MouseOverBackgroundColor = System.Drawing.Color.Silver;
-            this.ExtComboBoxPatrol.Name = "ExtComboBoxPatrol";
-            this.ExtComboBoxPatrol.ScrollBarButtonColor = System.Drawing.Color.LightGray;
-            this.ExtComboBoxPatrol.ScrollBarColor = System.Drawing.Color.LightGray;
-            this.ExtComboBoxPatrol.SelectedIndex = -1;
-            this.ExtComboBoxPatrol.SelectedItem = null;
-            this.ExtComboBoxPatrol.SelectedValue = null;
-            this.ExtComboBoxPatrol.Size = new System.Drawing.Size(122, 21);
-            this.ExtComboBoxPatrol.TabIndex = 18;
-            this.ExtComboBoxPatrol.Text = "Patrols";
-            this.ExtComboBoxPatrol.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.ExtComboBoxPatrol.ValueMember = "";
-            this.ExtComboBoxPatrol.SelectedIndexChanged += new System.EventHandler(this.toolStripPatrol_IndexChanged);
-            // 
-            // ExtComboBoxRange
-            // 
-            this.ExtComboBoxRange.BorderColor = System.Drawing.Color.White;
-            this.ExtComboBoxRange.ButtonColorScaling = 0.5F;
-            this.ExtComboBoxRange.DataSource = null;
-            this.ExtComboBoxRange.DisableBackgroundDisabledShadingGradient = false;
-            this.ExtComboBoxRange.DisplayMember = "";
-            this.ExtComboBoxRange.DropDownBackgroundColor = System.Drawing.Color.Gray;
-            this.ExtComboBoxRange.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.ExtComboBoxRange.Location = new System.Drawing.Point(150, 3);
-            this.ExtComboBoxRange.MouseOverBackgroundColor = System.Drawing.Color.Silver;
-            this.ExtComboBoxRange.Name = "ExtComboBoxRange";
-            this.ExtComboBoxRange.ScrollBarButtonColor = System.Drawing.Color.LightGray;
-            this.ExtComboBoxRange.ScrollBarColor = System.Drawing.Color.LightGray;
-            this.ExtComboBoxRange.SelectedIndex = -1;
-            this.ExtComboBoxRange.SelectedItem = null;
-            this.ExtComboBoxRange.SelectedValue = null;
-            this.ExtComboBoxRange.Size = new System.Drawing.Size(122, 21);
-            this.ExtComboBoxRange.TabIndex = 17;
-            this.ExtComboBoxRange.Text = "Ranges";
-            this.ExtComboBoxRange.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.ExtComboBoxRange.ValueMember = "";
-            this.ExtComboBoxRange.SelectedIndexChanged += new System.EventHandler(this.toolStripPatrol_IndexChanged);
-            // 
-            // buttonCreatePatrol
-            // 
-            this.buttonCreatePatrol.Enabled = false;
-            this.buttonCreatePatrol.Location = new System.Drawing.Point(289, 3);
-            this.buttonCreatePatrol.Name = "buttonCreatePatrol";
-            this.buttonCreatePatrol.Size = new System.Drawing.Size(71, 21);
-            this.buttonCreatePatrol.TabIndex = 16;
-            this.buttonCreatePatrol.Text = "Create";
-            this.buttonCreatePatrol.UseVisualStyleBackColor = true;
-            // 
             // tableLayoutNews
             // 
             this.tableLayoutNews.ColumnCount = 3;
@@ -520,30 +482,6 @@ namespace EDDCanonnPanel
             this.textBoxNews.TabIndex = 4;
             this.textBoxNews.Click += new System.EventHandler(this.textBoxNews_Click);
             // 
-            // buttonNextNews
-            // 
-            this.buttonNextNews.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.buttonNextNews.AutoSize = true;
-            this.buttonNextNews.Location = new System.Drawing.Point(318, 29);
-            this.buttonNextNews.Name = "buttonNextNews";
-            this.buttonNextNews.Size = new System.Drawing.Size(43, 23);
-            this.buttonNextNews.TabIndex = 1;
-            this.buttonNextNews.Text = "Next";
-            this.buttonNextNews.UseVisualStyleBackColor = true;
-            this.buttonNextNews.Click += new System.EventHandler(this.buttonNextNews_Click);
-            // 
-            // buttonPrevNews
-            // 
-            this.buttonPrevNews.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.buttonPrevNews.AutoSize = true;
-            this.buttonPrevNews.Location = new System.Drawing.Point(3, 29);
-            this.buttonPrevNews.Name = "buttonPrevNews";
-            this.buttonPrevNews.Size = new System.Drawing.Size(41, 23);
-            this.buttonPrevNews.TabIndex = 0;
-            this.buttonPrevNews.Text = "Prev";
-            this.buttonPrevNews.UseVisualStyleBackColor = true;
-            this.buttonPrevNews.Click += new System.EventHandler(this.buttonPrevNews_Click);
-            // 
             // labelNewsIndex
             // 
             this.labelNewsIndex.Anchor = System.Windows.Forms.AnchorStyles.Left;
@@ -564,7 +502,6 @@ namespace EDDCanonnPanel
             this.dataGridSignals.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.AllCells;
             this.dataGridSignals.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dataGridSignals.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.a,
             this.b,
             this.c,
             this.d,
@@ -584,59 +521,72 @@ namespace EDDCanonnPanel
             this.dataGridSignals.TabIndex = 16;
             this.dataGridSignals.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.dataGridSignals_DataError);
             // 
-            // a
+            // dataGridViewBioInfo
             // 
-            this.a.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.a.HeaderText = "";
-            this.a.MinimumWidth = 25;
-            this.a.Name = "a";
-            this.a.ReadOnly = true;
-            this.a.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+            this.dataGridViewBioInfo.AllowUserToAddRows = false;
+            this.dataGridViewBioInfo.AllowUserToDeleteRows = false;
+            this.dataGridViewBioInfo.AllowUserToResizeColumns = false;
+            this.dataGridViewBioInfo.AllowUserToResizeRows = false;
+            this.dataGridViewBioInfo.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            this.dataGridViewBioInfo.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.AllCells;
+            this.dataGridViewBioInfo.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dataGridViewBioInfo.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.ColumnBioInfo0,
+            this.ColumnBioInfo1,
+            this.ColumnBioInfo2,
+            this.clickableBioInfo});
+            this.dataGridViewBioInfo.Location = new System.Drawing.Point(0, 0);
+            this.dataGridViewBioInfo.Name = "dataGridViewBioInfo";
+            this.dataGridViewBioInfo.ReadOnly = true;
+            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.dataGridViewBioInfo.RowsDefaultCellStyle = dataGridViewCellStyle2;
+            this.dataGridViewBioInfo.ScrollBars = System.Windows.Forms.ScrollBars.None;
+            this.dataGridViewBioInfo.ShowCellErrors = false;
+            this.dataGridViewBioInfo.ShowCellToolTips = false;
+            this.dataGridViewBioInfo.ShowEditingIcon = false;
+            this.dataGridViewBioInfo.ShowRowErrors = false;
+            this.dataGridViewBioInfo.Size = new System.Drawing.Size(17, 53);
+            this.dataGridViewBioInfo.TabIndex = 17;
+            this.dataGridViewBioInfo.Visible = false;
+            this.dataGridViewBioInfo.CellMouseDoubleClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dataGridViewBioInfo_CellMouseDoubleClick);
             // 
-            // b
+            // ColumnBioInfo0
             // 
-            this.b.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.b.HeaderText = "";
-            this.b.MinimumWidth = 25;
-            this.b.Name = "b";
-            this.b.ReadOnly = true;
-            this.b.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+            this.ColumnBioInfo0.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
+            this.ColumnBioInfo0.HeaderText = "";
+            this.ColumnBioInfo0.MinimumWidth = 25;
+            this.ColumnBioInfo0.Name = "ColumnBioInfo0";
+            this.ColumnBioInfo0.ReadOnly = true;
+            this.ColumnBioInfo0.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+            this.ColumnBioInfo0.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.ColumnBioInfo0.Width = 25;
             // 
-            // c
+            // ColumnBioInfo1
             // 
-            this.c.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.c.HeaderText = "";
-            this.c.MinimumWidth = 25;
-            this.c.Name = "c";
-            this.c.ReadOnly = true;
-            this.c.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+            this.ColumnBioInfo1.HeaderText = "";
+            this.ColumnBioInfo1.MinimumWidth = 25;
+            this.ColumnBioInfo1.Name = "ColumnBioInfo1";
+            this.ColumnBioInfo1.ReadOnly = true;
+            this.ColumnBioInfo1.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+            this.ColumnBioInfo1.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
             // 
-            // d
+            // ColumnBioInfo2
             // 
-            this.d.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.d.HeaderText = "";
-            this.d.MinimumWidth = 25;
-            this.d.Name = "d";
-            this.d.ReadOnly = true;
-            this.d.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+            this.ColumnBioInfo2.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
+            this.ColumnBioInfo2.HeaderText = "";
+            this.ColumnBioInfo2.MinimumWidth = 25;
+            this.ColumnBioInfo2.Name = "ColumnBioInfo2";
+            this.ColumnBioInfo2.ReadOnly = true;
+            this.ColumnBioInfo2.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+            this.ColumnBioInfo2.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.ColumnBioInfo2.Width = 25;
             // 
-            // e
+            // clickableBioInfo
             // 
-            this.e.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.e.HeaderText = "";
-            this.e.MinimumWidth = 25;
-            this.e.Name = "e";
-            this.e.ReadOnly = true;
-            this.e.Resizable = System.Windows.Forms.DataGridViewTriState.False;
-            // 
-            // f
-            // 
-            this.f.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.f.HeaderText = "";
-            this.f.MinimumWidth = 25;
-            this.f.Name = "f";
-            this.f.ReadOnly = true;
-            this.f.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+            this.clickableBioInfo.HeaderText = "";
+            this.clickableBioInfo.Name = "clickableBioInfo";
+            this.clickableBioInfo.ReadOnly = true;
+            this.clickableBioInfo.Visible = false;
             // 
             // extPanelDataGridViewScrollPatrol
             // 
@@ -698,9 +648,9 @@ namespace EDDCanonnPanel
             this.dataGridPatrol.Location = new System.Drawing.Point(0, 0);
             this.dataGridPatrol.Name = "dataGridPatrol";
             this.dataGridPatrol.ReadOnly = true;
-            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.dataGridPatrol.RowsDefaultCellStyle = dataGridViewCellStyle2;
+            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.dataGridPatrol.RowsDefaultCellStyle = dataGridViewCellStyle3;
             this.dataGridPatrol.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.dataGridPatrol.ShowCellErrors = false;
             this.dataGridPatrol.ShowCellToolTips = false;
@@ -757,12 +707,95 @@ namespace EDDCanonnPanel
             this.PatrolUrl.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
             this.PatrolUrl.Visible = false;
             // 
+            // buttonNextNews
+            // 
+            this.buttonNextNews.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.buttonNextNews.AutoSize = true;
+            this.buttonNextNews.Location = new System.Drawing.Point(318, 29);
+            this.buttonNextNews.Name = "buttonNextNews";
+            this.buttonNextNews.Size = new System.Drawing.Size(43, 23);
+            this.buttonNextNews.TabIndex = 1;
+            this.buttonNextNews.Text = "Next";
+            this.buttonNextNews.UseVisualStyleBackColor = true;
+            this.buttonNextNews.Click += new System.EventHandler(this.buttonNextNews_Click);
+            // 
+            // buttonPrevNews
+            // 
+            this.buttonPrevNews.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.buttonPrevNews.AutoSize = true;
+            this.buttonPrevNews.Location = new System.Drawing.Point(3, 29);
+            this.buttonPrevNews.Name = "buttonPrevNews";
+            this.buttonPrevNews.Size = new System.Drawing.Size(41, 23);
+            this.buttonPrevNews.TabIndex = 0;
+            this.buttonPrevNews.Text = "Prev";
+            this.buttonPrevNews.UseVisualStyleBackColor = true;
+            this.buttonPrevNews.Click += new System.EventHandler(this.buttonPrevNews_Click);
+            // 
+            // ExtComboBoxPatrol
+            // 
+            this.ExtComboBoxPatrol.BorderColor = System.Drawing.Color.White;
+            this.ExtComboBoxPatrol.ButtonColorScaling = 0.5F;
+            this.ExtComboBoxPatrol.DataSource = null;
+            this.ExtComboBoxPatrol.DisableBackgroundDisabledShadingGradient = false;
+            this.ExtComboBoxPatrol.DisplayMember = "";
+            this.ExtComboBoxPatrol.DropDownBackgroundColor = System.Drawing.Color.Gray;
+            this.ExtComboBoxPatrol.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.ExtComboBoxPatrol.Location = new System.Drawing.Point(3, 3);
+            this.ExtComboBoxPatrol.MouseOverBackgroundColor = System.Drawing.Color.Silver;
+            this.ExtComboBoxPatrol.Name = "ExtComboBoxPatrol";
+            this.ExtComboBoxPatrol.ScrollBarButtonColor = System.Drawing.Color.LightGray;
+            this.ExtComboBoxPatrol.ScrollBarColor = System.Drawing.Color.LightGray;
+            this.ExtComboBoxPatrol.SelectedIndex = -1;
+            this.ExtComboBoxPatrol.SelectedItem = null;
+            this.ExtComboBoxPatrol.SelectedValue = null;
+            this.ExtComboBoxPatrol.Size = new System.Drawing.Size(122, 21);
+            this.ExtComboBoxPatrol.TabIndex = 18;
+            this.ExtComboBoxPatrol.Text = "Patrols";
+            this.ExtComboBoxPatrol.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.ExtComboBoxPatrol.ValueMember = "";
+            this.ExtComboBoxPatrol.SelectedIndexChanged += new System.EventHandler(this.toolStripPatrol_IndexChanged);
+            // 
+            // ExtComboBoxRange
+            // 
+            this.ExtComboBoxRange.BorderColor = System.Drawing.Color.White;
+            this.ExtComboBoxRange.ButtonColorScaling = 0.5F;
+            this.ExtComboBoxRange.DataSource = null;
+            this.ExtComboBoxRange.DisableBackgroundDisabledShadingGradient = false;
+            this.ExtComboBoxRange.DisplayMember = "";
+            this.ExtComboBoxRange.DropDownBackgroundColor = System.Drawing.Color.Gray;
+            this.ExtComboBoxRange.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.ExtComboBoxRange.Location = new System.Drawing.Point(150, 3);
+            this.ExtComboBoxRange.MouseOverBackgroundColor = System.Drawing.Color.Silver;
+            this.ExtComboBoxRange.Name = "ExtComboBoxRange";
+            this.ExtComboBoxRange.ScrollBarButtonColor = System.Drawing.Color.LightGray;
+            this.ExtComboBoxRange.ScrollBarColor = System.Drawing.Color.LightGray;
+            this.ExtComboBoxRange.SelectedIndex = -1;
+            this.ExtComboBoxRange.SelectedItem = null;
+            this.ExtComboBoxRange.SelectedValue = null;
+            this.ExtComboBoxRange.Size = new System.Drawing.Size(122, 21);
+            this.ExtComboBoxRange.TabIndex = 17;
+            this.ExtComboBoxRange.Text = "Ranges";
+            this.ExtComboBoxRange.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.ExtComboBoxRange.ValueMember = "";
+            this.ExtComboBoxRange.SelectedIndexChanged += new System.EventHandler(this.toolStripPatrol_IndexChanged);
+            // 
+            // buttonCreatePatrol
+            // 
+            this.buttonCreatePatrol.Enabled = false;
+            this.buttonCreatePatrol.Location = new System.Drawing.Point(289, 3);
+            this.buttonCreatePatrol.Name = "buttonCreatePatrol";
+            this.buttonCreatePatrol.Size = new System.Drawing.Size(71, 21);
+            this.buttonCreatePatrol.TabIndex = 16;
+            this.buttonCreatePatrol.Text = "Create";
+            this.buttonCreatePatrol.UseVisualStyleBackColor = true;
+            // 
             // extTabControlData
             // 
             this.extTabControlData.AllowDragReorder = false;
             this.extTabControlData.Controls.Add(this.tabData);
             this.extTabControlData.Controls.Add(this.tabRing);
             this.extTabControlData.Controls.Add(this.tabBio);
+            this.extTabControlData.Controls.Add(this.tabGeo);
             this.extTabControlData.Controls.Add(this.tabSurvey);
             this.extTabControlData.Controls.Add(this.tabGmo);
             this.extTabControlData.Controls.Add(this.tabPageAbout);
@@ -857,8 +890,8 @@ namespace EDDCanonnPanel
             this.dataGridViewData.Location = new System.Drawing.Point(0, 0);
             this.dataGridViewData.Name = "dataGridViewData";
             this.dataGridViewData.ReadOnly = true;
-            dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.dataGridViewData.RowsDefaultCellStyle = dataGridViewCellStyle3;
+            dataGridViewCellStyle4.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.dataGridViewData.RowsDefaultCellStyle = dataGridViewCellStyle4;
             this.dataGridViewData.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.dataGridViewData.ShowCellErrors = false;
             this.dataGridViewData.ShowCellToolTips = false;
@@ -956,8 +989,8 @@ namespace EDDCanonnPanel
             this.dataGridViewRing.Location = new System.Drawing.Point(0, 0);
             this.dataGridViewRing.Name = "dataGridViewRing";
             this.dataGridViewRing.ReadOnly = true;
-            dataGridViewCellStyle4.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.dataGridViewRing.RowsDefaultCellStyle = dataGridViewCellStyle4;
+            dataGridViewCellStyle5.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.dataGridViewRing.RowsDefaultCellStyle = dataGridViewCellStyle5;
             this.dataGridViewRing.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.dataGridViewRing.ShowCellErrors = false;
             this.dataGridViewRing.ShowCellToolTips = false;
@@ -1073,12 +1106,13 @@ namespace EDDCanonnPanel
             this.dataGridViewBio.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.ColumnBio0,
             this.ColumnBio1,
-            this.ColumnBio2});
+            this.ColumnBio2,
+            this.clickable});
             this.dataGridViewBio.Location = new System.Drawing.Point(0, 0);
             this.dataGridViewBio.Name = "dataGridViewBio";
             this.dataGridViewBio.ReadOnly = true;
-            dataGridViewCellStyle5.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.dataGridViewBio.RowsDefaultCellStyle = dataGridViewCellStyle5;
+            dataGridViewCellStyle6.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.dataGridViewBio.RowsDefaultCellStyle = dataGridViewCellStyle6;
             this.dataGridViewBio.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.dataGridViewBio.ShowCellErrors = false;
             this.dataGridViewBio.ShowCellToolTips = false;
@@ -1086,6 +1120,7 @@ namespace EDDCanonnPanel
             this.dataGridViewBio.ShowRowErrors = false;
             this.dataGridViewBio.Size = new System.Drawing.Size(339, 233);
             this.dataGridViewBio.TabIndex = 14;
+            this.dataGridViewBio.CellMouseDoubleClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dataGridViewBio_CellMouseDoubleClick);
             this.dataGridViewBio.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.dataGridViewBio_DataError);
             // 
             // ColumnBio0
@@ -1117,6 +1152,129 @@ namespace EDDCanonnPanel
             this.ColumnBio2.ReadOnly = true;
             this.ColumnBio2.Resizable = System.Windows.Forms.DataGridViewTriState.False;
             this.ColumnBio2.Width = 25;
+            // 
+            // clickable
+            // 
+            this.clickable.HeaderText = "";
+            this.clickable.Name = "clickable";
+            this.clickable.ReadOnly = true;
+            this.clickable.Visible = false;
+            // 
+            // tabGeo
+            // 
+            this.tabGeo.Controls.Add(this.extPanelDataGridViewScroll1);
+            this.tabGeo.Location = new System.Drawing.Point(4, 22);
+            this.tabGeo.Name = "tabGeo";
+            this.tabGeo.Padding = new System.Windows.Forms.Padding(3);
+            this.tabGeo.Size = new System.Drawing.Size(356, 228);
+            this.tabGeo.TabIndex = 10;
+            this.tabGeo.Text = "Geological";
+            this.tabGeo.UseVisualStyleBackColor = true;
+            // 
+            // extPanelDataGridViewScroll1
+            // 
+            this.extPanelDataGridViewScroll1.Controls.Add(this.extScrollBar1);
+            this.extPanelDataGridViewScroll1.Controls.Add(this.dataGridView1);
+            this.extPanelDataGridViewScroll1.InternalMargin = new System.Windows.Forms.Padding(0);
+            this.extPanelDataGridViewScroll1.Location = new System.Drawing.Point(0, 0);
+            this.extPanelDataGridViewScroll1.Name = "extPanelDataGridViewScroll1";
+            this.extPanelDataGridViewScroll1.Size = new System.Drawing.Size(358, 233);
+            this.extPanelDataGridViewScroll1.TabIndex = 16;
+            this.extPanelDataGridViewScroll1.VerticalScrollBarDockRight = true;
+            // 
+            // extScrollBar1
+            // 
+            this.extScrollBar1.AlwaysHideScrollBar = false;
+            this.extScrollBar1.ArrowBorderColor = System.Drawing.Color.LightBlue;
+            this.extScrollBar1.ArrowButtonColor = System.Drawing.Color.LightGray;
+            this.extScrollBar1.ArrowColorScaling = 0.5F;
+            this.extScrollBar1.ArrowDownDrawAngle = 270F;
+            this.extScrollBar1.ArrowUpDrawAngle = 90F;
+            this.extScrollBar1.BorderColor = System.Drawing.Color.White;
+            this.extScrollBar1.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.extScrollBar1.HideScrollBar = false;
+            this.extScrollBar1.LargeChange = 0;
+            this.extScrollBar1.Location = new System.Drawing.Point(339, 0);
+            this.extScrollBar1.Maximum = -1;
+            this.extScrollBar1.Minimum = 0;
+            this.extScrollBar1.MouseOverButtonColor = System.Drawing.Color.Green;
+            this.extScrollBar1.MousePressedButtonColor = System.Drawing.Color.Red;
+            this.extScrollBar1.Name = "extScrollBar1";
+            this.extScrollBar1.Size = new System.Drawing.Size(19, 233);
+            this.extScrollBar1.SliderColor = System.Drawing.Color.DarkGray;
+            this.extScrollBar1.SmallChange = 1;
+            this.extScrollBar1.TabIndex = 15;
+            this.extScrollBar1.Text = "extScrollBar1";
+            this.extScrollBar1.ThumbBorderColor = System.Drawing.Color.Yellow;
+            this.extScrollBar1.ThumbButtonColor = System.Drawing.Color.DarkBlue;
+            this.extScrollBar1.ThumbColorScaling = 0.5F;
+            this.extScrollBar1.ThumbDrawAngle = 0F;
+            this.extScrollBar1.Value = -1;
+            this.extScrollBar1.ValueLimited = -1;
+            // 
+            // dataGridView1
+            // 
+            this.dataGridView1.AllowUserToAddRows = false;
+            this.dataGridView1.AllowUserToDeleteRows = false;
+            this.dataGridView1.AllowUserToResizeColumns = false;
+            this.dataGridView1.AllowUserToResizeRows = false;
+            this.dataGridView1.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            this.dataGridView1.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.AllCells;
+            this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dataGridView1.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.dataGridViewTextBoxColumn3,
+            this.dataGridViewTextBoxColumn4,
+            this.dataGridViewImageColumn2,
+            this.dataGridViewTextBoxColumn5});
+            this.dataGridView1.Location = new System.Drawing.Point(0, 0);
+            this.dataGridView1.Name = "dataGridView1";
+            this.dataGridView1.ReadOnly = true;
+            dataGridViewCellStyle7.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.dataGridView1.RowsDefaultCellStyle = dataGridViewCellStyle7;
+            this.dataGridView1.ScrollBars = System.Windows.Forms.ScrollBars.None;
+            this.dataGridView1.ShowCellErrors = false;
+            this.dataGridView1.ShowCellToolTips = false;
+            this.dataGridView1.ShowEditingIcon = false;
+            this.dataGridView1.ShowRowErrors = false;
+            this.dataGridView1.Size = new System.Drawing.Size(339, 233);
+            this.dataGridView1.TabIndex = 14;
+            // 
+            // dataGridViewTextBoxColumn3
+            // 
+            this.dataGridViewTextBoxColumn3.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
+            this.dataGridViewTextBoxColumn3.HeaderText = "";
+            this.dataGridViewTextBoxColumn3.MinimumWidth = 25;
+            this.dataGridViewTextBoxColumn3.Name = "dataGridViewTextBoxColumn3";
+            this.dataGridViewTextBoxColumn3.ReadOnly = true;
+            this.dataGridViewTextBoxColumn3.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+            this.dataGridViewTextBoxColumn3.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.dataGridViewTextBoxColumn3.Width = 25;
+            // 
+            // dataGridViewTextBoxColumn4
+            // 
+            this.dataGridViewTextBoxColumn4.HeaderText = "";
+            this.dataGridViewTextBoxColumn4.MinimumWidth = 25;
+            this.dataGridViewTextBoxColumn4.Name = "dataGridViewTextBoxColumn4";
+            this.dataGridViewTextBoxColumn4.ReadOnly = true;
+            this.dataGridViewTextBoxColumn4.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+            this.dataGridViewTextBoxColumn4.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            // 
+            // dataGridViewImageColumn2
+            // 
+            this.dataGridViewImageColumn2.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
+            this.dataGridViewImageColumn2.HeaderText = "";
+            this.dataGridViewImageColumn2.MinimumWidth = 25;
+            this.dataGridViewImageColumn2.Name = "dataGridViewImageColumn2";
+            this.dataGridViewImageColumn2.ReadOnly = true;
+            this.dataGridViewImageColumn2.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+            this.dataGridViewImageColumn2.Width = 25;
+            // 
+            // dataGridViewTextBoxColumn5
+            // 
+            this.dataGridViewTextBoxColumn5.HeaderText = "";
+            this.dataGridViewTextBoxColumn5.Name = "dataGridViewTextBoxColumn5";
+            this.dataGridViewTextBoxColumn5.ReadOnly = true;
+            this.dataGridViewTextBoxColumn5.Visible = false;
             // 
             // tabSurvey
             // 
@@ -1206,8 +1364,8 @@ namespace EDDCanonnPanel
             this.dataGridViewGMO.Location = new System.Drawing.Point(0, 0);
             this.dataGridViewGMO.Name = "dataGridViewGMO";
             this.dataGridViewGMO.ReadOnly = true;
-            dataGridViewCellStyle6.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.dataGridViewGMO.RowsDefaultCellStyle = dataGridViewCellStyle6;
+            dataGridViewCellStyle8.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
+            this.dataGridViewGMO.RowsDefaultCellStyle = dataGridViewCellStyle8;
             this.dataGridViewGMO.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.dataGridViewGMO.ShowCellErrors = false;
             this.dataGridViewGMO.ShowCellToolTips = false;
@@ -1348,10 +1506,56 @@ namespace EDDCanonnPanel
             this.LSY.UseVisualStyleBackColor = true;
             this.LSY.Click += new System.EventHandler(this.LSY_Click);
             // 
+            // b
+            // 
+            this.b.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.b.HeaderText = "";
+            this.b.MinimumWidth = 25;
+            this.b.Name = "b";
+            this.b.ReadOnly = true;
+            this.b.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+            // 
+            // c
+            // 
+            this.c.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.c.HeaderText = "";
+            this.c.MinimumWidth = 25;
+            this.c.Name = "c";
+            this.c.ReadOnly = true;
+            this.c.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+            // 
+            // d
+            // 
+            this.d.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.d.HeaderText = "";
+            this.d.MinimumWidth = 25;
+            this.d.Name = "d";
+            this.d.ReadOnly = true;
+            this.d.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+            // 
+            // e
+            // 
+            this.e.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.e.HeaderText = "";
+            this.e.MinimumWidth = 25;
+            this.e.Name = "e";
+            this.e.ReadOnly = true;
+            this.e.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+            // 
+            // f
+            // 
+            this.f.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.f.HeaderText = "";
+            this.f.MinimumWidth = 25;
+            this.f.Name = "f";
+            this.f.ReadOnly = true;
+            this.f.Resizable = System.Windows.Forms.DataGridViewTriState.False;
+            // 
             // EDDCanonnUserControl
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Inherit;
             this.AutoScroll = true;
+            this.Controls.Add(this.dataGridViewBioInfo);
             this.Controls.Add(this.dataGridSignals);
             this.Controls.Add(this.extPanelDataGridViewScrollPatrol);
             this.Controls.Add(this.tableLayoutNews);
@@ -1369,6 +1573,7 @@ namespace EDDCanonnPanel
             this.tableLayoutNews.ResumeLayout(false);
             this.tableLayoutNews.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridSignals)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridViewBioInfo)).EndInit();
             this.extPanelDataGridViewScrollPatrol.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridPatrol)).EndInit();
             this.extTabControlData.ResumeLayout(false);
@@ -1381,6 +1586,9 @@ namespace EDDCanonnPanel
             this.tabBio.ResumeLayout(false);
             this.extPanelDataGridViewScrollBio.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewBio)).EndInit();
+            this.tabGeo.ResumeLayout(false);
+            this.extPanelDataGridViewScroll1.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
             this.tabSurvey.ResumeLayout(false);
             this.tabSurvey.PerformLayout();
             this.tabGmo.ResumeLayout(false);
@@ -1399,9 +1607,6 @@ namespace EDDCanonnPanel
         private Label labelSystemCount;
         private TextBox textBoxBodyCount;
         private TableLayoutPanel tableLayoutSystem;
-        private ExtendedControls.ExtTabControl extTabControlData;
-        private TabPage tabData;
-        private TabPage tabSurvey;
         private DataGridView dataGridPatrol;
         private TableLayoutPanel tableLayoutPatrol;
         private TableLayoutPanel tableLayoutNews;
@@ -1409,8 +1614,6 @@ namespace EDDCanonnPanel
         private ExtendedControls.ExtButton buttonNextNews;
         private Label labelNews;
         private TextBox textBoxNews;
-        private DataGridView dataGridViewData;
-        private TabPage tabGmo;
         private ExtendedControls.ExtButton buttonCreatePatrol;
         private ContextMenuStrip contextMenuStrip1;
         private DataGridViewTextBoxColumn Inst;
@@ -1421,51 +1624,69 @@ namespace EDDCanonnPanel
         private DataGridViewTextBoxColumn Distance;
         private DataGridViewTextBoxColumn Sysname;
         private DataGridViewTextBoxColumn PatrolUrl;
-        private TabPage tabBio;
-        private TabPage tabRing;
-        private DataGridView dataGridViewRing;
         private ExtendedControls.ExtPanelDataGridViewScroll extPanelDataGridViewScrollPatrol;
         private ExtendedControls.ExtScrollBar extScrollBarPatrol;
-        private ExtPanelDataGridViewScroll extPanelDataGridViewScrollData;
-        private ExtScrollBar extScrollBarData;
-        private ExtPanelDataGridViewScroll extPanelDataGridViewScrollBio;
-        private ExtScrollBar extScrollBarBio;
-        private ExtPanelDataGridViewScroll extPanelDataGridViewScrollRing;
-        private ExtScrollBar extScrollBarRing;
         private ExtComboBox ExtComboBoxRange;
         private ExtComboBox ExtComboBoxPatrol;
-        private Label labelSurvey;
-        private TabPage tabPageAbout;
-        private TableLayoutPanel tableLayoutAbout;
-        private PictureBox pictureBoxEDD;
-        private PictureBox pictureBoxCanonn;
-        private Label labelDev;
-        private Label labelTest;
-        private Label labelSpecial;
-        private LinkLabel linkLabelEDDCanonn;
         private Label labelNewsIndex;
         private DataGridView dataGridSignals;
+        private TabPage tabPageAbout;
+        private TableLayoutPanel tableLayoutAbout;
+        private PictureBox pictureBoxCanonn;
+        private Label labelDev;
+        private LinkLabel linkLabelEDDCanonn;
+        private Label labelSpecial;
+        private Label labelTest;
+        private Label label1;
+        private PictureBox pictureBoxEDD;
+        private Button LSY;
+        private TabPage tabGmo;
         private ExtPanelDataGridViewScroll extPanelDataGridViewScrollGMO;
         private ExtScrollBar extScrollBarGMO;
         private DataGridView dataGridViewGMO;
+        private DataGridViewTextBoxColumn ColumnGMO0;
+        private TabPage tabSurvey;
+        private Label labelSurvey;
+        private TabPage tabBio;
+        private ExtPanelDataGridViewScroll extPanelDataGridViewScrollBio;
+        private ExtScrollBar extScrollBarBio;
+        private DataGridView dataGridViewBio;
+        private DataGridViewTextBoxColumn ColumnBio0;
+        private DataGridViewTextBoxColumn ColumnBio1;
+        private DataGridViewImageColumn ColumnBio2;
+        private DataGridViewTextBoxColumn clickable;
+        private TabPage tabRing;
+        private ExtPanelDataGridViewScroll extPanelDataGridViewScrollRing;
+        private ExtScrollBar extScrollBarRing;
+        private DataGridView dataGridViewRing;
+        private DataGridViewTextBoxColumn ColumnRing0;
+        private DataGridViewTextBoxColumn ColumnRing1;
+        private DataGridViewTextBoxColumn ColumnRing2;
+        private DataGridViewImageColumn ColumnRing3;
+        private TabPage tabData;
+        private ExtPanelDataGridViewScroll extPanelDataGridViewScrollData;
+        private ExtScrollBar extScrollBarData;
+        private DataGridView dataGridViewData;
         private DataGridViewTextBoxColumn ColumnData0;
         private DataGridViewImageColumn ColumnData1;
-        private DataGridView dataGridViewBio;
-        private DataGridViewTextBoxColumn ColumnGMO0;
-        private Label label1;
-        private DataGridViewImageColumn a;
+        private ExtTabControl extTabControlData;
+        private DataGridView dataGridViewBioInfo;
+        private TabPage tabGeo;
+        private ExtPanelDataGridViewScroll extPanelDataGridViewScroll1;
+        private ExtScrollBar extScrollBar1;
+        private DataGridView dataGridView1;
+        private DataGridViewTextBoxColumn dataGridViewTextBoxColumn3;
+        private DataGridViewTextBoxColumn dataGridViewTextBoxColumn4;
+        private DataGridViewImageColumn dataGridViewImageColumn2;
+        private DataGridViewTextBoxColumn dataGridViewTextBoxColumn5;
+        private DataGridViewTextBoxColumn ColumnBioInfo0;
+        private DataGridViewTextBoxColumn ColumnBioInfo1;
+        private DataGridViewTextBoxColumn ColumnBioInfo2;
+        private DataGridViewTextBoxColumn clickableBioInfo;
         private DataGridViewImageColumn b;
         private DataGridViewImageColumn c;
         private DataGridViewImageColumn d;
         private DataGridViewImageColumn e;
         private DataGridViewImageColumn f;
-        private DataGridViewTextBoxColumn ColumnRing0;
-        private DataGridViewTextBoxColumn ColumnRing1;
-        private DataGridViewTextBoxColumn ColumnRing2;
-        private DataGridViewImageColumn ColumnRing3;
-        private DataGridViewTextBoxColumn ColumnBio0;
-        private DataGridViewTextBoxColumn ColumnBio1;
-        private DataGridViewImageColumn ColumnBio2;
-        private Button LSY;
-    }
+        }
 }

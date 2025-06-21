@@ -49,9 +49,40 @@
   <ItemGroup>
     <Compile Include="Base\ActionDataHandler.cs" />
     <Compile Include="Base\Codex.cs" />
+    <Compile Include="Base\SystemPoi.cs" />
     <Compile Include="Diagnostics\CanonnLogging.cs" />
     <Compile Include="Base\Patrols.cs" />
     <Compile Include="Emitter\CanonnEmitter.cs" />
+    <Compile Include="ExtendedControls\Button.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="ExtendedControls\CheckBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="ExtendedControls\Color.cs" />
+    <Compile Include="ExtendedControls\Combobox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="ExtendedControls\controlhelpers.cs" />
+    <Compile Include="ExtendedControls\DataGridViewHelpers.cs" />
+    <Compile Include="ExtendedControls\DrawingHelpers.cs" />
+    <Compile Include="ExtendedControls\ListBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="ExtendedControls\ListBoxForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ExtendedControls\PanelDataGridViewScroll.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="ExtendedControls\ScrollBar.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="ExtendedControls\TabControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="ExtendedControls\TabStyleCustom.cs" />
+    <Compile Include="ExtendedControls\Win32Constants.cs" />
     <Compile Include="Utility\Payload.cs" />
     <Compile Include="Base\SystemData.cs" />
     <Compile Include="Diagnostics\WhiteListTest.cs" />
@@ -64,36 +95,6 @@
     <Compile Include="Panel\EDDCanonnUserControl.designer.cs">
       <DependentUpon>EDDCanonnUserControl.cs</DependentUpon>
     </Compile>
-    <Compile Include="extendedcontrols\Button.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="extendedcontrols\CheckBox.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="extendedcontrols\Color.cs" />
-    <Compile Include="extendedcontrols\Combobox.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="extendedcontrols\controlhelpers.cs" />
-    <Compile Include="extendedcontrols\DataGridViewHelpers.cs" />
-    <Compile Include="extendedcontrols\DrawingHelpers.cs" />
-    <Compile Include="extendedcontrols\ListBox.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="extendedcontrols\ListBoxForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="extendedcontrols\PanelDataGridViewScroll.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="extendedcontrols\ScrollBar.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="extendedcontrols\TabControl.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="extendedcontrols\TabStyleCustom.cs" />
-    <Compile Include="extendedcontrols\Win32Constants.cs" />
     <Compile Include="KdTree\HyperRect.cs" />
     <Compile Include="KdTree\IKdTree.cs" />
     <Compile Include="KdTree\IPriorityQueue.cs" />

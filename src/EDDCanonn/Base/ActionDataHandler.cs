@@ -38,7 +38,6 @@ namespace EDDCanonnPanel.Base
             return StartTask(() => job(effectiveToken), name, effectiveToken, finalAction, errorCallback);
         }
 
-
         private readonly List<Task> _tasks = new List<Task>();
         private CancellationTokenSource _cts = new CancellationTokenSource();
         private readonly object _lock = new object();

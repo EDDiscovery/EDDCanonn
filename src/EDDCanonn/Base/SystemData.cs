@@ -136,6 +136,19 @@ namespace EDDCanonnPanel.Base
                         result += AddListToString("Organics", body.ScanData.Organics);
                         result += AddListToString("Surface Features", body.ScanData.SurfaceFeatures);
                         result += AddListToString("Genuses", body.ScanData.Genuses);
+
+                        result += "      System POIs:\n";
+                        if (body.ScanData.SystemPois != null && body.ScanData.SystemPois.Count > 0)
+                        {
+                            foreach (var poi in body.ScanData.SystemPois)
+                            {
+                                result += $"        Name: {poi.Name}, EntryID: {poi.EntryID}, IndexID: {poi.IndexID}, Lat: {poi.Lat}, Lon: {poi.Lon}, Scanned: {poi.Scanned}\n";
+                            }
+                        }
+                        else
+                        {
+                            result += "        None\n";
+                        }
                     }
                 }
             }
@@ -146,6 +159,7 @@ namespace EDDCanonnPanel.Base
 
             return result;
         }
+
 
         private string AddListToString(string name, List<JObject> list)
         {
@@ -199,6 +213,8 @@ namespace EDDCanonnPanel.Base
             Organics = scanData.Organics?.Select(j => new JObject(j)).ToList() ?? new List<JObject>();
             SurfaceFeatures = scanData.SurfaceFeatures?.Select(j => new JObject(j)).ToList() ?? new List<JObject>();
             Genuses = scanData.Genuses?.Select(j => new JObject(j)).ToList() ?? new List<JObject>();
+            SystemPois = scanData.SystemPois?.Select(poi => new SystemPoi(poi)).ToList() ?? new List<SystemPoi>();
+
         }
 
         public int BodyID { get; set; } = 0;
@@ -207,6 +223,7 @@ namespace EDDCanonnPanel.Base
         public List<JObject> Organics { get; set; } = null;
         public List<JObject> SurfaceFeatures { get; set; } = null;
         public List<JObject> Genuses { get; set; } = null;
+        public List<SystemPoi> SystemPois { get; set; } = null;
     }
 
 }

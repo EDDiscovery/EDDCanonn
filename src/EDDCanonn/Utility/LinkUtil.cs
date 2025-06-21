@@ -38,6 +38,12 @@ namespace EDDCanonnPanel.Utility
         //URL to fetch the latest posts from the Canonn news feed.
         public static readonly string CanonnNews = "https://canonn.science/wp-json/wp/v2/posts";
 
+
+        public static string GetCanonnSystemPoi(string systemName, string cmdrName)
+        {
+            return "https://us-central1-canonn-api-236217.cloudfunctions.net/query/getSystemPoi?system=" + systemName + "&odyssey=True&cmdr=" + cmdrName;
+        }
+
         //GitHub repository for the EDDCanonn plugin.
         public static readonly string EDDCanonnGitHub = "https://github.com/EDDiscovery/EDDCanonn";
         //GitHub organization page for EDDiscovery.
