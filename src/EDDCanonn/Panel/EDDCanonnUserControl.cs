@@ -1294,24 +1294,24 @@ namespace EDDCanonnPanel
             }
 
         private List<DataGridViewRow> CollectBioInfoData(SystemData system)
-            {
-            if (system?.Bodys?.Values == null || dataGridViewBioInfo?.AccessibleDescription == null)
-                return null;
-
+            {      
             List<DataGridViewRow> rows = new List<DataGridViewRow>
                 {
                     CanonnUtil.CreateDataGridViewRow(dataGridViewBioInfo, new object[]
                     {
                         "Double-click for return.",
                         null,
-                        dataGridViewBioInfo.AccessibleDescription,
+                        dataGridViewBioInfo?.AccessibleDescription,
                         "true"
                     })
                 };
 
+            if (system?.Bodys?.Values == null || dataGridViewBioInfo?.AccessibleDescription == null)
+                return rows;
+
             Base.Body body = systemData?.GetBodyByName($"{system.Name} {dataGridViewBioInfo.AccessibleDescription}");
             if (body?.ScanData?.SystemPois == null)
-                return null;
+                return rows;
 
             List<IGrouping<string, SystemPoi>> groupedPois = body.ScanData.SystemPois
                 .Where(poi => poi.HudCategory == "Biology")
@@ -1342,12 +1342,6 @@ namespace EDDCanonnPanel
                             "false"
                     }));
                     }
-                }
-
-            if (rows.Count <= 1)
-                {
-                CanonnUtil.DisposeDataGridViewRowList(rows);
-                return null;
                 }
 
             return rows;
