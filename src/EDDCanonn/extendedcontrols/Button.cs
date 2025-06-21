@@ -228,7 +228,7 @@ namespace ExtendedControls
         /// <param name="mevent">A <see cref="MouseEventArgs"/> containing the event data.</param>
         protected override void OnMouseMove(MouseEventArgs mevent)
         {
-            // Allow a very long click to come and go from our bounds, updating the UpdateMainFields state the whole time.
+            // Allow a very long click to come and go from our bounds, updating the draw state the whole time.
             if (ClientRectangle.Contains(mevent.Location))
                 SetDrawState(mevent.Button == MouseButtons.Left ? DrawState.Click : DrawState.Hover);
             else

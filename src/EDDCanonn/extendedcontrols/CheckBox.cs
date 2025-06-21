@@ -130,7 +130,7 @@ namespace ExtendedControls
 
                     Color checkboxbasecolour = (Enabled && mouseover) ? MouseOverColor : CheckBoxColor.Multiply(discaling);
 
-                    if (!hasimages)      // UpdateMainFields the over box of the checkbox if no images
+                    if (!hasimages)      // draw the over box of the checkbox if no images
                     {
                         using (Pen outer = new Pen(checkboxbasecolour))
                             e.Graphics.DrawRectangle(outer, tickarea);
@@ -141,11 +141,11 @@ namespace ExtendedControls
                     Rectangle checkarea = tickarea;
                     checkarea.Width++; checkarea.Height++;          // convert back to area
 
-                    //                System.Diagnostics.Debug.WriteLine("Owner UpdateMainFields " + Name + checkarea + rect);
+                    //                System.Diagnostics.Debug.WriteLine("Owner draw " + Name + checkarea + rect);
 
                     if (hasimages)
                     {
-                        if (Enabled && mouseover)                // if mouse over, UpdateMainFields a nice box around it
+                        if (Enabled && mouseover)                // if mouse over, draw a nice box around it
                         {
                             using (Brush mover = new SolidBrush(MouseOverColor))
                             {
@@ -154,7 +154,7 @@ namespace ExtendedControls
                         }
                     }
                     else
-                    {                                   // in no image, we UpdateMainFields a set of boxes
+                    {                                   // in no image, we draw a set of boxes
                         using (Pen second = new Pen(CheckBoxInnerColor.Multiply(discaling), 1F))
                             e.Graphics.DrawRectangle(second, tickarea);
 

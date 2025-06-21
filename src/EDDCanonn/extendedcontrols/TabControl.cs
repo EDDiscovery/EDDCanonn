@@ -241,7 +241,7 @@ namespace ExtendedControls
                         }
 
                         // seen instances of SelectedIndex being set BEFORE tab up, meaning selected index is out of range
-                        if (SelectedIndex >= 0 && SelectedIndex < TabCount)      // and if its selected, we did not UpdateMainFields it     -- seen it above TabCount.. protect
+                        if (SelectedIndex >= 0 && SelectedIndex < TabCount)      // and if its selected, we did not draw it     -- seen it above TabCount.. protect
                             DrawTab(SelectedIndex, backImageGraphics, true, false);     // we paint the selected one last, in case it overwrites the other ones.
                     }
 
@@ -339,7 +339,7 @@ namespace ExtendedControls
 
             bool systemmode = flatstyle == FlatStyle.System;
 
-            // Put it back into system mode. if we don't put it back into system UpdateMainFields, it seems to never resize the tabs
+            // Put it back into system mode. if we don't put it back into system draw, it seems to never resize the tabs
             if (!systemmode)
                 SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint | ControlStyles.Opaque | ControlStyles.ResizeRedraw, false);      // go back to system
 
@@ -358,7 +358,7 @@ namespace ExtendedControls
                 Multiline = true;
             }
 
-            // put it back into user UpdateMainFields if applicable
+            // put it back into user draw if applicable
             if (!systemmode)
                 SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint | ControlStyles.Opaque | ControlStyles.ResizeRedraw, true);
 

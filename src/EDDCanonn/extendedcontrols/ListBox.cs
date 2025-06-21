@@ -228,7 +228,7 @@ namespace ExtendedControls
             {
                 Rectangle totalarea = mainarea;     // total width area
                 totalarea.Height = itemheight;
-                Rectangle textarea = totalarea;     // where we UpdateMainFields text
+                Rectangle textarea = totalarea;     // where we draw text
                 Rectangle imagearea = totalarea;
 
                 if (imageitems != null)           // if we have images, allocate space between the 
@@ -293,7 +293,7 @@ namespace ExtendedControls
             }
         }
 
-        private void Lbsys_DrawItem(object sender, DrawItemEventArgs e) // for system UpdateMainFields with ICON
+        private void Lbsys_DrawItem(object sender, DrawItemEventArgs e) // for system draw with ICON
         {
             e.DrawBackground();
 

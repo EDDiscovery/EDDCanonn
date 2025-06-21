@@ -570,10 +570,10 @@ namespace BaseUtils.Win32Constants
         public const int SIZE = 0x0005;
 
         /// <summary>
-        /// The WM_ACTIVATE message is sent to both the window being _eventLock and the window being deactivated. If the
+        /// The WM_ACTIVATE message is sent to both the window being activated and the window being deactivated. If the
         /// windows use the same input queue, the message is sent synchronously, first to the window procedure of the
-        /// top-level window being deactivated, then to the window procedure of the top-level window being _eventLock.
-        /// If the windows use different input queues, the message is sent asynchronously, so the window is _eventLock
+        /// top-level window being deactivated, then to the window procedure of the top-level window being activated.
+        /// If the windows use different input queues, the message is sent asynchronously, so the window is activated
         /// immediately.
         /// </summary>
         /// <seealso href="https://msdn.microsoft.com/en-us/library/windows/desktop/ms646274(v=vs.85).aspx"/>
@@ -911,18 +911,18 @@ namespace BaseUtils.Win32Constants
         public const int MOUSELEAVE = 0x02A3;
 
         /// <summary>
-        /// The WM_PRINT message is sent to a window to request that it UpdateMainFields itself in the specified device context,
-        /// most commonly in a printer device context. wParam contains a handle to the device context to UpdateMainFields in, while
+        /// The WM_PRINT message is sent to a window to request that it draw itself in the specified device context,
+        /// most commonly in a printer device context. wParam contains a handle to the device context to draw in, while
         /// lParam contains the drawing options. See the remarks section for more information.
         /// </summary>
         /// <seealso href="https://msdn.microsoft.com/en-us/library/dd145216(v=vs.85).aspx"/>
         public const int PRINT = 0x0317;
 
         /// <summary>
-        /// The WM_PRINTCLIENT message is sent to a window to request that it UpdateMainFields its client area in the specified
+        /// The WM_PRINTCLIENT message is sent to a window to request that it draw its client area in the specified
         /// device context, most commonly in a printer device context. Unlike WM_PRINT, WM_PRINTCLIENT is not processed
         /// by DefWindowProc. A window should process the WM_PRINTCLIENT message through an application-defined
-        /// WindowProc function for it to be used properly. wParam contains a handle to the device context to UpdateMainFields in,
+        /// WindowProc function for it to be used properly. wParam contains a handle to the device context to draw in,
         /// while lParam has drawing options. See the remarks section for more information.
         /// </summary>
         /// <seealso href="https://msdn.microsoft.com/en-us/library/dd145217(v=vs.85).aspx"/>
@@ -1056,7 +1056,7 @@ namespace BaseUtils.Win32Constants
         /// Clips child windows relative to each other; that is, when a particular child window receives a <see cref="WM.PAINT"/>
         /// message, the CLIPSIBLINGS style clips all other overlapping child windows out of the region of the child
         /// window to be updated. If CLIPSIBLINGS is not specified and child windows overlap, it is possible, when
-        /// drawing within the client area of a child window, to UpdateMainFields within the client area of a neighboring child window.
+        /// drawing within the client area of a child window, to draw within the client area of a neighboring child window.
         /// </summary>
         public const int CLIPSIBLINGS = 0x04000000;
 
