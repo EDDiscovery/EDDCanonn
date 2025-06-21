@@ -527,12 +527,13 @@ namespace EDDCanonnPanel
             {
             lock (_lockSystemData)
                 {
-                _systemData = null;
-
-                extTabControlData.SelectedIndex = 0;
-
-                CanonnUtil.DisposeDataGridViewRowList(_dataGridNotifications.Values.ToList());
-                _dataGridNotifications.Clear();
+                    SafeInvoke(() =>
+                    {
+                        _systemData = null;
+                        extTabControlData.SelectedIndex = 0;
+                        CanonnUtil.DisposeDataGridViewRowList(_dataGridNotifications.Values.ToList());
+                        _dataGridNotifications.Clear();
+                    });
                 }
             }
 
@@ -817,6 +818,7 @@ namespace EDDCanonnPanel
 
             string variant = eventData["Variant"].Value?.ToString();
             string genus = eventData["Genus"].Value?.ToString();
+            string variant_localised = CodexDatabase.GetByName(variant).LocalisedName;
 
             JObject o = new JObject
                 {
@@ -824,14 +826,31 @@ namespace EDDCanonnPanel
                     {
                         new JObject
                         {
-                            ["Variant"] = variant,                                                  //$Codex_Ent_Tussocks_09_F_Name;
-                            ["Variant_Localised"] = CodexDatabase.GetByName(variant).LocalisedName, //Tussock Propagito - Yellow
-                            ["Genus"] = genus                                                       //$Codex_Ent_Tussocks_Genus_Name;
+                            ["Variant"] = variant,                          //$Codex_Ent_Tussocks_09_F_Name;
+                            ["Variant_Localised"] = variant_localised,      //Tussock Propagito - Yellow
+                            ["Genus"] = genus                               //$Codex_Ent_Tussocks_Genus_Name;
                         }
                     }
                 };
 
             body.ScanData.Organics = CanonnUtil.GetUniqueEntries(o, "Organics", body.ScanData.Organics);
+
+            if (body.ScanData.SystemPois == null)
+                body.ScanData.SystemPois = new List<SystemPoi>();
+
+            SystemPoi poi = new SystemPoi(
+                body.BodyName?.Replace(systemData?.Name, "")?.TrimStart(),
+                variant_localised,
+                -1,
+                "Biology",
+                -1,
+                "-",
+                "-",
+                true
+            );
+
+            body.ScanData.SystemPois.Add(poi);
+
             }
 
         private void ProcessCodex(JObject eventData)
@@ -872,6 +891,23 @@ namespace EDDCanonnPanel
                     };
 
                 body.ScanData.Organics = CanonnUtil.GetUniqueEntries(o, "Organics", body.ScanData.Organics);
+
+                if (body.ScanData.SystemPois == null)
+                    body.ScanData.SystemPois = new List<SystemPoi>();
+
+                SystemPoi poi = new SystemPoi(
+                    body.BodyName?.Replace(systemData?.Name, "")?.TrimStart(),
+                    entry?.LocalisedName,
+                    -1,
+                    "Biology",
+                    -1,
+                    "-",
+                    "-",
+                    true
+                );
+
+                body.ScanData.SystemPois.Add(poi);
+
                 }
             else if (false)
                 {
@@ -1225,7 +1261,7 @@ namespace EDDCanonnPanel
                     .Where(genus => !CanonnUtil.ContainsKeyValuePair(body.ScanData.Organics, "Genus", genus["Genus"].StrNull()))
                     .ToList();
 
-                if (missingSamples.Count < body.ScanData.Genuses.Count)
+                if (missingSamples.Count < body.ScanData.Genuses.Count && body.ScanData.SystemPois?.Count > 0)
                     {
                     existingRows.Add(CanonnUtil.CreateDataGridViewRow(dataGridViewBio, new object[]
                     {
