@@ -847,8 +847,8 @@ namespace EDDCanonnPanel
                 -1,
                 "Biology",
                 -1,
-                "-",
-                "-",
+                CanonnEDDClass.GetStatusJson()["Pos"]["Latitude"].Double(DataUtil.PositionFallback).ToString(),
+                CanonnEDDClass.GetStatusJson()["Pos"]["Longitude"].Double(DataUtil.PositionFallback).ToString(),
                 true
             );
 
@@ -862,7 +862,7 @@ namespace EDDCanonnPanel
             if (category == null)
                 return;
 
-            if (category.Equals("$Codex_SubCategory_Organic_Structures;"))
+            if (category.Equals("$Codex_SubCategory_Organic_Structures;")) //wip
                 {
                 int bodyId = eventData["BodyID"].Int(-1);
                 if (bodyId == -1)
@@ -904,8 +904,8 @@ namespace EDDCanonnPanel
                     -1,
                     "Biology",
                     -1,
-                    "-",
-                    "-",
+                    eventData["Latitude"].Double(DataUtil.PositionFallback).ToString(),
+                    eventData["Longitude"].Double(DataUtil.PositionFallback).ToString(),
                     true
                 );
 
