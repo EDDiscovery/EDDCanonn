@@ -134,6 +134,7 @@ namespace EDDCanonnPanel.Base
                         result += AddListToString("Rings", body.ScanData.Rings);
                         result += AddListToString("Signals", body.ScanData.Signals);
                         result += AddListToString("Organics", body.ScanData.Organics);
+                        result += AddListToString("Geologic", body.ScanData.Geologic);
                         result += AddListToString("Surface Features", body.ScanData.SurfaceFeatures);
                         result += AddListToString("Genuses", body.ScanData.Genuses);
 
@@ -211,6 +212,7 @@ namespace EDDCanonnPanel.Base
             Rings = scanData.Rings?.Select(j => new JObject(j)).ToList() ?? new List<JObject>();
             Signals = scanData.Signals?.Select(j => new JObject(j)).ToList() ?? new List<JObject>();
             Organics = scanData.Organics?.Select(j => new JObject(j)).ToList() ?? new List<JObject>();
+            Geologic = scanData.Geologic?.Select(j => new JObject(j)).ToList() ?? new List<JObject>();
             SurfaceFeatures = scanData.SurfaceFeatures?.Select(j => new JObject(j)).ToList() ?? new List<JObject>();
             Genuses = scanData.Genuses?.Select(j => new JObject(j)).ToList() ?? new List<JObject>();
             SystemPois = scanData.SystemPois?.Select(poi => new SystemPoi(poi)).ToList() ?? new List<SystemPoi>();
@@ -221,6 +223,7 @@ namespace EDDCanonnPanel.Base
         public List<JObject> Rings { get; set; } = null;
         public List<JObject> Signals { get; set; } = null;
         public List<JObject> Organics { get; set; } = null;
+        public List<JObject> Geologic { get; set; } = null;
         public List<JObject> SurfaceFeatures { get; set; } = null;
         public List<JObject> Genuses { get; set; } = null;
         public List<SystemPoi> SystemPois { get; set; } = null;
