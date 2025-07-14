@@ -193,6 +193,22 @@ namespace EDDCanonnPanel
             extScrollBarGMO.ForeColor = GridScrollArrow;
             extScrollBarGMO.FlatStyle = fs;
 
+            // 
+            // extScrollBarGEO
+            // 
+            extScrollBarGeo.BackColor = form;
+            extScrollBarGeo.SliderColor = GridSliderBack;
+            extScrollBarGeo.BorderColor = GridBorderLines;
+            extScrollBarGeo.BackColor = form;
+            extScrollBarGeo.SliderColor = GridSliderBack;
+            extScrollBarGeo.BorderColor = extScrollBarGeo.ThumbBorderColor =
+            extScrollBarGeo.ArrowBorderColor = GridBorderLines;
+            extScrollBarGeo.ArrowButtonColor = extScrollBarGeo.ThumbButtonColor = c1;
+            extScrollBarGeo.MouseOverButtonColor = c1.Multiply(mouseoverscaling);
+            extScrollBarGeo.MousePressedButtonColor = c1.Multiply(mouseselectedscaling);
+            extScrollBarGeo.ForeColor = GridScrollArrow;
+            extScrollBarGeo.FlatStyle = fs;
+
             ExtComboBoxRange.ForeColor = ButtonTextColor;
             ExtComboBoxRange.BackColor = ExtComboBoxRange.DropDownBackgroundColor = ButtonBackColor;
             ExtComboBoxRange.BorderColor = ButtonBorderColor;
@@ -286,9 +302,9 @@ namespace EDDCanonnPanel
             this.ColumnBio2 = new System.Windows.Forms.DataGridViewImageColumn();
             this.clickable = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.tabGeo = new System.Windows.Forms.TabPage();
-            this.extPanelDataGridViewScroll1 = new ExtendedControls.ExtPanelDataGridViewScroll();
-            this.extScrollBar1 = new ExtendedControls.ExtScrollBar();
-            this.dataGridView1 = new System.Windows.Forms.DataGridView();
+            this.extPanelDataGridViewScrollGeo = new ExtendedControls.ExtPanelDataGridViewScroll();
+            this.extScrollBarGeo = new ExtendedControls.ExtScrollBar();
+            this.dataGridViewGeo = new System.Windows.Forms.DataGridView();
             this.tabSurvey = new System.Windows.Forms.TabPage();
             this.labelSurvey = new System.Windows.Forms.Label();
             this.tabGmo = new System.Windows.Forms.TabPage();
@@ -329,8 +345,8 @@ namespace EDDCanonnPanel
             this.extPanelDataGridViewScrollBio.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewBio)).BeginInit();
             this.tabGeo.SuspendLayout();
-            this.extPanelDataGridViewScroll1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
+            this.extPanelDataGridViewScrollGeo.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridViewGeo)).BeginInit();
             this.tabSurvey.SuspendLayout();
             this.tabGmo.SuspendLayout();
             this.extPanelDataGridViewScrollGMO.SuspendLayout();
@@ -1207,7 +1223,7 @@ namespace EDDCanonnPanel
             // 
             // tabGeo
             // 
-            this.tabGeo.Controls.Add(this.extPanelDataGridViewScroll1);
+            this.tabGeo.Controls.Add(this.extPanelDataGridViewScrollGeo);
             this.tabGeo.Location = new System.Drawing.Point(4, 22);
             this.tabGeo.Name = "tabGeo";
             this.tabGeo.Padding = new System.Windows.Forms.Padding(3);
@@ -1216,73 +1232,73 @@ namespace EDDCanonnPanel
             this.tabGeo.Text = "Geological";
             this.tabGeo.UseVisualStyleBackColor = true;
             // 
-            // extPanelDataGridViewScroll1
+            // extPanelDataGridViewScrollGeo
             // 
-            this.extPanelDataGridViewScroll1.Controls.Add(this.extScrollBar1);
-            this.extPanelDataGridViewScroll1.Controls.Add(this.dataGridView1);
-            this.extPanelDataGridViewScroll1.InternalMargin = new System.Windows.Forms.Padding(0);
-            this.extPanelDataGridViewScroll1.Location = new System.Drawing.Point(0, 0);
-            this.extPanelDataGridViewScroll1.Name = "extPanelDataGridViewScroll1";
-            this.extPanelDataGridViewScroll1.Size = new System.Drawing.Size(358, 233);
-            this.extPanelDataGridViewScroll1.TabIndex = 16;
-            this.extPanelDataGridViewScroll1.VerticalScrollBarDockRight = true;
+            this.extPanelDataGridViewScrollGeo.Controls.Add(this.extScrollBarGeo);
+            this.extPanelDataGridViewScrollGeo.Controls.Add(this.dataGridViewGeo);
+            this.extPanelDataGridViewScrollGeo.InternalMargin = new System.Windows.Forms.Padding(0);
+            this.extPanelDataGridViewScrollGeo.Location = new System.Drawing.Point(0, 0);
+            this.extPanelDataGridViewScrollGeo.Name = "extPanelDataGridViewScrollGeo";
+            this.extPanelDataGridViewScrollGeo.Size = new System.Drawing.Size(358, 233);
+            this.extPanelDataGridViewScrollGeo.TabIndex = 16;
+            this.extPanelDataGridViewScrollGeo.VerticalScrollBarDockRight = true;
             // 
-            // extScrollBar1
+            // extScrollBarGeo
             // 
-            this.extScrollBar1.AlwaysHideScrollBar = false;
-            this.extScrollBar1.ArrowBorderColor = System.Drawing.Color.LightBlue;
-            this.extScrollBar1.ArrowButtonColor = System.Drawing.Color.LightGray;
-            this.extScrollBar1.ArrowColorScaling = 0.5F;
-            this.extScrollBar1.ArrowDownDrawAngle = 270F;
-            this.extScrollBar1.ArrowUpDrawAngle = 90F;
-            this.extScrollBar1.BorderColor = System.Drawing.Color.White;
-            this.extScrollBar1.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.extScrollBar1.HideScrollBar = false;
-            this.extScrollBar1.LargeChange = 0;
-            this.extScrollBar1.Location = new System.Drawing.Point(339, 0);
-            this.extScrollBar1.Maximum = -1;
-            this.extScrollBar1.Minimum = 0;
-            this.extScrollBar1.MouseOverButtonColor = System.Drawing.Color.Green;
-            this.extScrollBar1.MousePressedButtonColor = System.Drawing.Color.Red;
-            this.extScrollBar1.Name = "extScrollBar1";
-            this.extScrollBar1.Size = new System.Drawing.Size(19, 233);
-            this.extScrollBar1.SliderColor = System.Drawing.Color.DarkGray;
-            this.extScrollBar1.SmallChange = 1;
-            this.extScrollBar1.TabIndex = 15;
-            this.extScrollBar1.Text = "extScrollBar1";
-            this.extScrollBar1.ThumbBorderColor = System.Drawing.Color.Yellow;
-            this.extScrollBar1.ThumbButtonColor = System.Drawing.Color.DarkBlue;
-            this.extScrollBar1.ThumbColorScaling = 0.5F;
-            this.extScrollBar1.ThumbDrawAngle = 0F;
-            this.extScrollBar1.Value = -1;
-            this.extScrollBar1.ValueLimited = -1;
+            this.extScrollBarGeo.AlwaysHideScrollBar = false;
+            this.extScrollBarGeo.ArrowBorderColor = System.Drawing.Color.LightBlue;
+            this.extScrollBarGeo.ArrowButtonColor = System.Drawing.Color.LightGray;
+            this.extScrollBarGeo.ArrowColorScaling = 0.5F;
+            this.extScrollBarGeo.ArrowDownDrawAngle = 270F;
+            this.extScrollBarGeo.ArrowUpDrawAngle = 90F;
+            this.extScrollBarGeo.BorderColor = System.Drawing.Color.White;
+            this.extScrollBarGeo.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.extScrollBarGeo.HideScrollBar = false;
+            this.extScrollBarGeo.LargeChange = 0;
+            this.extScrollBarGeo.Location = new System.Drawing.Point(339, 0);
+            this.extScrollBarGeo.Maximum = -1;
+            this.extScrollBarGeo.Minimum = 0;
+            this.extScrollBarGeo.MouseOverButtonColor = System.Drawing.Color.Green;
+            this.extScrollBarGeo.MousePressedButtonColor = System.Drawing.Color.Red;
+            this.extScrollBarGeo.Name = "extScrollBarGeo";
+            this.extScrollBarGeo.Size = new System.Drawing.Size(19, 233);
+            this.extScrollBarGeo.SliderColor = System.Drawing.Color.DarkGray;
+            this.extScrollBarGeo.SmallChange = 1;
+            this.extScrollBarGeo.TabIndex = 15;
+            this.extScrollBarGeo.Text = "extScrollBar1";
+            this.extScrollBarGeo.ThumbBorderColor = System.Drawing.Color.Yellow;
+            this.extScrollBarGeo.ThumbButtonColor = System.Drawing.Color.DarkBlue;
+            this.extScrollBarGeo.ThumbColorScaling = 0.5F;
+            this.extScrollBarGeo.ThumbDrawAngle = 0F;
+            this.extScrollBarGeo.Value = -1;
+            this.extScrollBarGeo.ValueLimited = -1;
             // 
-            // dataGridView1
+            // dataGridViewGeo
             // 
-            this.dataGridView1.AllowUserToAddRows = false;
-            this.dataGridView1.AllowUserToDeleteRows = false;
-            this.dataGridView1.AllowUserToResizeColumns = false;
-            this.dataGridView1.AllowUserToResizeRows = false;
-            this.dataGridView1.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
-            this.dataGridView1.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.AllCells;
-            this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridView1.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.dataGridViewGeo.AllowUserToAddRows = false;
+            this.dataGridViewGeo.AllowUserToDeleteRows = false;
+            this.dataGridViewGeo.AllowUserToResizeColumns = false;
+            this.dataGridViewGeo.AllowUserToResizeRows = false;
+            this.dataGridViewGeo.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            this.dataGridViewGeo.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.AllCells;
+            this.dataGridViewGeo.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dataGridViewGeo.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.dataGridViewTextBoxColumn3,
             this.dataGridViewTextBoxColumn4,
             this.dataGridViewImageColumn2,
             this.dataGridViewTextBoxColumn5});
-            this.dataGridView1.Location = new System.Drawing.Point(0, 0);
-            this.dataGridView1.Name = "dataGridView1";
-            this.dataGridView1.ReadOnly = true;
+            this.dataGridViewGeo.Location = new System.Drawing.Point(0, 0);
+            this.dataGridViewGeo.Name = "dataGridViewGeo";
+            this.dataGridViewGeo.ReadOnly = true;
             dataGridViewCellStyle7.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.dataGridView1.RowsDefaultCellStyle = dataGridViewCellStyle7;
-            this.dataGridView1.ScrollBars = System.Windows.Forms.ScrollBars.None;
-            this.dataGridView1.ShowCellErrors = false;
-            this.dataGridView1.ShowCellToolTips = false;
-            this.dataGridView1.ShowEditingIcon = false;
-            this.dataGridView1.ShowRowErrors = false;
-            this.dataGridView1.Size = new System.Drawing.Size(339, 233);
-            this.dataGridView1.TabIndex = 14;
+            this.dataGridViewGeo.RowsDefaultCellStyle = dataGridViewCellStyle7;
+            this.dataGridViewGeo.ScrollBars = System.Windows.Forms.ScrollBars.None;
+            this.dataGridViewGeo.ShowCellErrors = false;
+            this.dataGridViewGeo.ShowCellToolTips = false;
+            this.dataGridViewGeo.ShowEditingIcon = false;
+            this.dataGridViewGeo.ShowRowErrors = false;
+            this.dataGridViewGeo.Size = new System.Drawing.Size(339, 233);
+            this.dataGridViewGeo.TabIndex = 14;
             // 
             // tabSurvey
             // 
@@ -1517,13 +1533,13 @@ namespace EDDCanonnPanel
             // dataGridViewTextBoxColumn3
             // 
             this.dataGridViewTextBoxColumn3.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.DisplayedCells;
-            this.dataGridViewTextBoxColumn3.HeaderText = "Work in Progress.";
+            this.dataGridViewTextBoxColumn3.HeaderText = "";
             this.dataGridViewTextBoxColumn3.MinimumWidth = 25;
             this.dataGridViewTextBoxColumn3.Name = "dataGridViewTextBoxColumn3";
             this.dataGridViewTextBoxColumn3.ReadOnly = true;
             this.dataGridViewTextBoxColumn3.Resizable = System.Windows.Forms.DataGridViewTriState.False;
             this.dataGridViewTextBoxColumn3.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.dataGridViewTextBoxColumn3.Width = 87;
+            this.dataGridViewTextBoxColumn3.Width = 25;
             // 
             // dataGridViewTextBoxColumn4
             // 
@@ -1587,8 +1603,8 @@ namespace EDDCanonnPanel
             this.extPanelDataGridViewScrollBio.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewBio)).EndInit();
             this.tabGeo.ResumeLayout(false);
-            this.extPanelDataGridViewScroll1.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
+            this.extPanelDataGridViewScrollGeo.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridViewGeo)).EndInit();
             this.tabSurvey.ResumeLayout(false);
             this.tabSurvey.PerformLayout();
             this.tabGmo.ResumeLayout(false);
@@ -1672,9 +1688,9 @@ namespace EDDCanonnPanel
         private ExtTabControl extTabControlData;
         private DataGridView dataGridViewBioInfo;
         private TabPage tabGeo;
-        private ExtPanelDataGridViewScroll extPanelDataGridViewScroll1;
-        private ExtScrollBar extScrollBar1;
-        private DataGridView dataGridView1;
+        private ExtPanelDataGridViewScroll extPanelDataGridViewScrollGeo;
+        private ExtScrollBar extScrollBarGeo;
+        private DataGridView dataGridViewGeo;
         private DataGridViewTextBoxColumn ColumnBioInfo0;
         private DataGridViewTextBoxColumn ColumnBioInfo1;
         private DataGridViewTextBoxColumn ColumnBioInfo2;
