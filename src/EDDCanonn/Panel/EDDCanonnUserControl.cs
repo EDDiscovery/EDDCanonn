@@ -835,6 +835,9 @@ namespace EDDCanonnPanel
 
             body.ScanData.Organics = CanonnUtil.GetUniqueEntries(o, "Organics", body.ScanData.Organics);
 
+            if (eventData["ScanType"].StrNull() == "Analyse")
+                return;
+
             if (body.ScanData.SystemPois == null)
                 body.ScanData.SystemPois = new List<SystemPoi>();
 
@@ -855,11 +858,11 @@ namespace EDDCanonnPanel
 
         private void ProcessCodex(JObject eventData)
             {
-            string category = eventData["Category"].StrNull();
+            string category = eventData["SubCategory"].StrNull();
             if (category == null)
                 return;
 
-            if (category.Equals("$Codex_Category_Biology;"))
+            if (category.Equals("$Codex_SubCategory_Organic_Structures;"))
                 {
                 int bodyId = eventData["BodyID"].Int(-1);
                 if (bodyId == -1)
@@ -909,9 +912,37 @@ namespace EDDCanonnPanel
                 body.ScanData.SystemPois.Add(poi);
 
                 }
-            else if (false)
+            if (category.Equals("$Codex_SubCategory_Geology_and_Anomalies;"))
                 {
-                //...
+                int bodyId = eventData["BodyID"].Int(-1);
+                if (bodyId == -1)
+                    return;
+
+                Base.Body body;
+                if (!systemData?.Bodys?.ContainsKey(bodyId) ?? true)
+                    body = ProcessScan(eventData);
+                else
+                    body = systemData.Bodys[bodyId];
+
+                if (body == null)
+                    return;
+
+                string variant = eventData["Name"].StrNull();
+                CodexEntry entry = CodexDatabase.GetByName(variant);
+
+                JObject o = new JObject
+                    {
+                    ["Geologic"] = new JArray
+                        {
+                            new JObject
+                            {
+                                ["Variant"] = variant,                              
+                                ["Variant_Localised"] = entry?.LocalisedName,                                                                                              
+                            }
+                        }
+                    };
+
+                body.ScanData.Geologic = CanonnUtil.GetUniqueEntries(o, "Geologic", body.ScanData.Geologic);
                 }
             else if (false)
                 {
@@ -1293,6 +1324,60 @@ namespace EDDCanonnPanel
             return (missingRows, existingRows);
             }
 
+        private List<DataGridViewRow> CollectGeoData(SystemData system)
+            {
+            if (system?.Bodys?.Values == null)
+                return null;
+
+            List<DataGridViewRow> missingRows = new List<DataGridViewRow>
+    {
+        CanonnUtil.CreateDataGridViewRow(dataGridViewGeo, new object[] { "Missing Geo Data:", null, new Bitmap(1, 1), "false" })
+    };
+
+            IEnumerable<Base.Body> validBodies = system.Bodys.Values
+                .Where(body => body?.ScanData?.Signals?.Any() == true);
+
+            foreach (Base.Body body in validBodies)
+                {
+                JObject geologicalSignal = CanonnUtil.FindFirstMatchingJObject(body.ScanData.Signals, "Type", "$SAA_SignalType_Geological;") ??
+                                           CanonnUtil.FindFirstMatchingJObject(body.ScanData.Signals, null, "$SAA_SignalType_Geological;");
+
+                if (geologicalSignal == null)
+                    continue;
+
+                int geoCount = geologicalSignal["Count"].Int(-1);
+                geoCount = geoCount == -1
+                    ? geologicalSignal["$SAA_SignalType_Geological;"].Int(-1)
+                    : geoCount;
+
+                if (geoCount <= 0)
+                    continue;
+
+                int foundCount = body.ScanData.Geologic?.Count ?? 0;
+                int missingCount = geoCount - foundCount;
+
+                if (missingCount <= 0)
+                    continue;
+
+                missingRows.Add(CanonnUtil.CreateDataGridViewRow(dataGridViewGeo, new object[]
+                {
+            body.BodyName?.Replace(system.Name, "")?.TrimStart(),
+            $"{missingCount} missing geo signals",
+            Properties.Resources.geology,
+            "false"
+                }));
+                }
+
+            if (missingRows.Count <= 1)
+                {
+                CanonnUtil.DisposeDataGridViewRowList(missingRows);
+                return null;
+                }
+
+            return missingRows;
+            }
+
+
         private List<DataGridViewRow> CollectBioInfoData(SystemData system)
             {      
             List<DataGridViewRow> rows = new List<DataGridViewRow>
@@ -1625,6 +1710,7 @@ namespace EDDCanonnPanel
                     //Clear all grid views before populating them with new data.
                     dataGridViewData.Rows.Clear();
                     dataGridViewRing.Rows.Clear();
+                    dataGridViewGeo.Rows.Clear();   
                     dataGridViewBio.Rows.Clear();
 
                     //Collect missing ring data and update the corresponding grid.
@@ -1637,6 +1723,18 @@ namespace EDDCanonnPanel
                         {
                         dataGridViewData.Rows.Add(CanonnUtil.CreateDataGridViewRow(dataGridViewData, new object[]
                         { "There are new rings that can be scanned.", Properties.Resources.ring }));
+                        }
+
+                    //Collect missing geo data and update the corresponding grid.
+                    List<DataGridViewRow> geoRows = CollectGeoData(system);
+                    dataGridViewGeo.Rows.AddRange(geoRows?.ToArray() ??
+                        new[] { CanonnUtil.CreateDataGridViewRow(dataGridViewGeo, new object[]
+                        { "No missing geo data for this system yet.", null, null, new Bitmap(1, 1) }) });
+
+                    if (geoRows?.Count > 0)
+                        {
+                        dataGridViewData.Rows.Add(CanonnUtil.CreateDataGridViewRow(dataGridViewData, new object[]
+                        { "There are geological data that haven't been scanned yet.", Properties.Resources.geology }));
                         }
 
                     // Collect missing and existing bio data
