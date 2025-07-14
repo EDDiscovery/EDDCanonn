@@ -912,7 +912,7 @@ namespace EDDCanonnPanel
                 body.ScanData.SystemPois.Add(poi);
 
                 }
-            if (category.Equals("$Codex_SubCategory_Geology_and_Anomalies;"))
+            if (category.Equals("$Codex_SubCategory_Geology_and_Anomalies;")) //wip
                 {
                 int bodyId = eventData["BodyID"].Int(-1);
                 if (bodyId == -1)
@@ -1068,7 +1068,7 @@ namespace EDDCanonnPanel
                 }
             }
 
-        private void ProcessCanonnBiostats(long i64)
+        private void ProcessCanonnBiostats(long i64) //WIP: Bio + Geo
             {
             JObject o = dataHandler.FetchData(LinkUtil.BioStats + i64).response.JSONParse().Object();
             if (o?["system"]?["bodies"] == null || o["system"]["bodies"].Count == 0)
@@ -1079,50 +1079,55 @@ namespace EDDCanonnPanel
             foreach (JObject node in o["system"]["bodies"])
                 {
                 if (node == null || node.Count == 0)
-                    {
                     continue;
-                    }
 
                 int bodyId = node["bodyId"].Int(-1);
                 if (bodyId == -1)
-                    {
                     continue;
-                    }
 
-                Base.Body body = systemData?.Bodys?[bodyId] ?? null;
-                if (body == null)
-                    {
+                Base.Body body = systemData?.Bodys?[bodyId];
+                if (body?.ScanData == null)
                     continue;
-                    }
-
-                if (body.ScanData == null)
-                    {
-                    continue;
-                    }
 
                 List<JObject> biology = CanonnUtil.GetJObjectList(node["signals"] as JObject, "biology", "Bio");
-
-                if (biology == null || biology.Count == 0)
+                if (biology?.Count > 0)
                     {
-                    continue;
+                    body.ScanData.Organics = biology
+                        .Select(b =>
+                        {
+                            string variantLocalised = b["Bio"].StrNull();
+                            CodexEntry entry = CodexDatabase?.GetByLocalisedName(variantLocalised);
+
+                            return new JObject
+                                {
+                                ["Variant"] = entry?.Name,
+                                ["Variant_Localised"] = variantLocalised,
+                                ["Genus"] = DataUtil.BiologyGenuses(entry?.CodexSubType)
+                                };
+                        })
+                        .ToList();
                     }
 
-                body.ScanData.Organics = biology
-                    .Select(b =>
+                List<JObject> geology = CanonnUtil.GetJObjectList(node["signals"] as JObject, "geology", "Geo");
+                if (geology?.Count > 0)
                     {
-                        string variantLocalised = b["Bio"].StrNull();
-                        CodexEntry entry = CodexDatabase?.GetByLocalisedName(variantLocalised);
+                    body.ScanData.Geologic = geology
+                        .Select(g =>
+                        {
+                            string variantLocalised = g["Geo"].StrNull();
+                            CodexEntry entry = CodexDatabase?.GetByLocalisedName(variantLocalised);
 
-                        return new JObject
-                            {
-                            ["Variant"] = entry?.Name,
-                            ["Variant_Localised"] = variantLocalised,
-                            ["Genus"] = DataUtil.BiologyGenuses(entry?.CodexSubType)
-                            };
-                    })
-                    .ToList();
+                            return new JObject
+                                {
+                                ["Variant"] = entry?.Name,
+                                ["Variant_Localised"] = variantLocalised
+                                };
+                        })
+                        .ToList();
+                    }
                 }
             }
+
 
         private void ProcessCanonnSystemPoi(string systemName)
             {
@@ -1324,7 +1329,7 @@ namespace EDDCanonnPanel
             return (missingRows, existingRows);
             }
 
-        private List<DataGridViewRow> CollectGeoData(SystemData system)
+        private List<DataGridViewRow> CollectGeoData(SystemData system) //wip
             {
             if (system?.Bodys?.Values == null)
                 return null;
