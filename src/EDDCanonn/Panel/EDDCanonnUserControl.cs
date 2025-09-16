@@ -242,8 +242,7 @@ namespace EDDCanonnPanel
                         string patrolType = record.TryGetValue("Patrol", out string patrolValue) ? patrolValue :
                             record.TryGetValue("Type", out string typeValue) ? typeValue : string.Empty;
 
-                        string system = record.TryGetValue("System", out string systemValue) ? systemValue : 
-                                    record.TryGetValue("Sytstem", out string systemValue2) ? systemValue2 : string.Empty;
+                        string system = record.TryGetValue("System", out string systemValue) ? systemValue : string.Empty;
 
                         if (system.HasChars() && patrolType.HasChars())
                             {
