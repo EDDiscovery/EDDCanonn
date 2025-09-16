@@ -158,6 +158,7 @@ namespace EDDCanonnPanel
 
                             if (type.Equals("tsv")) //Worker for tsv files.
                                 {
+                                // comment below out to make it easier to debug sequentially: CreateFromTSV(url, description, new CancellationToken());
                                 _tasks.Add(dataHandler.StartTaskAsync(
                                     (subToken) =>
                                     {
@@ -241,18 +242,28 @@ namespace EDDCanonnPanel
                         string patrolType = record.TryGetValue("Patrol", out string patrolValue) ? patrolValue :
                             record.TryGetValue("Type", out string typeValue) ? typeValue : string.Empty;
 
-                        string system = record.TryGetValue("System", out string systemValue) ? systemValue : string.Empty;
+                        string system = record.TryGetValue("System", out string systemValue) ? systemValue : 
+                                    record.TryGetValue("Sytstem", out string systemValue2) ? systemValue2 : string.Empty;
 
-                        double x = new JToken(record["X"]).Double(DataUtil.PositionFallback);
-                        double y = new JToken(record["Y"]).Double(DataUtil.PositionFallback);
-                        double z = new JToken(record["Z"]).Double(DataUtil.PositionFallback);
+                        if (system.HasChars() && patrolType.HasChars())
+                            {
+                            double x = record.TryGetValue("X", out string xstr) ? Convert.ToDouble(xstr) : DataUtil.PositionFallback;
+                            double y = record.TryGetValue("Y", out string ystr) ? Convert.ToDouble(ystr) : DataUtil.PositionFallback;
+                            double z = record.TryGetValue("Z", out string zstr) ? Convert.ToDouble(zstr) : DataUtil.PositionFallback;
 
-                        string instructions = record.TryGetValue("Instructions", out string instructionsValue) ? instructionsValue : "none";
-                        string urlp = record.TryGetValue("Url", out string urlValue) ? urlValue : string.Empty;
+                            string instructions = record.TryGetValue("Instructions", out string instructionsValue) ? instructionsValue : "none";
+                            string urlp = record.TryGetValue("Url", out string urlValue) ? urlValue : string.Empty;
 
-                        //Construct a new Patrol object and insert it into the KdTree.
-                        Patrol patrol = new Patrol(patrolType, category, system, x, y, z, instructions, urlp);
-                        kdT.Add(new double[] { patrol.x, patrol.y, patrol.z }, patrol);
+                            //Construct a new Patrol object and insert it into the KdTree.
+                            Patrol patrol = new Patrol(patrolType, category, system, x, y, z, instructions, urlp);
+                            kdT.Add(new double[] { patrol.x, patrol.y, patrol.z }, patrol);
+                            }
+                        else
+                            {
+                            string error = $"EDDCanonn: Error in record downloaded from {url} missing data";
+                            CanonnLogging.Instance.Log(error);
+                            }
+
                         }
                     catch (Exception ex)
                         {
