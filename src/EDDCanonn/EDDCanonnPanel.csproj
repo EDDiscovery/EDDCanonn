@@ -165,7 +165,6 @@
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>
-copy EDDCanonnPanel*.dll ..\..\..\appdata
 copy EDDCanonnPanel*.* c:\users\%25USERNAME%25\appdata\local\eddiscovery\dll
 	</PostBuildEvent>
   </PropertyGroup>

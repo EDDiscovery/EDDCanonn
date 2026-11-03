@@ -1540,22 +1540,19 @@ namespace EDDCanonnPanel
         private int NewsIndex = 0;
 
         private void InitializeNews()
-            {
-            dataHandler.StartTaskAsync(
-                (token) =>
+        {
+            dataHandler.StartTaskAsync( (token) =>
                 {
                     try
-                        {
+                    {
                         News = dataHandler.FetchData(LinkUtil.CanonnNews).response.JSONParseArray();
-                        if (News == null || News.Count == 0)
-                            return;
                         NewsIndexChanged(0);
-                        }
+                    }
                     catch (Exception ex)
-                        {
+                    {
                         string error = $"EDDCanonn: Error in InitializeNews: {ex}";
                         CanonnLogging.Instance.Log(error);
-                        }
+                    }
                 },
                 ex =>
                 {
@@ -1564,23 +1561,34 @@ namespace EDDCanonnPanel
                 },
                 "InitializeNews"
             );
-            }
+        }
 
         private void NewsIndexChanged(int n)
-            {
-            if (News == null || News.Count == 0)
-                return;
-            if (n == 1 && NewsIndex + n >= News.Count)
-                NewsIndex = 0;
-            else if (n == -1 && NewsIndex + n < 0)
-                NewsIndex = News.Count - 1;
-            else
-                NewsIndex += n;
-
+        {
             SafeBeginInvoke(() =>
             {
+                if (News == null)
+                {
+                    textBoxNews.Text = "No News Service";
+                    buttonPrevNews.Enabled = buttonNextNews.Enabled = false;
+                    return;
+                }
+                else if (News.Count < 1)
+                {
+                    textBoxNews.Text = "No News";
+                    buttonPrevNews.Enabled = buttonNextNews.Enabled = false;
+                    return;
+                }
+
+                if (n == 1 && NewsIndex + n >= News.Count)
+                    NewsIndex = 0;
+                else if (n == -1 && NewsIndex + n < 0)
+                    NewsIndex = News.Count - 1;
+                else
+                    NewsIndex += n;
+
                 try
-                    {
+                {
                     textBoxNews.Clear();
 
                     string decoded = News[NewsIndex]?["excerpt"]?["rendered"].Str("none");
@@ -1604,7 +1612,7 @@ namespace EDDCanonnPanel
                     CanonnLogging.Instance.Log(error);
                     }
             });
-            }
+        }
 
         private void buttonNextNews_Click(object sender, EventArgs e)
             {
@@ -1884,7 +1892,8 @@ namespace EDDCanonnPanel
 
         private void textBoxNews_Click(object sender, EventArgs e)
             {
-            LinkUtil.OpenUrl(News[NewsIndex]?["link"].StrNull() ?? LinkUtil.CanonnWebPage);
+            if ( News != null && News.Count>0)
+               LinkUtil.OpenUrl(News[NewsIndex]?["link"].StrNull() ?? LinkUtil.CanonnWebPage);
             }
 
         private void textBoxSystem_Click(object sender, EventArgs e)
