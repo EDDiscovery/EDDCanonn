@@ -34,6 +34,7 @@ using System.Net;
 using EDDCanonnPanel.Utility;
 using System.ComponentModel;
 using System.Reflection;
+using System.Globalization;
 
 
 namespace EDDCanonnPanel
@@ -238,17 +239,17 @@ namespace EDDCanonnPanel
                     token.ThrowIfCancellationRequested(); //We abort here if a cancellation was requested.
 
                     try
-                        {
+                    {
                         string patrolType = record.TryGetValue("Patrol", out string patrolValue) ? patrolValue :
                             record.TryGetValue("Type", out string typeValue) ? typeValue : string.Empty;
 
                         string system = record.TryGetValue("System", out string systemValue) ? systemValue : string.Empty;
 
                         if (system.HasChars() && patrolType.HasChars())
-                            {
-                            double x = record.TryGetValue("X", out string xstr) ? Convert.ToDouble(xstr) : DataUtil.PositionFallback;
-                            double y = record.TryGetValue("Y", out string ystr) ? Convert.ToDouble(ystr) : DataUtil.PositionFallback;
-                            double z = record.TryGetValue("Z", out string zstr) ? Convert.ToDouble(zstr) : DataUtil.PositionFallback;
+                        {
+                            double x = record.TryGetValue("X", out string xstr) ? Convert.ToDouble(xstr, CultureInfo.InvariantCulture) : DataUtil.PositionFallback;
+                            double y = record.TryGetValue("Y", out string ystr) ? Convert.ToDouble(ystr, CultureInfo.InvariantCulture) : DataUtil.PositionFallback;
+                            double z = record.TryGetValue("Z", out string zstr) ? Convert.ToDouble(zstr, CultureInfo.InvariantCulture) : DataUtil.PositionFallback;
 
                             string instructions = record.TryGetValue("Instructions", out string instructionsValue) ? instructionsValue : "none";
                             string urlp = record.TryGetValue("Url", out string urlValue) ? urlValue : string.Empty;
@@ -256,20 +257,20 @@ namespace EDDCanonnPanel
                             //Construct a new Patrol object and insert it into the KdTree.
                             Patrol patrol = new Patrol(patrolType, category, system, x, y, z, instructions, urlp);
                             kdT.Add(new double[] { patrol.x, patrol.y, patrol.z }, patrol);
-                            }
+                        }
                         else
-                            {
+                        {
                             string error = $"EDDCanonn: Error in record downloaded from {url} missing data";
                             CanonnLogging.Instance.Log(error);
-                            }
-
                         }
+
+                    }
                     catch (Exception ex)
-                        {
+                    {
                         string error = $"EDDCanonn: Error processing record: {ex}";
                         CanonnLogging.Instance.Log(error);
-                        }
                     }
+                }
 
                 //Store the completed KdTree in the patrols dictionary.
                 patrols.Add(category, kdT);
