@@ -58,7 +58,7 @@ namespace EDDCanonnPanel
         public void EDDDataResult(object requesttag, object usertag, string data)
         {
             EDDCanonnPanel.EDDCanonnUserControl uc = usertag as EDDCanonnPanel.EDDCanonnUserControl;
-            uc.DataResult(requesttag, data);
+            uc.DataResultCallBackFromDLLRequest(requesttag, data);
         }
 
         public static event Action<EDDDLLInterfaces.EDDDLLIF.JournalEntry> OnNewJournalEntry;

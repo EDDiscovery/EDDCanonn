@@ -92,6 +92,30 @@
     <Compile Include="ExtendedControls\TabStyleCustom.cs" />
     <Compile Include="ExtendedControls\Theme.cs" />
     <Compile Include="ExtendedControls\Win32Constants.cs" />
+    <Compile Include="Panel\EDDCanonnUserControlEvents.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Panel\EDDCanonnUserControlNews.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Panel\EDDCanonnUserControlDataTabControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Panel\EDDCanonnUserControlCodex.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Panel\EDDCanonnUserControlPatrol.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Panel\EDDCanonnUserControlSystemData.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Panel\EDDCanonnUserControlSpanshData.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Panel\EDDCanonnUserControlUI.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Include="Utility\Payload.cs" />
     <Compile Include="Base\SystemData.cs" />
     <Compile Include="Diagnostics\WhiteListTest.cs" />
