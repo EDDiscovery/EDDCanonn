@@ -778,24 +778,5 @@ namespace EDDCanonnPanel
             e.ThrowException = false;
             }
         #endregion
-        private void dataGridPatrol_MouseDown(object sender, MouseEventArgs e)
-        {
-
-        }
-
-        private void extComboBoxPatrolOrRange_IndexChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void buttonNextNews_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void buttonPrevNews_Click(object sender, EventArgs e)
-        {
-
-        }
     }
     }
