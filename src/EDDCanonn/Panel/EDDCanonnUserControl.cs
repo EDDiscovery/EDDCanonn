@@ -357,120 +357,38 @@ namespace EDDCanonnPanel
 
         #endregion
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        #region ProcessUpperGridViews
-
-
-
-
-        private List<DataGridViewRow> CollectBioInfoData(SystemData system)
-            {      
-            List<DataGridViewRow> rows = new List<DataGridViewRow>
-                {
-                    CanonnUtil.CreateDataGridViewRow(dataGridViewBioInfo, new object[]
-                    {
-                        "Double-click for return.",
-                        null,
-                        dataGridViewBioInfo?.AccessibleDescription,
-                        "true"
-                    })
-                };
-
-            if (system?.Bodys?.Values == null || dataGridViewBioInfo?.AccessibleDescription == null)
-                return rows;
-
-            Base.Body body = systemData?.GetBodyByName($"{system.Name} {dataGridViewBioInfo.AccessibleDescription}");
-            if (body?.ScanData?.SystemPois == null)
-                return rows;
-
-            List<IGrouping<string, SystemPoi>> groupedPois = body.ScanData.SystemPois
-                .Where(poi => poi.HudCategory == "Biology")
-                .GroupBy(poi => poi.Name)
-                .ToList();
-
-            foreach (IGrouping<string, SystemPoi> group in groupedPois)
-                {
-                string name = group.Key;
-                int total = group.Count();
-                int scanned = group.Count(poi => poi.Scanned);
-
-                rows.Add(CanonnUtil.CreateDataGridViewRow(dataGridViewBioInfo, new object[]
-                {
-                    name,
-                    scanned + " self",
-                    total + " total",
-                    "false"
-                }));
-
-                foreach (SystemPoi poi in group)
-                    {
-                    rows.Add(CanonnUtil.CreateDataGridViewRow(dataGridViewBioInfo, new object[]
-                    {
-                            poi.Lat,
-                            poi.Lon,
-                            null,
-                            "false"
-                    }));
-                    }
-                }
-
-            return rows;
-            }
-
-
-        #endregion
-
-        #region CanonnNews
-
-        private JArray News;
-        private int NewsIndex = 0;
-
-            #endregion
-
         #region UpdateUI
 
+
+        // Update due to Data callback from spansh etc request
+        // Update due to new system from events
+
         private void UpdateUI(bool jumped = false) //Updates all UI events. Except for the patrols.
-            {
+        {
             dataHandler.StartTaskAsync(
                 (token) =>
                 {
                     try
-                        {
+                    {
                         while (systemData == null) //We have to wait until the system data has been loaded.
-                            {
+                        {
                             token.ThrowIfCancellationRequested(); //We abort here if a cancellation was requested.
                             Task.Delay(250, token).Wait();
-                            }
+                        }
 
                         SystemData system = DeepCopySystemData();
 
                         if (system == null) //Ensure system data is valid before updating UI.
                             return;
-                        UpdateMainFields(system, jumped);
-                        UpdateUpperGridViews(system, jumped);
-                        UpdateOptionalUpperGridViews(system);
-                        }
+                        UpdateSystemBarFields(system, jumped);
+                        UpdateTabControl(system, jumped);
+                        UpdateTabControlAlternateGrids(system);
+                    }
                     catch (Exception ex)
-                        {
+                    {
                         string error = $"EDDCanonn: Error during UpdateUI: {ex}";
                         CanonnLogging.Instance.Log(error);
-                        }
+                    }
                 },
                 ex =>
                 {
@@ -479,147 +397,130 @@ namespace EDDCanonnPanel
                 },
                 "UpdateUI"
             );
-            }
+        }
 
-        private void UpdateMainFields(SystemData system, bool jumped) //This should only be called by 'UpdateMainFields'.
-            {
-            if (system == null) //Safety first.
-                return;
+        #endregion
 
-            SafeBeginInvoke(() =>
+        #region Invokers
+
+        private void SafeBeginInvoke(Action action)
+        {
+            if (this.IsHandleCreated && !this.IsDisposed)
             {
                 try
-                    {
-                    textBoxSystem.Clear();
-                    textBoxBodyCount.Clear();
-
-                    textBoxSystem.AppendText(system.Name ?? "none");
-                    textBoxBodyCount.AppendText(system.CountBodysFilteredByNodeType(new string[] { "Planet", "Star" }) + " / " + (system.BodyCount == -1 ? "?" : system.BodyCount.ToString()));
-                    }
-                catch (Exception ex)
-                    {
-                    string error = $"EDDCanonn: Error in UpdateMainFields: {ex}";
-                    CanonnLogging.Instance.Log(error);
-                    }
-            });
-            }
-
-        private enum NType
-            {
-            [Description("This system is not yet known to spansh.")]
-            systemNotKnown,
-            [Description("Spansh data may be incorrect. FSS all bodies.")]
-            spanshIncorrect,
-            [Description("A GMO is available for this system.")]
-            gmoAvailable,
-            [Description("D-Scan is required.")]
-            dscanRequired
-            }
-
-        private string NTypeDescription(NType type)
-            {
-            return
-                typeof(NType)
-                        .GetField(type.ToString())
-                        ?.GetCustomAttribute<DescriptionAttribute>()
-                        ?.Description;
-            }
-
-        private Dictionary<NType, DataGridViewRow> _dataGridNotifications;
-        private Dictionary<NType, DataGridViewRow> DataGridNotifications
-            {
-            get
                 {
-                lock (_lockSystemData)
+                    BeginInvoke(new Action(() =>
                     {
-                    if (_dataGridNotifications == null)
-                        _dataGridNotifications = new Dictionary<NType, DataGridViewRow>();
-                    return _dataGridNotifications;
-                    }
+                        try
+                        {
+                            action();
+                        }
+                        catch (Exception ex)
+                        {
+                            string error = $"EDDCanonn: UI update failed in invoked action (SafeBeginInvoke): {ex}";
+                            CanonnLogging.Instance.Log(error);
+                        }
+                    }));
+                }
+                catch (Exception ex)
+                {
+                    string error = $"EDDCanonn: UI update failed in SafeBeginInvoke: {ex}";
+                    CanonnLogging.Instance.Log(error);
                 }
             }
+        }
 
-
-        private bool OptionalUpperGridLock = false;
-        private void UpdateOptionalUpperGridViews(SystemData system)
+        private void SafeInvoke(Action action)
+        {
+            if (this.IsHandleCreated && !this.IsDisposed)
             {
-            if (system == null)
-                return;
-            if (OptionalUpperGridLock)
-                return;
-            OptionalUpperGridLock = true;
-            SafeBeginInvoke(() =>
-            {
-                dataGridViewBioInfo.Rows.Clear();
-
-                List<DataGridViewRow> bioInfoRows = CollectBioInfoData(system);
-
-                if (bioInfoRows != null)
-                    dataGridViewBioInfo.Rows.AddRange(bioInfoRows.ToArray());
-            });
-
-            OptionalUpperGridLock = false;
+                try
+                {
+                    Invoke(new Action(() =>
+                    {
+                        try
+                        {
+                            action();
+                        }
+                        catch (Exception ex)
+                        {
+                            string error = $"EDDCanonn: UI update failed in invoked action (SafeInvoke): {ex}";
+                            CanonnLogging.Instance.Log(error);
+                        }
+                    }));
+                }
+                catch (Exception ex)
+                {
+                    string error = $"EDDCanonn: UI update failed in SafeInvoke: {ex}";
+                    CanonnLogging.Instance.Log(error);
+                }
             }
+        }
 
-        private void dataGridViewBio_CellMouseDoubleClick(object sender, DataGridViewCellMouseEventArgs e)
-            {
-            if (e.RowIndex < 0 || e.ColumnIndex < 0)
-                return;
+        #endregion
 
-            DataGridViewRow row = dataGridViewBio.Rows[e.RowIndex];
-            DataGridViewCell clickableCell = row.Cells["clickable"];
-            if (clickableCell?.Value?.ToString()?.Equals("true", StringComparison.OrdinalIgnoreCase) != true)
-                return;
 
-            DataGridViewCell nameCell = row.Cells["ColumnBio0"];
-            string name = nameCell?.Value?.ToString() ?? "Bio Info";
 
-            dataGridViewBioInfo.AccessibleDescription = name;
-            CanonnUtil.SwapDGVs(dataGridViewBioInfo, dataGridViewBio, extPanelDataGridViewScrollBio, this);
 
-            UpdateOptionalUpperGridViews(DeepCopySystemData());
-            }
 
-        private void dataGridViewBioInfo_CellMouseDoubleClick(object sender, DataGridViewCellMouseEventArgs e)
-            {
-            if (e.RowIndex < 0 || e.ColumnIndex < 0)
-                return;
 
-            DataGridViewRow row = dataGridViewBioInfo.Rows[e.RowIndex];
-            DataGridViewCell clickableCell = row.Cells["clickableBioInfo"];
-            if (clickableCell?.Value?.ToString()?.Equals("true", StringComparison.OrdinalIgnoreCase) != true)
-                return;
 
-            CanonnUtil.SwapDGVs(dataGridViewBio, dataGridViewBioInfo, extPanelDataGridViewScrollBio, this);
-            }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        //private enum NType
+        //    {
+        //    [Description("This system is not yet known to spansh.")]
+        //    systemNotKnown,
+        //    [Description("Spansh data may be incorrect. FSS all bodies.")]
+        //    spanshIncorrect,
+        //    [Description("A GMO is available for this system.")]
+        //    gmoAvailable,
+        //    [Description("D-Scan is required.")]
+        //    dscanRequired
+        //    }
+
+        //private string NTypeDescription(NType type)
+        //    {
+        //    return
+        //        typeof(NType)
+        //                .GetField(type.ToString())
+        //                ?.GetCustomAttribute<DescriptionAttribute>()
+        //                ?.Description;
+        //    }
+
+        //private Dictionary<NType, DataGridViewRow> _dataGridNotifications;
+        //private Dictionary<NType, DataGridViewRow> DataGridNotifications
+        //    {
+        //    get
+        //        {
+        //        lock (_lockSystemData)
+        //            {
+        //            if (_dataGridNotifications == null)
+        //                _dataGridNotifications = new Dictionary<NType, DataGridViewRow>();
+        //            return _dataGridNotifications;
+        //            }
+        //        }
+        //    }
+
 
         #region Links
 
-        private void linkLabelEDDCanonn_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-            {
-            LinkUtil.OpenUrl(LinkUtil.EDDCanonnGitHub);
-            }
 
-        private void pictureBoxCanonn_Click(object sender, EventArgs e)
-            {
-            LinkUtil.OpenUrl(LinkUtil.CanonnWebPage);
-            }
 
-        private void pictureBoxEDD_Click(object sender, EventArgs e)
-            {
-            LinkUtil.OpenUrl(LinkUtil.EDDGitHub);
-            }
 
-        private void textBoxNews_Click(object sender, EventArgs e)
-            {
-            if ( News != null && News.Count>0)
-               LinkUtil.OpenUrl(News[NewsIndex]?["link"].StrNull() ?? LinkUtil.CanonnWebPage);
-            }
-
-        private void textBoxSystem_Click(object sender, EventArgs e)
-            {
-            LinkUtil.OpenUrl(LinkUtil.SignalsCanonnTech + systemData?.Name?.Replace(" ", "%20"));
-            }
         #endregion
 
         #region Notify
@@ -644,77 +545,13 @@ namespace EDDCanonnPanel
             }
         #endregion
 
-        private void SafeBeginInvoke(Action action)
-            {
-            if (this.IsHandleCreated && !this.IsDisposed)
-                {
-                try
-                    {
-                    BeginInvoke(new Action(() =>
-                    {
-                        try
-                            {
-                            action();
-                            }
-                        catch (Exception ex)
-                            {
-                            string error = $"EDDCanonn: UI update failed in invoked action (SafeBeginInvoke): {ex}";
-                            CanonnLogging.Instance.Log(error);
-                            }
-                    }));
-                    }
-                catch (Exception ex)
-                    {
-                    string error = $"EDDCanonn: UI update failed in SafeBeginInvoke: {ex}";
-                    CanonnLogging.Instance.Log(error);
-                    }
-                }
-            }
 
-        private void SafeInvoke(Action action)
-            {
-            if (this.IsHandleCreated && !this.IsDisposed)
-                {
-                try
-                    {
-                    Invoke(new Action(() =>
-                    {
-                        try
-                            {
-                            action();
-                            }
-                        catch (Exception ex)
-                            {
-                            string error = $"EDDCanonn: UI update failed in invoked action (SafeInvoke): {ex}";
-                            CanonnLogging.Instance.Log(error);
-                            }
-                    }));
-                    }
-                catch (Exception ex)
-                    {
-                    string error = $"EDDCanonn: UI update failed in SafeInvoke: {ex}";
-                    CanonnLogging.Instance.Log(error);
-                    }
-                }
-            }
-        #endregion
-
-        #region IEDDPanelExtension
-
-
-        Color FromJson(JToken color)
-            {
-            return System.Drawing.ColorTranslator.FromHtml(color.Str("Yellow"));
-            }
-
-
-        #endregion
 
         #region Debug
 
         private bool isAbort = false;
         private void Abort(string msg = "default")
-            {
+        {
             isAbort = true;
             _journalLock = false;
             _eventLock = false;
@@ -732,51 +569,16 @@ namespace EDDCanonnPanel
 
             patrols = null;
             News = null;
-            }
+        }
 
-        private void EDDCanonnUserControl_Resize(object sender, EventArgs e)
-            {
-            this.Refresh();
-            }
+        #endregion
 
         private void LSY_Click(object sender, EventArgs e)
-            {
+        {
             SystemData system = DeepCopySystemData();
 
             CanonnLogging.Instance.Log(Environment.NewLine + "=== System ToString ===" + Environment.NewLine + system.ToString() ?? "none" + Environment.NewLine);
-            }
+        }
 
-        private void dataGridViewBio_DataError(object sender, DataGridViewDataErrorEventArgs e)
-            {
-            HandleDataGridViewError("dataGridViewBio", e);
-            }
-
-        private void dataGridViewRing_DataError(object sender, DataGridViewDataErrorEventArgs e)
-            {
-            HandleDataGridViewError("dataGridViewRing", e);
-            }
-
-        private void dataGridViewData_DataError(object sender, DataGridViewDataErrorEventArgs e)
-            {
-            HandleDataGridViewError("dataGridViewData", e);
-            }
-
-        private void dataGridViewGMO_DataError(object sender, DataGridViewDataErrorEventArgs e)
-            {
-            HandleDataGridViewError("dataGridViewGMO", e);
-            }
-
-        private void dataGridPatrol_DataError(object sender, DataGridViewDataErrorEventArgs e)
-            {
-            HandleDataGridViewError("dataGridPatrol", e);
-            }
-
-        private void HandleDataGridViewError(string gridName, DataGridViewDataErrorEventArgs e)
-            {
-            string error = $"EDDCanonn: DataGridView error in {gridName} (Row: {e.RowIndex}, Column: {e.ColumnIndex}): {e.Exception}";
-            CanonnLogging.Instance.Log(error);
-            e.ThrowException = false;
-            }
-        #endregion
     }
-    }
+}

@@ -113,7 +113,7 @@
     <Compile Include="Panel\EDDCanonnUserControlSpanshData.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Panel\EDDCanonnUserControlUI.cs">
+    <Compile Include="Panel\EDDCanonnUserControlSystemBar.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Utility\Payload.cs" />

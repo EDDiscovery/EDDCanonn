@@ -19,6 +19,9 @@ namespace EDDCanonnPanel
 {
     partial class EDDCanonnUserControl 
     {
+        private JArray News;
+        private int NewsIndex = 0;
+
         private void InitializeNews()
         {
             dataHandler.StartTaskAsync((token) =>
@@ -104,6 +107,11 @@ namespace EDDCanonnPanel
             NewsIndexChanged(-1);
         }
 
+        private void textBoxNews_Click(object sender, EventArgs e)
+        {
+            if (News != null && News.Count > 0)
+                LinkUtil.OpenUrl(News[NewsIndex]?["link"].StrNull() ?? LinkUtil.CanonnWebPage);
+        }
 
     }
 }

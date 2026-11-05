@@ -66,7 +66,7 @@ namespace EDDCanonnPanel
             this.buttonNextNews = new ExtendedControls.ExtButton();
             this.buttonPrevNews = new ExtendedControls.ExtButton();
             this.labelNewsIndex = new System.Windows.Forms.Label();
-            this.dataGridViewBioInfo = new System.Windows.Forms.DataGridView();
+            this.dataGridViewBioAlt = new System.Windows.Forms.DataGridView();
             this.ColumnBioInfo0 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ColumnBioInfo1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ColumnBioInfo2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -131,7 +131,7 @@ namespace EDDCanonnPanel
             this.contextMenuStrip1.SuspendLayout();
             this.tableLayoutPatrol.SuspendLayout();
             this.tableLayoutNews.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridViewBioInfo)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridViewBioAlt)).BeginInit();
             this.extPanelDataGridViewScrollPatrol.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridPatrol)).BeginInit();
             this.extTabControlData.SuspendLayout();
@@ -413,35 +413,35 @@ namespace EDDCanonnPanel
             this.labelNewsIndex.TabIndex = 16;
             this.labelNewsIndex.Text = "Page: #";
             // 
-            // dataGridViewBioInfo
+            // dataGridViewBioAlt
             // 
-            this.dataGridViewBioInfo.AllowUserToAddRows = false;
-            this.dataGridViewBioInfo.AllowUserToDeleteRows = false;
-            this.dataGridViewBioInfo.AllowUserToResizeColumns = false;
-            this.dataGridViewBioInfo.AllowUserToResizeRows = false;
-            this.dataGridViewBioInfo.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
-            this.dataGridViewBioInfo.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.AllCells;
-            this.dataGridViewBioInfo.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridViewBioInfo.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.dataGridViewBioAlt.AllowUserToAddRows = false;
+            this.dataGridViewBioAlt.AllowUserToDeleteRows = false;
+            this.dataGridViewBioAlt.AllowUserToResizeColumns = false;
+            this.dataGridViewBioAlt.AllowUserToResizeRows = false;
+            this.dataGridViewBioAlt.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
+            this.dataGridViewBioAlt.AutoSizeRowsMode = System.Windows.Forms.DataGridViewAutoSizeRowsMode.AllCells;
+            this.dataGridViewBioAlt.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dataGridViewBioAlt.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.ColumnBioInfo0,
             this.ColumnBioInfo1,
             this.ColumnBioInfo2,
             this.clickableBioInfo});
-            this.dataGridViewBioInfo.Dock = System.Windows.Forms.DockStyle.Top;
-            this.dataGridViewBioInfo.Location = new System.Drawing.Point(0, 376);
-            this.dataGridViewBioInfo.Name = "dataGridViewBioInfo";
-            this.dataGridViewBioInfo.ReadOnly = true;
+            this.dataGridViewBioAlt.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.dataGridViewBioAlt.Location = new System.Drawing.Point(0, 376);
+            this.dataGridViewBioAlt.Name = "dataGridViewBioAlt";
+            this.dataGridViewBioAlt.ReadOnly = true;
             dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.dataGridViewBioInfo.RowsDefaultCellStyle = dataGridViewCellStyle1;
-            this.dataGridViewBioInfo.ScrollBars = System.Windows.Forms.ScrollBars.None;
-            this.dataGridViewBioInfo.ShowCellErrors = false;
-            this.dataGridViewBioInfo.ShowCellToolTips = false;
-            this.dataGridViewBioInfo.ShowEditingIcon = false;
-            this.dataGridViewBioInfo.ShowRowErrors = false;
-            this.dataGridViewBioInfo.Size = new System.Drawing.Size(860, 107);
-            this.dataGridViewBioInfo.TabIndex = 17;
-            this.dataGridViewBioInfo.Visible = false;
-            this.dataGridViewBioInfo.CellMouseDoubleClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dataGridViewBioInfo_CellMouseDoubleClick);
+            this.dataGridViewBioAlt.RowsDefaultCellStyle = dataGridViewCellStyle1;
+            this.dataGridViewBioAlt.ScrollBars = System.Windows.Forms.ScrollBars.None;
+            this.dataGridViewBioAlt.ShowCellErrors = false;
+            this.dataGridViewBioAlt.ShowCellToolTips = false;
+            this.dataGridViewBioAlt.ShowEditingIcon = false;
+            this.dataGridViewBioAlt.ShowRowErrors = false;
+            this.dataGridViewBioAlt.Size = new System.Drawing.Size(860, 394);
+            this.dataGridViewBioAlt.TabIndex = 17;
+            this.dataGridViewBioAlt.Visible = false;
+            this.dataGridViewBioAlt.CellMouseDoubleClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dataGridViewBioAlt_CellMouseDoubleClick);
             // 
             // ColumnBioInfo0
             // 
@@ -559,7 +559,6 @@ namespace EDDCanonnPanel
             this.dataGridPatrol.ShowRowErrors = false;
             this.dataGridPatrol.Size = new System.Drawing.Size(834, 392);
             this.dataGridPatrol.TabIndex = 12;
-            this.dataGridPatrol.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.dataGridPatrol_DataError);
             this.dataGridPatrol.MouseDown += new System.Windows.Forms.MouseEventHandler(this.dataGridPatrol_MouseDown);
             // 
             // Patrol
@@ -736,7 +735,6 @@ namespace EDDCanonnPanel
             this.dataGridViewData.ShowRowErrors = false;
             this.dataGridViewData.Size = new System.Drawing.Size(822, 222);
             this.dataGridViewData.TabIndex = 12;
-            this.dataGridViewData.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.dataGridViewData_DataError);
             // 
             // ColumnData0
             // 
@@ -842,7 +840,6 @@ namespace EDDCanonnPanel
             this.dataGridViewRing.ShowRowErrors = false;
             this.dataGridViewRing.Size = new System.Drawing.Size(822, 222);
             this.dataGridViewRing.TabIndex = 14;
-            this.dataGridViewRing.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.dataGridViewRing_DataError);
             // 
             // ColumnRing0
             // 
@@ -972,7 +969,6 @@ namespace EDDCanonnPanel
             this.dataGridViewBio.Size = new System.Drawing.Size(822, 222);
             this.dataGridViewBio.TabIndex = 14;
             this.dataGridViewBio.CellMouseDoubleClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dataGridViewBio_CellMouseDoubleClick);
-            this.dataGridViewBio.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.dataGridViewBio_DataError);
             // 
             // ColumnBio0
             // 
@@ -1238,7 +1234,6 @@ namespace EDDCanonnPanel
             this.dataGridViewGMO.ShowRowErrors = false;
             this.dataGridViewGMO.Size = new System.Drawing.Size(822, 222);
             this.dataGridViewGMO.TabIndex = 14;
-            this.dataGridViewGMO.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.dataGridViewGMO_DataError);
             // 
             // ColumnGMO0
             // 
@@ -1376,7 +1371,7 @@ namespace EDDCanonnPanel
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Inherit;
             this.AutoScroll = true;
-            this.Controls.Add(this.dataGridViewBioInfo);
+            this.Controls.Add(this.dataGridViewBioAlt);
             this.Controls.Add(this.extPanelDataGridViewScrollPatrol);
             this.Controls.Add(this.tableLayoutPatrol);
             this.Controls.Add(this.tableLayoutNews);
@@ -1385,14 +1380,13 @@ namespace EDDCanonnPanel
             this.Enabled = false;
             this.Name = "EDDCanonnUserControl";
             this.Size = new System.Drawing.Size(860, 770);
-            this.Resize += new System.EventHandler(this.EDDCanonnUserControl_Resize);
             this.tableLayoutSystem.ResumeLayout(false);
             this.tableLayoutSystem.PerformLayout();
             this.contextMenuStrip1.ResumeLayout(false);
             this.tableLayoutPatrol.ResumeLayout(false);
             this.tableLayoutNews.ResumeLayout(false);
             this.tableLayoutNews.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridViewBioInfo)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dataGridViewBioAlt)).EndInit();
             this.extPanelDataGridViewScrollPatrol.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridPatrol)).EndInit();
             this.extTabControlData.ResumeLayout(false);
@@ -1461,33 +1455,22 @@ namespace EDDCanonnPanel
         private ExtPanelDataGridViewScroll extPanelDataGridViewScrollGMO;
         private ExtScrollBar extScrollBarGMO;
         private DataGridView dataGridViewGMO;
-        private DataGridViewTextBoxColumn ColumnGMO0;
         private TabPage tabSurvey;
         private Label labelSurvey;
         private TabPage tabBio;
         private ExtPanelDataGridViewScroll extPanelDataGridViewScrollBio;
         private ExtScrollBar extScrollBarBio;
         private DataGridView dataGridViewBio;
-        private DataGridViewTextBoxColumn ColumnBio0;
-        private DataGridViewTextBoxColumn ColumnBio1;
-        private DataGridViewImageColumn ColumnBio2;
-        private DataGridViewTextBoxColumn clickable;
         private TabPage tabRing;
         private ExtPanelDataGridViewScroll extPanelDataGridViewScrollRing;
         private ExtScrollBar extScrollBarRing;
         private DataGridView dataGridViewRing;
-        private DataGridViewTextBoxColumn ColumnRing0;
-        private DataGridViewTextBoxColumn ColumnRing1;
-        private DataGridViewTextBoxColumn ColumnRing2;
-        private DataGridViewImageColumn ColumnRing3;
         private TabPage tabData;
         private ExtPanelDataGridViewScroll extPanelDataGridViewScrollData;
         private ExtScrollBar extScrollBarData;
         private DataGridView dataGridViewData;
-        private DataGridViewTextBoxColumn ColumnData0;
-        private DataGridViewImageColumn ColumnData1;
         private ExtTabControl extTabControlData;
-        private DataGridView dataGridViewBioInfo;
+        private DataGridView dataGridViewBioAlt;
         private TabPage tabGeo;
         private ExtPanelDataGridViewScroll extPanelDataGridViewScrollGeo;
         private ExtScrollBar extScrollBarGeo;
@@ -1496,9 +1479,20 @@ namespace EDDCanonnPanel
         private DataGridViewTextBoxColumn ColumnBioInfo1;
         private DataGridViewTextBoxColumn ColumnBioInfo2;
         private DataGridViewTextBoxColumn clickableBioInfo;
+        private DataGridViewTextBoxColumn ColumnData0;
+        private DataGridViewImageColumn ColumnData1;
+        private DataGridViewTextBoxColumn ColumnRing0;
+        private DataGridViewTextBoxColumn ColumnRing1;
+        private DataGridViewTextBoxColumn ColumnRing2;
+        private DataGridViewImageColumn ColumnRing3;
+        private DataGridViewTextBoxColumn ColumnBio0;
+        private DataGridViewTextBoxColumn ColumnBio1;
+        private DataGridViewImageColumn ColumnBio2;
+        private DataGridViewTextBoxColumn clickable;
         private DataGridViewTextBoxColumn dataGridViewTextBoxColumn3;
         private DataGridViewTextBoxColumn dataGridViewTextBoxColumn4;
         private DataGridViewImageColumn dataGridViewImageColumn2;
         private DataGridViewTextBoxColumn dataGridViewTextBoxColumn5;
-        }
+        private DataGridViewTextBoxColumn ColumnGMO0;
+    }
 }

@@ -19,7 +19,7 @@ namespace EDDCanonnPanel
 {
     partial class EDDCanonnUserControl 
     {
-        private void UpdateUpperGridViews(SystemData system, bool jumped)
+        private void UpdateTabControl(SystemData system, bool jumped)
         {
             if (system == null)
                 return;
@@ -318,8 +318,6 @@ namespace EDDCanonnPanel
             return (missingRows, existingRows);
         }
 
-
-
         private List<DataGridViewRow> CollectGMO(SystemData system)
         {
             JArray gmos = DLLCallBack.GetGMOs("systemname=" + system.Name)?.JSONParseArray() ?? null;
@@ -342,5 +340,141 @@ namespace EDDCanonnPanel
         }
 
 
+        // BIO has an alternate grid.. Bio and BioAlt
+
+        private bool OptionalUpperGridLock = false;
+        private void UpdateTabControlAlternateGrids(SystemData system)
+        {
+            if (system == null)
+                return;
+            if (OptionalUpperGridLock)
+                return;
+            OptionalUpperGridLock = true;
+            SafeBeginInvoke(() =>
+            {
+                dataGridViewBioAlt.Rows.Clear();
+
+                List<DataGridViewRow> bioInfoRows = CollectBioInfoData(system);
+
+                if (bioInfoRows != null)
+                    dataGridViewBioAlt.Rows.AddRange(bioInfoRows.ToArray());
+            });
+
+            OptionalUpperGridLock = false;
+        }
+
+        // CONFUSINGLY, there are two bio grids. 
+
+
+        private List<DataGridViewRow> CollectBioInfoData(SystemData system)
+        {
+            List<DataGridViewRow> rows = new List<DataGridViewRow>
+                {
+                    CanonnUtil.CreateDataGridViewRow(dataGridViewBioAlt, new object[]
+                    {
+                        "Double-click for return.",
+                        null,
+                        dataGridViewBioAlt?.AccessibleDescription,
+                        "true"
+                    })
+                };
+
+            if (system?.Bodys?.Values == null || dataGridViewBioAlt?.AccessibleDescription == null)
+                return rows;
+
+            Base.Body body = systemData?.GetBodyByName($"{system.Name} {dataGridViewBioAlt.AccessibleDescription}");
+            if (body?.ScanData?.SystemPois == null)
+                return rows;
+
+            List<IGrouping<string, SystemPoi>> groupedPois = body.ScanData.SystemPois
+                .Where(poi => poi.HudCategory == "Biology")
+                .GroupBy(poi => poi.Name)
+                .ToList();
+
+            foreach (IGrouping<string, SystemPoi> group in groupedPois)
+            {
+                string name = group.Key;
+                int total = group.Count();
+                int scanned = group.Count(poi => poi.Scanned);
+
+                rows.Add(CanonnUtil.CreateDataGridViewRow(dataGridViewBioAlt, new object[]
+                {
+                    name,
+                    scanned + " self",
+                    total + " total",
+                    "false"
+                }));
+
+                foreach (SystemPoi poi in group)
+                {
+                    rows.Add(CanonnUtil.CreateDataGridViewRow(dataGridViewBioAlt, new object[]
+                    {
+                            poi.Lat,
+                            poi.Lon,
+                            null,
+                            "false"
+                    }));
+                }
+            }
+
+            return rows;
+        }
+
+
+        #region UI For Grids
+
+        private void dataGridViewBio_CellMouseDoubleClick(object sender, DataGridViewCellMouseEventArgs e)
+        {
+            if (e.RowIndex < 0 || e.ColumnIndex < 0)
+                return;
+
+            DataGridViewRow row = dataGridViewBio.Rows[e.RowIndex];
+            DataGridViewCell clickableCell = row.Cells["clickable"];
+            if (clickableCell?.Value?.ToString()?.Equals("true", StringComparison.OrdinalIgnoreCase) != true)
+                return;
+
+            DataGridViewCell nameCell = row.Cells["ColumnBio0"];
+            string name = nameCell?.Value?.ToString() ?? "Bio Info";
+
+            dataGridViewBioAlt.AccessibleDescription = name;
+            CanonnUtil.SwapDGVs(dataGridViewBioAlt, dataGridViewBio, extPanelDataGridViewScrollBio, this);
+
+            UpdateTabControlAlternateGrids(DeepCopySystemData());
+        }
+
+        private void dataGridViewBioAlt_CellMouseDoubleClick(object sender, DataGridViewCellMouseEventArgs e)
+        {
+            if (e.RowIndex < 0 || e.ColumnIndex < 0)
+                return;
+
+            DataGridViewRow row = dataGridViewBioAlt.Rows[e.RowIndex];
+            DataGridViewCell clickableCell = row.Cells["clickableBioInfo"];
+            if (clickableCell?.Value?.ToString()?.Equals("true", StringComparison.OrdinalIgnoreCase) != true)
+                return;
+
+            CanonnUtil.SwapDGVs(dataGridViewBio, dataGridViewBioAlt, extPanelDataGridViewScrollBio, this);
+        }
+
+        #endregion
+
+
+        #region About
+
+        private void linkLabelEDDCanonn_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            LinkUtil.OpenUrl(LinkUtil.EDDCanonnGitHub);
+        }
+
+        private void pictureBoxCanonn_Click(object sender, EventArgs e)
+        {
+            LinkUtil.OpenUrl(LinkUtil.CanonnWebPage);
+        }
+
+        private void pictureBoxEDD_Click(object sender, EventArgs e)
+        {
+            LinkUtil.OpenUrl(LinkUtil.EDDGitHub);
+        }
+
+        #endregion
     }
 }
