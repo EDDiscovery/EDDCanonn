@@ -46,6 +46,7 @@ namespace EDDCanonnPanel
         private readonly ActionDataHandler dataHandler;
         private EDDPanelCallbacks PanelCallBack;
         private EDDCallBacks DLLCallBack;
+        private bool isAbort = false;
 
         public EDDCanonnUserControl()
         {
@@ -62,15 +63,15 @@ namespace EDDCanonnPanel
             PanelCallBack = callbacks;
             ThemeChanged(themeasjson);
 
-            NotifyMainFields("Start Up...");
+            UpdateMainFieldsWithMessage("Start Up...");
             try
             {
                 if (CanonnUtil.InstanceCount > 0)
                 {
                     CanonnUtil.InstanceCount++;
                     //Abort if a Canonn Panel already exists.
-                    Abort("Only one Canonn Panel instance can be active. " +
-                    "Use the main instance or close all other instances and restart EDD.");
+                    UpdateMainFieldsWithMessage("Multiple Canonn Panels");
+                    isAbort = true;
                     return;
                 }
                 else
@@ -116,7 +117,6 @@ namespace EDDCanonnPanel
             {
                 string error = $"EDDCanonn: Error during Startup: {ex}";
                 CanonnLogging.Instance.Log(error);
-                Abort(error);
             }
         }
 
@@ -125,16 +125,11 @@ namespace EDDCanonnPanel
 
         public void SetTransparency(bool ison, Color curcol)
         {
-            if (isAbort)
-                return;
-
             this.BackColor = curcol;
         }
 
         public void TransparencyModeChanged(bool on)
         {
-            if (isAbort)
-                return;
         }
 
         public void LoadLayout()
@@ -148,14 +143,10 @@ namespace EDDCanonnPanel
 
         public void InitialDisplay()
         {
-            if (isAbort)
-                return;
         }
 
         void IEDDPanelExtension.CursorChanged(JournalEntry je)
         {
-            if (isAbort)
-                return;
         }
 
         public void Closing()
@@ -176,8 +167,6 @@ namespace EDDCanonnPanel
 
         public void ControlTextVisibleChange(bool on)
         {
-            if (isAbort)
-                return;
         }
 
         #endregion
@@ -221,8 +210,11 @@ namespace EDDCanonnPanel
                     });
 
                     // The callback may take some time. That's why we give the user some feedback in an early stage.
-                    NotifyField(textBoxSystem, je.systemname);
-                    NotifyField(textBoxBodyCount, "Fetch...");
+                    SafeBeginInvoke(() =>
+                    {
+                        textBoxSystem.Text = je.systemname;
+                        textBoxBodyCount.Text = "Fetch...";
+                    });
 
                     return;
                 }
@@ -245,20 +237,14 @@ namespace EDDCanonnPanel
 
         public void NewFilteredJournal(JournalEntry je)
         {
-            if (isAbort)
-                return;
         }
 
         public void NewUIEvent(string jsonui)
         {
-            if (isAbort)
-                return;
         }
 
         public void NewTarget(Tuple<string, double, double, double> target)
         {
-            if (isAbort)
-                return;
         }
 
         #endregion
@@ -274,8 +260,6 @@ namespace EDDCanonnPanel
 
         public void ScreenShotCaptured(string file, Size s)
         {
-            if (isAbort)
-                return;
         }
 
         #endregion
@@ -293,9 +277,6 @@ namespace EDDCanonnPanel
         // callback from EDD with data.. Passed by CannonEDDClass back to us
         public void DataResultCallBackFromDLLRequest(object requestTag, string data)
         {
-            if (isAbort)
-                return;
-
             try
             {
                 if (requestTag == null || data == null)
@@ -460,80 +441,49 @@ namespace EDDCanonnPanel
         #endregion
 
 
+        #region Notify - list of items by dictionary added to the Data grid in tab control
 
+        private enum NType
+        {
+            [Description("This system is not yet known to spansh.")]
+            systemNotKnown,
+            [Description("Spansh data may be incorrect. FSS all bodies.")]
+            spanshIncorrect,
+            [Description("A GMO is available for this system.")]
+            gmoAvailable,
+            [Description("D-Scan is required.")]
+            dscanRequired
+        }
+        private Dictionary<NType, DataGridViewRow> notifications;
 
+        private string NTypeDescription(NType type)
+        {
+            return
+                typeof(NType)
+                        .GetField(type.ToString())
+                        ?.GetCustomAttribute<DescriptionAttribute>()
+                        ?.Description;
+        }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        //private enum NType
-        //    {
-        //    [Description("This system is not yet known to spansh.")]
-        //    systemNotKnown,
-        //    [Description("Spansh data may be incorrect. FSS all bodies.")]
-        //    spanshIncorrect,
-        //    [Description("A GMO is available for this system.")]
-        //    gmoAvailable,
-        //    [Description("D-Scan is required.")]
-        //    dscanRequired
-        //    }
-
-        //private string NTypeDescription(NType type)
-        //    {
-        //    return
-        //        typeof(NType)
-        //                .GetField(type.ToString())
-        //                ?.GetCustomAttribute<DescriptionAttribute>()
-        //                ?.Description;
-        //    }
-
-        //private Dictionary<NType, DataGridViewRow> _dataGridNotifications;
-        //private Dictionary<NType, DataGridViewRow> DataGridNotifications
-        //    {
-        //    get
-        //        {
-        //        lock (_lockSystemData)
-        //            {
-        //            if (_dataGridNotifications == null)
-        //                _dataGridNotifications = new Dictionary<NType, DataGridViewRow>();
-        //            return _dataGridNotifications;
-        //            }
-        //        }
-        //    }
-
-
-        #region Links
-
-
-
+        // this DGV gets added to Tab Data ..
+        private Dictionary<NType, DataGridViewRow> DataGridNotifications
+        {
+            get
+            {
+                lock (_lockSystemData)
+                {
+                    if (notifications == null)
+                        notifications = new Dictionary<NType, DataGridViewRow>();
+                    return notifications;
+                }
+            }
+        }
 
         #endregion
 
-        #region Notify
+        #region UI Helper 
 
-        private void NotifyField(Control control, String arg)
-            {
-            SafeBeginInvoke(() =>
-            {
-                control.Text = arg;
-            });
-            }
-
-        private void NotifyMainFields(String arg)
+        private void UpdateMainFieldsWithMessage(String arg)
             {
             SafeBeginInvoke(() =>
             {
@@ -545,33 +495,6 @@ namespace EDDCanonnPanel
             }
         #endregion
 
-
-
-        #region Debug
-
-        private bool isAbort = false;
-        private void Abort(string msg = "default")
-        {
-            isAbort = true;
-            _journalLock = false;
-            _eventLock = false;
-
-            NotifyMainFields("Aborted");
-            extTabControlData.SelectedIndex = 0;
-
-            dataGridViewData.Rows.Add(CanonnUtil.CreateDataGridViewRow(dataGridViewData, new object[]
-                        { msg, Properties.Resources.tourist }));
-
-            dataHandler.Closing();
-
-            this.Enabled = false;
-            _eventLock = false;
-
-            patrols = null;
-            News = null;
-        }
-
-        #endregion
 
         private void LSY_Click(object sender, EventArgs e)
         {

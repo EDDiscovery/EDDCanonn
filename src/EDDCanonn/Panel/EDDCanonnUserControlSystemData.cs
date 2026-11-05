@@ -22,8 +22,8 @@ namespace EDDCanonnPanel
                 {
                     _systemData = null;
                     extTabControlData.SelectedIndex = 0;
-                    CanonnUtil.DisposeDataGridViewRowList(_dataGridNotifications.Values.ToList());
-                    _dataGridNotifications.Clear();
+                    CanonnUtil.DisposeDataGridViewRowList(notifications.Values.ToList());
+                    notifications.Clear();
                 });
             }
         }
