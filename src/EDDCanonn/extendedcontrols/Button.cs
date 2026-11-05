@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright © 2016 - 2022 EDDiscovery development team
+ * Copyright 2016-2025 EDDiscovery development team
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
  * file except in compliance with the License. You may obtain a copy of the License at
@@ -11,9 +11,9 @@
  * ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
+
 using System;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
@@ -22,10 +22,15 @@ using System.Windows.Forms;
 
 namespace ExtendedControls
 {
+    interface ITranslatableControl
+    {
+
+    }
+
     /// <summary>
     /// Represents a customizable Windows <see cref="Button"/> <see cref="Control"/>.
     /// </summary>
-    public class ExtButton : Button
+    public class ExtButton : Button, IThemeable, ITranslatableControl
     {
         public ExtButton() : base() { }
 
@@ -36,65 +41,13 @@ namespace ExtendedControls
             set { throw new InvalidOperationException("The BackgroundImage property is not supported by this control. Use Image instead."); }
         }
 
-        [Category("Appearance"), DefaultValue(1.25F),
-            Description("When using FlatStyle.Popup, the FlatAppearance.BorderColor will be multiplied by this amount during a hover or click.")]
-        public float BorderColorScaling
-        {
-            get { return borderColorScaling; }
-            set
-            {
-                if (float.IsNaN(value) || float.IsInfinity(value))
-                    return;
-                else if (borderColorScaling != value)
-                {
-                    borderColorScaling = value;
-                    if (drawState > DrawState.Normal && FlatStyle == FlatStyle.Popup)
-                        Invalidate();
-                }
-            }
-        }
+        public Color BackColor2 { get { return backColor2; } set { backColor2 = value; Invalidate(); } }
+        public float MouseOverScaling { get; set; } = 1.3F;
+        public float MouseSelectedScaling { get; set; } = 1.3F;
+        public float ButtonDisabledScaling { get { return buttonDisabledScaling; } set { buttonDisabledScaling = value; Invalidate(); } }
+        public float GradientDirection { get { return gradientdirection; } set { gradientdirection = value; Invalidate(); } }
 
-        [Category("Appearance"), DefaultValue(0.5F),
-            Description("When using FlatStyle.Popup, the BackColor multiplication factor for the bottom of the background gradient.")]
-        public float ButtonColorScaling
-        {
-            get { return buttonColorScaling; }
-            set
-            {
-                if (float.IsNaN(value) || float.IsInfinity(value))
-                    return;
-                else if (buttonColorScaling != value)
-                {
-                    buttonColorScaling = value;
-                    if (FlatStyle == FlatStyle.Popup)
-                        Invalidate();
-                }
-            }
-        }
-
-        [Category("Appearance"), DefaultValue(0.5F),
-            Description("When using FlatStyle.Popup and not Enabled, this multiplication factor will be used for the background color.")]
-        public float ButtonDisabledScaling
-        {
-            get { return buttonDisabledScaling; }
-            set
-            {
-                if (float.IsNaN(value) || float.IsInfinity(value))
-                    return;
-                else if (buttonDisabledScaling != value)
-                {
-                    buttonDisabledScaling = value;
-                    if (!Enabled && FlatStyle == FlatStyle.Popup)
-                        Invalidate();
-                }
-            }
-        }
-
-        /// <summary>
-        /// Occurs when the control is redrawn.
-        /// </summary>
-        [Category("Appearance"), Description("Occurs when a control needs repainting.")]
-        public new event PaintEventHandler Paint { add { base.Paint += value; _CustomPaint += value; } remove { base.Paint -= value; _CustomPaint -= value; } }
+        public bool TranslateDoChildren => false;
 
         /// <summary>
         /// Specify a <see cref="Color"/> <paramref name="remap"/> table and corresponding <see cref="ColorMatrix"/>.
@@ -116,22 +69,6 @@ namespace ExtendedControls
         }
 
 
-        private ImageAttributes drawnImageAttributesEnabled = null;         // Image override (colour etc) for background when using Image while Enabled.
-        private ImageAttributes drawnImageAttributesDisabled = null;        // Image override (colour etc) for background when using Image while !Enabled.
-
-        private enum DrawState { Disabled = -1, Normal = 0, Hover, Click };
-        private DrawState drawState = DrawState.Normal;                    // The current state of our control, even if base is currently doing the painting.
-
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]                   // Visible via BorderColorScaling
-        private float borderColorScaling = 1.25F;
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]                   // Visible via ButtonColorScaling
-        private float buttonColorScaling = 0.5F;
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]                   // Visible via ButtonDisabledScaling
-        private float buttonDisabledScaling = 0.5F;
-
-        private event PaintEventHandler _CustomPaint;                       // base.OnPaint interferes with our custom painting; mimic it to allow others in on the fun.
-
-
         /// <summary>
         /// Releases the unmanaged resources used by the <see cref="ExtButton"/> and optionally releases the managed
         /// resources.
@@ -145,19 +82,9 @@ namespace ExtendedControls
                 drawnImageAttributesDisabled?.Dispose();
                 drawnImageAttributesEnabled?.Dispose();
             }
-            _CustomPaint = null;
             drawnImageAttributesDisabled = null;
             drawnImageAttributesEnabled = null;
             base.Dispose(disposing);
-        }
-
-        /// <summary>
-        /// Raises the <see cref="ExtButton.Paint"/> event with custom painting logic.
-        /// </summary>
-        /// <param name="pe">A <see cref="PaintEventArgs"/> that contains the event data.</param>
-        protected virtual void OnCustomPaint(PaintEventArgs pe)
-        {
-            _CustomPaint?.Invoke(this, pe);
         }
 
         /// <summary>
@@ -249,85 +176,94 @@ namespace ExtendedControls
             base.OnMouseUp(mevent);
         }
 
-        /// <summary>
-        /// Raises the <see cref="ExtButton.Paint"/> event.
-        /// </summary>
-        /// <param name="pe">A <see cref="PaintEventArgs"/> that contains the event data.</param>
+        // implements Flat and Gradient from Oct 26.
+        // System should not call it but there for protection
         protected override void OnPaint(PaintEventArgs pe)
         {
-            if (FlatStyle != FlatStyle.Popup)      // popup style uses custom painting.
+            if (FlatStyle == FlatStyle.System)
             {
                 base.OnPaint(pe);
             }
             else
             {
-                Rectangle border = ClientRectangle;
-                border.Width--; border.Height--;
+                // we use BorderSize for the outline, and we want something left inside that, a minimum of 3 pixels are needed (2 for border)
 
-                Rectangle buttonarea = ClientRectangle;
-                buttonarea.Inflate(-1, -1);                     // inside it.
+                var cr = ClientRectangle;
+                // debugcr = new Rectangle(0, 0, 3, 3);
 
-                //System.Diagnostics.Debug.WriteLine("ButPaint " + this.Name + " " + ClientRectangle +" " + border + " " + buttonarea + " c " + BackColor + " " + FlatAppearance.BorderColor + " E:" + Enabled + " D:" + ButtonDisabledScaling + " ms:" + MinimumSize);
+                if (cr.Width <= 1 + FlatAppearance.BorderSize || cr.Height <= 1 + FlatAppearance.BorderSize)
+                    return;
 
-                Color colBack = Color.Empty;
-                Color colBorder = Color.Empty;
-                switch (drawState)
+                Color colBack = BackColor;
+                Color colBack2 = BackColor2;
+                Color colBorder = FlatAppearance.BorderColor;
+
+                if (drawState == DrawState.Disabled)
                 {
-                    case DrawState.Disabled:
-                        colBack = BackColor.Multiply(buttonDisabledScaling);
-                        colBorder = FlatAppearance.BorderColor.Multiply(buttonDisabledScaling);
-                        break;
-                    case DrawState.Normal:
-                    default:
-                        colBack = BackColor;
-                        colBorder = FlatAppearance.BorderColor;
-                        break;
-                    case DrawState.Hover:
-                        colBack = FlatAppearance.MouseOverBackColor;
-                        colBorder = FlatAppearance.BorderColor.Multiply(borderColorScaling);
-                        break;
-                    case DrawState.Click:
-                        colBack = FlatAppearance.MouseDownBackColor;
-                        colBorder = FlatAppearance.BorderColor.Multiply(borderColorScaling);
-                        break;
+                    colBack = colBack.Multiply(buttonDisabledScaling);
+                    colBack2 = colBack2.Multiply(buttonDisabledScaling);
+                    colBorder = colBorder.Multiply(buttonDisabledScaling);
+                }
+                else if (drawState != DrawState.Normal)
+                {
+                    if (colBack.GetBrightness() < 0.05f)        // ensure a color for these states, if background is back it won't do anything
+                    {
+                        colBack2 = colBack = Color.FromArgb(255, 32, 32, 32);
+                    }
 
+                    if (drawState == DrawState.Hover)
+                    {
+                        colBack = colBack.Multiply(MouseOverScaling);
+                        colBack2 = colBack2.Multiply(MouseOverScaling);
+                        colBorder = colBorder.Multiply(MouseOverScaling);
+                    }
+                    else
+                    {
+                        colBack = colBack.Multiply(MouseSelectedScaling);
+                        colBack2 = colBack2.Multiply(MouseSelectedScaling);
+                        colBorder = colBorder.Multiply(MouseSelectedScaling);
+                    }
                 }
 
-                if (buttonarea.Width >= 1 && buttonarea.Height >= 1)  // ensure size
-                {
-                    //System.Diagnostics.Debug.WriteLine($"{Name} {colBack} { buttonColorScaling}");
-                    using (var b = new LinearGradientBrush(buttonarea, colBack, colBack.Multiply(buttonColorScaling), 90))
-                        pe.Graphics.FillRectangle(b, buttonarea);       // linear grad brushes do not respect smoothing mode, btw
-                }
+                Rectangle border = new Rectangle(0, 0, cr.Width - FlatAppearance.BorderSize, cr.Height - FlatAppearance.BorderSize);
+
+                // System.Diagnostics.Debug.WriteLine($"\r\nControl Button {Name} {cr}, {FlatStyle}, brd {border} back {colBack}-{colBack2} border {colBorder}:{FlatAppearance.BorderSize}");
+
+                //System.Diagnostics.Debug.WriteLine($"Control Button Background {Name} {colBack} {GradientDirection}");
+                using (var b = new LinearGradientBrush(cr, colBack, colBack2, GradientDirection))
+                    pe.Graphics.FillRectangle(b, cr);       // linear grad brushes do not respect smoothing mode, btw
 
                 pe.Graphics.SmoothingMode = SmoothingMode.None;
 
-                if (border.Width >= 1 && border.Height >= 1)        // ensure it does not except
+                if (FlatAppearance.BorderSize > 0)        // do we want a border to our button
                 {
-                    using (var p = new Pen(colBorder))
+                    //colBorder = Color.Purple;
+                    using (var p = new Pen(colBorder, FlatAppearance.BorderSize))
                         pe.Graphics.DrawRectangle(p, border);
                 }
 
-                if (buttonarea.Width < 1 || buttonarea.Height < 1)  // and no point drawing any more in the button area if its too small, it will except
+                Rectangle buttonarea = new Rectangle(FlatAppearance.BorderSize, FlatAppearance.BorderSize, cr.Width - FlatAppearance.BorderSize * 2, cr.Height - FlatAppearance.BorderSize * 2);
+
+                if (buttonarea.Width < 1 || buttonarea.Height < 1)  // triage for crashing and no point drawing any more in the button area if its too small, it will except
                     return;
 
                 if (Image != null)
                 {
                     // if we are in the centre, we use the whole of the buttonarea, else we use the button height.
                     Size isize = (ImageAlign == ContentAlignment.MiddleCenter) ? new Size(buttonarea.Width, buttonarea.Height) : new Size(buttonarea.Height, buttonarea.Height);
+
                     var destrect = ImageAlign.ImagePositionFromContentAlignment(buttonarea, isize);
 
-                    //System.Diagnostics.Debug.WriteLine($"ButtonExt {this.Name} {buttonarea} {destrect} {Image.Width}x {Image.Height} {ImageAlign}");
+                    // System.Diagnostics.Debug.WriteLine($"Control Button Image {this.Name} {buttonarea} {destrect} {Image.Width}x {Image.Height} {ImageAlign}");
 
                     if ((Enabled && drawnImageAttributesEnabled != null) || (!Enabled && drawnImageAttributesDisabled != null))
                     {
-                        pe.Graphics.DrawImage(Image, destrect,
-                                    0, 0, Image.Width, Image.Height, GraphicsUnit.Pixel, (Enabled) ? drawnImageAttributesEnabled : drawnImageAttributesDisabled);
+                        //using (var b = new SolidBrush(Color.FromArgb(128, 64, 0, 0))) pe.Graphics.FillRectangle(b, destrect);       // linear grad brushes do not respect smoothing mode, btw
+                        pe.Graphics.DrawImage(Image, destrect, 0, 0, Image.Width, Image.Height, GraphicsUnit.Pixel, (Enabled) ? drawnImageAttributesEnabled : drawnImageAttributesDisabled);
                     }
                     else
                     {
-                        pe.Graphics.DrawImage(Image, destrect,
-                                    0, 0, Image.Width, Image.Height, GraphicsUnit.Pixel);
+                        pe.Graphics.DrawImage(Image, destrect, 0, 0, Image.Width, Image.Height, GraphicsUnit.Pixel);
                     }
                 }
 
@@ -371,10 +307,9 @@ namespace ExtendedControls
                 }
 
                 pe.Graphics.SmoothingMode = SmoothingMode.Default;
-
-                this.OnCustomPaint(pe);
             }
         }
+
 
         // Change the current DrawState, and invalidate as needed.
         private void SetDrawState(DrawState state)
@@ -385,6 +320,101 @@ namespace ExtendedControls
                 if (FlatStyle == FlatStyle.Popup)
                     Invalidate();
             }
+        }
+
+        public bool Theme(Theme t, Font fnt)
+        {
+            ExtButton ctrl = this;
+            ctrl.ForeColor = t.ButtonTextColor;
+
+            if (ctrl.Text.HasChars())      // we autosize text to make it fit.. we do not autosize image buttons
+                ctrl.AutoSize = true;
+
+            //System.Diagnostics.Debug.WriteLine($"Control Theme {ctrl.Name} size {Size} {ctrl.FlatStyle}");
+
+            // if in system mode, and no image, we can use the system theme
+
+            if (t.IsButtonSystemStyle && Image == null)
+            {
+                ctrl.UseVisualStyleBackColor = true;
+                ctrl.FlatStyle = FlatStyle.System;
+            }
+            else
+            {
+                // flatstyle, gradient, system when image
+
+                ctrl.ButtonDisabledScaling = t.DisabledScaling;
+                ctrl.GradientDirection = t.ButtonBackGradientDirection;
+                ctrl.MouseOverScaling = t.MouseOverScaling;
+                ctrl.MouseSelectedScaling = t.MouseSelectedScaling;
+
+                if (ctrl.Image != null)     // any images, White and a gray (for historic reasons) gets replaced.
+                {
+                    System.Drawing.Imaging.ColorMap colormap1 = new System.Drawing.Imaging.ColorMap();       // any drawn panel with drawn images
+                    colormap1.OldColor = Color.FromArgb(134, 134, 134);                                      // gray is defined as the forecolour
+                    colormap1.NewColor = ctrl.ForeColor;
+                    //System.Diagnostics.Debug.WriteLine("Theme Image in " + ctrl.Name + " Map " + colormap1.OldColor + " to " + colormap1.NewColor);
+
+                    System.Drawing.Imaging.ColorMap colormap2 = new System.Drawing.Imaging.ColorMap();       // any drawn panel with drawn images
+                    colormap2.OldColor = Color.FromArgb(255, 255, 255);                                      // and white is defined as the forecolour
+                    colormap2.NewColor = ctrl.ForeColor;
+                    //System.Diagnostics.Debug.WriteLine("Theme Image in " + ctrl.Name + " Map " + colormap2.OldColor + " to " + colormap2.NewColor);
+
+                    ctrl.SetDrawnBitmapRemapTable(new System.Drawing.Imaging.ColorMap[] { colormap1, colormap2 });     // used ButtonDisabledScaling note!
+                }
+
+                // if image, and no text or text over image centred (so over the image),
+                // set background to form to make the back disappear
+
+                if (ctrl.Image != null && (ctrl.Text.Length == 0 || (ctrl.TextAlign == ContentAlignment.MiddleCenter && ctrl.ImageAlign == ContentAlignment.MiddleCenter)))
+                {
+                    // composite auto scale buttons inherit parent back colour and have disabled scaling turned off
+
+                    //if (ctrl.Parent != null && ctrl.Parent is CompositeAutoScaleButton)
+                    //{
+                    //    ctrl.BackColor = ctrl.BackColor2 = ctrl.Parent.BackColor;
+                    //    ctrl.ButtonDisabledScaling = 1.0F;
+                    //}
+                    //else
+                    {
+                        if (t.ImageButtonsHaveBackground)
+                        {
+                            ctrl.BackColor = t.ButtonBackColor;
+                            ctrl.BackColor2 = t.IsButtonGradientStyle ? t.ButtonBackColor2 : t.ButtonBackColor;
+                        }
+                        else
+                        {
+                            ctrl.BackColor = ctrl.BackColor2 = t.Form;
+                        }
+                    }
+
+                    if (t.ImageButtonsHaveBorders)
+                    {
+                        ctrl.FlatAppearance.BorderColor = t.ButtonBorderColor;
+                        ctrl.FlatAppearance.BorderSize = 1;
+                    }
+                    else
+                    {
+                        ctrl.FlatAppearance.BorderColor = t.Form;
+                        ctrl.FlatAppearance.BorderSize = 0;
+                    }
+                }
+                else
+                {
+                    // no image, gradient only uses back color 2
+
+                    ctrl.BackColor = t.ButtonBackColor;
+                    ctrl.BackColor2 = t.IsButtonGradientStyle ? t.ButtonBackColor2 : t.ButtonBackColor;
+                    ctrl.FlatAppearance.BorderColor = t.ButtonBorderColor;
+                    ctrl.FlatAppearance.BorderSize = 1;
+                }
+
+                // if we are here in system, then it had an image, and we use flat, else we use the style
+
+                ctrl.FlatStyle = t.IsButtonSystemStyle ? FlatStyle.Flat : t.ButtonFlatStyle;
+            }
+
+            return false;
         }
 
         // debug for scaling
@@ -399,6 +429,14 @@ namespace ExtendedControls
         //    }
         //}
 
+        private ImageAttributes drawnImageAttributesEnabled = null;         // Image override (colour etc) for background when using Image while Enabled.
+        private ImageAttributes drawnImageAttributesDisabled = null;        // Image override (colour etc) for background when using Image while !Enabled.
+        private enum DrawState { Disabled = -1, Normal = 0, Hover, Click };
+        private DrawState drawState = DrawState.Normal;                    // The current state of our control, even if base is currently doing the painting.
+
+        private float gradientdirection = 90F;
+        private float buttonDisabledScaling = 0.5F;
+        private Color backColor2 = Color.White;
 
     }
 }

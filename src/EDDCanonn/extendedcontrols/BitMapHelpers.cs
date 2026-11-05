@@ -1,0 +1,420 @@
+﻿/*
+ * Copyright 2016-2025 EDDiscovery development team
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
+ * file except in compliance with the License. You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software distributed under
+ * the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
+ * ANY KIND, either express or implied. See the License for the specific language
+ * governing permissions and limitations under the License.
+ */
+
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+
+namespace BaseUtils
+{
+    public static partial class BitMapHelpers
+    {
+        #region Multithread support
+        // Helpers to use Images/Bitmaps in a multithread environment - can't multithread GDI objects so can't access a stored bitmaps in multi thread
+
+        static object bitmapgdilock = new object();
+
+        // draw from an image, under GDI lock.  Image may be direct and not owned by thread
+        static public void DrawImageLocked(this Graphics gr, Image image, int x, int y, int width, int height)
+        {
+            lock (bitmapgdilock)
+            {
+                gr.DrawImage(image, x, y, width, height);
+            }
+        }
+
+        // draw from an image, under GDI lock.  Image may be direct and not owned by thread
+        static public void DrawImageLocked(this Graphics gr, Image image, Rectangle rect)
+        {
+            lock (bitmapgdilock)
+            {
+                gr.DrawImage(image, rect);
+            }
+        }
+
+        // Clone bitmap under GDI lock
+        public static Image CloneLocked(this Image source)
+        {
+            lock (bitmapgdilock)
+            {
+                Bitmap newmap = new Bitmap(source);
+                return newmap;
+            }
+        }
+
+        // Clone bitmap and recolour under GDI lock
+        public static Bitmap CloneReplaceColourLocked(Bitmap source, System.Drawing.Imaging.ColorMap[] remap)
+        {
+            lock (bitmapgdilock)
+            {
+                Bitmap newmap = new Bitmap(source.Width, source.Height);
+
+                System.Drawing.Imaging.ImageAttributes ia = new System.Drawing.Imaging.ImageAttributes();
+                ia.SetRemapTable(remap, System.Drawing.Imaging.ColorAdjustType.Bitmap);
+
+                using (Graphics gr = Graphics.FromImage(newmap))
+                    gr.DrawImage(source, new Rectangle(0, 0, source.Width, source.Height), 0, 0, source.Width, source.Height, GraphicsUnit.Pixel, ia);
+
+                return newmap;
+            }
+        }
+
+        static Dictionary<Image, float> imageintensities = new Dictionary<Image, float>();       // cached locked image intensity database
+
+        // using FromFile or new Bitmap locks the file, this loads, copies it so its unattached
+        // may except, protect yourself.  under GDI lock
+        public static Bitmap CloneBitmapFromFileLocked(this string source)
+        {
+            lock (bitmapgdilock)
+            {
+                using (var tmp = new Bitmap(source))
+                {
+                    return new Bitmap(tmp);
+                }
+            }
+        }
+
+        #endregion
+
+        #region Helpers
+
+        public static Bitmap ScaleColourInBitmap(Bitmap source, System.Drawing.Imaging.ColorMatrix cm)
+        {
+            Bitmap newmap = new Bitmap(source.Width, source.Height);
+
+            System.Drawing.Imaging.ImageAttributes ia = new System.Drawing.Imaging.ImageAttributes();
+            ia.SetColorMatrix(cm);
+
+            using (Graphics gr = Graphics.FromImage(newmap))
+                gr.DrawImage(source, new Rectangle(0, 0, source.Width, source.Height), 0, 0, source.Width, source.Height, GraphicsUnit.Pixel, ia);
+
+            return newmap;
+        }
+
+        public static Bitmap ScaleColourInBitmapSideBySide(Bitmap source, Bitmap source2, System.Drawing.Imaging.ColorMatrix cm)
+        {
+            Bitmap newmap = new Bitmap(source.Width + source2.Width, Math.Max(source.Height, source2.Height));
+
+            System.Drawing.Imaging.ImageAttributes ia = new System.Drawing.Imaging.ImageAttributes();
+            ia.SetColorMatrix(cm);
+
+            using (Graphics gr = Graphics.FromImage(newmap))
+            {
+                gr.DrawImage(source, new Rectangle(0, 0, source.Width, source.Height), 0, 0, source.Width, source.Height, GraphicsUnit.Pixel, ia);
+                gr.DrawImage(source2, new Rectangle(source.Width, 0, source2.Width, source2.Height), 0, 0, source2.Width, source2.Height, GraphicsUnit.Pixel, ia);
+            }
+
+            return newmap;
+        }
+
+        // measure string by font and format.  if maxsize=null, its given all the space it needs.  If maxsize != null, limit it to this size (wordwrap, centre etc)
+        public static SizeF MeasureStringInBitmap(string text, Font f, StringFormat fmt = null, Size? maxsize = null)
+        {
+            using (Bitmap t = new Bitmap(1, 1))
+            {
+                using (Graphics g = Graphics.FromImage(t))
+                {
+                    g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;      // recommendation from https://docs.microsoft.com/en-us/dotnet/api/system.drawing.graphics.measurestring?view=dotnet-plat-ext-5.0
+
+                    if (maxsize == null)
+                        maxsize = new Size(30000, 30000);
+
+                    SizeF size = fmt != null ? g.MeasureString(text, f, maxsize.Value, fmt) : g.MeasureString(text, f, maxsize.Value);
+                    return size;
+                }
+            }
+        }
+
+        // measure how long a string would be unformatted.
+        public static SizeF MeasureStringUnformattedLengthInBitmap(string text, Font f)
+        {
+            using (Bitmap t = new Bitmap(1, 1))
+            {
+                using (Graphics g = Graphics.FromImage(t))
+                {
+                    g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;      // recommendation from https://docs.microsoft.com/en-us/dotnet/api/system.drawing.graphics.measurestring?view=dotnet-plat-ext-5.0
+                    SizeF size = g.MeasureString(text, f);
+                    return size;
+                }
+            }
+        }
+
+
+        // Create new Bitmap to hold text, sized to text (or set to width and dynamic height)
+        // if b != Transparent, a back box is drawn.
+        // no frmt means a single line across the bitmap unless there are \n in it. Setting frmt allows you to word wrap etc into a bitmap.
+        // maxsize indicates the area you want the text to flow into, this is the area used to estimate
+        // maxsize.Width = 0 is valid
+        // if maxsize.Width>0 the width is the minimum of text width and maxsize width
+        // if setwidth>0, the bitmap will be setwidth wide, use this to force say with centre/far the bitmap to be the same width as maxsize.Width so they align right
+        public static Bitmap DrawTextIntoAutoSizedBitmap(string text, Size maxsize, Font dp, Color c, Color b,
+                                            float backscale = 1.0F, StringFormat frmt = null, int setwidth = -1)
+        {
+            Bitmap t = new Bitmap(1, 1);
+
+            using (Graphics bgr = Graphics.FromImage(t))
+            {
+                // if frmt, we measure the string within the maxsize bounding box.
+                SizeF sizef = (frmt != null) ? bgr.MeasureString(text, dp, maxsize, frmt) : bgr.MeasureString(text, dp);
+                //System.Diagnostics.Debug.WriteLine("Bit map auto size " + sizef);
+
+                int width = (int)(sizef.Width + 1);     // text width indicated to be needed
+
+                if (setwidth > 0)
+                    width = setwidth;
+                else if (maxsize.Width > 0)
+                    width = Math.Min(width, maxsize.Width);
+
+                int height = Math.Min((int)(sizef.Height + 1), maxsize.Height);
+
+                Bitmap img = new Bitmap(Math.Max(1, width), Math.Max(1, height)); // ensure we have a bitmap #2842
+
+                using (Graphics dgr = Graphics.FromImage(img))
+                {
+                    if (!b.IsFullyTransparent() && text.Length > 0)
+                    {
+                        Rectangle backarea = new Rectangle(0, 0, img.Width, img.Height);
+                        using (Brush bb = new System.Drawing.Drawing2D.LinearGradientBrush(backarea, b, b.Multiply(backscale), 90))
+                            dgr.FillRectangle(bb, backarea);
+
+                        dgr.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;   // only worth doing this if we have filled it.. if transparent, antialias does not work
+                    }
+
+                    using (Brush textb = new SolidBrush(c))
+                    {
+                        if (frmt != null)
+                            dgr.DrawString(text, dp, textb, new Rectangle(0, 0, width, height), frmt); // use the draw into rectangle with formatting function
+                        else
+                            dgr.DrawString(text, dp, textb, 0, 0);
+                    }
+
+                    dgr.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.Default;
+
+                    return img;
+                }
+            }
+        }
+
+        // draw into a bitmap the text, centred in bitmap
+        public static void DrawTextCentreIntoBitmap(ref Bitmap img, string text, Font dp, Color c, Color? b = null)
+        {
+            using (Graphics bgr = Graphics.FromImage(img))
+            {
+                if (b != null)
+                {
+                    Rectangle backarea = new Rectangle(0, 0, img.Width, img.Height);
+                    using (Brush bb = new SolidBrush(b.Value))
+                        bgr.FillRectangle(bb, backarea);
+                }
+
+                SizeF sizef = bgr.MeasureString(text, dp);
+
+                bgr.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+
+                using (Brush textb = new SolidBrush(c))
+                    bgr.DrawString(text, dp, textb, img.Width / 2 - (int)((sizef.Width + 1) / 2), img.Height / 2 - (int)((sizef.Height + 1) / 2));
+
+                bgr.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.Default;
+            }
+        }
+
+        // Create new Bitmap to hold text with a fixed bitmap size
+        // draw into fixed sized bitmap. 
+        // centretext overrided frmt and just centres it
+        // frmt provides full options and draws text into bitmap
+        // accepts maxsize having an element <1, if so, returns a 1 pixel image in that direction
+        public static Bitmap DrawTextIntoFixedSizeBitmapC(string text, Size size, Font dp, Color c, Color b,
+                                                    float backscale = 1.0F, StringFormat frmt = null, Point? pos = null)
+        {
+            Bitmap img = new Bitmap(Math.Max(1, size.Width), Math.Max(1, size.Height)); // ensure we have a bitmap #2842
+            Color? back = null;
+            if (!b.IsFullyTransparent() && text.Length > 0)       // transparent means no paint, or text length = 0 means no background paint, for this version
+                back = b;
+            DrawTextIntoBitmap(img, new Rectangle(0, 0, img.Width, img.Height), text, dp, c, back, backscale, frmt);
+            return img;
+        }
+
+        // draw text into existing bitmap at position.
+        // If back colour is set, back fill area is sized to text used area (limited to maxsize).  This includes transparent back colour painting. Return SizeF
+        // if back colour is null, then draw into box with pos and maxsize. Whole back area is coloured.  Return empty sizef
+        public static SizeF DrawTextIntoBitmap(Bitmap img, Point pos, Size maxsize, string text, Font dp, Color c, Color? back,
+                                                float backscale = 1.0F, StringFormat frmt = null, int angleback = 90)
+        {
+            if (back == null)
+            {
+                DrawTextIntoBitmap(img, new Rectangle(pos.X, pos.Y, maxsize.Width, maxsize.Height), text, dp, c, back, backscale, frmt);
+                return SizeF.Empty;
+            }
+            else
+            {
+                SizeF sizef = MeasureStringInBitmap(text, dp, frmt, maxsize);
+                DrawTextIntoBitmap(img, new Rectangle(pos.X, pos.Y, (int)(sizef.Width + 1), (int)(sizef.Height + 1)), text, dp, c, back, backscale, frmt);
+                return sizef;
+            }
+        }
+
+        // draw text into existing bitmap into rectangle
+        // If back colour is set, back fill is the whole rectangle
+        public static void DrawTextIntoBitmap(Bitmap img, Rectangle area, string text, Font dp, Color c, Color? b,
+                                                float backscale = 1.0F, StringFormat frmt = null, int angleback = 90)
+        {
+            using (Graphics dgr = Graphics.FromImage(img))
+            {
+                if (b != null)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Draw back into {area}");
+
+                    if (b.Value.IsFullyTransparent())       // if transparent colour to paint in, need to fill clear it completely
+                    {
+                        if (area.Size != img.Size || area.Left != 0 || area.Top != 0)      // if not the whole bitmap
+                        {
+                            dgr.SetClip(area);
+                            dgr.Clear(Color.Transparent);       // seems to be the only way to set transparent pixels
+                            dgr.ResetClip();
+                        }
+                        else
+                            dgr.Clear(Color.Transparent);       // clear the lot
+                    }
+                    else
+                    {
+                        using (Brush bb = new System.Drawing.Drawing2D.LinearGradientBrush(area, b.Value, b.Value.Multiply(backscale), angleback))
+                            dgr.FillRectangle(bb, area);
+                    }
+
+                    dgr.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias; // only if filled
+                }
+
+                using (Brush textb = new SolidBrush(c))
+                {
+                    if (frmt != null)
+                        dgr.DrawString(text, dp, textb, area, frmt);
+                    else
+                        dgr.DrawString(text, dp, textb, area);
+                }
+
+                dgr.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.Default;
+            }
+        }
+
+        public static void FillBitmap(Bitmap img, Color c, float backscale = 1.0F)
+        {
+            using (Graphics dgr = Graphics.FromImage(img))
+            {
+                Rectangle backarea = new Rectangle(0, 0, img.Width, img.Height);
+                using (Brush bb = new System.Drawing.Drawing2D.LinearGradientBrush(backarea, c, c.Multiply(backscale), 90))
+                    dgr.FillRectangle(bb, backarea);
+            }
+        }
+
+        public static void ClearBitmapArea(Bitmap img, Rectangle backarea, Color c)     // allows transparent to be restored to areas..
+        {
+            using (Graphics dgr = Graphics.FromImage(img))
+            {
+                dgr.SetClip(backarea);   // set graphics to the clip area so we can clear a specific area
+                dgr.Clear(c);
+                dgr.ResetClip();
+            }
+        }
+
+        // convert BMP to another format and return the bytes of that format
+
+        public static byte[] ConvertTo(this Bitmap bmp, System.Drawing.Imaging.ImageFormat fmt)
+        {
+            System.IO.MemoryStream ms = new System.IO.MemoryStream();
+            bmp.Save(ms, fmt);
+            Byte[] f = ms.ToArray();
+            return f;
+        }
+
+        // from https://stackoverflow.com/questions/1922040/how-to-resize-an-image-c-sharp
+        public static Bitmap ResizeImage(this Image image, int width, int height,
+                                         System.Drawing.Drawing2D.InterpolationMode interm = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic
+                                        )
+        {
+            if (width <= 0)
+                width = image.Width;
+            if (height <= 0)
+                height = image.Height;
+
+            var destRect = new Rectangle(0, 0, width, height);
+            var destImage = new Bitmap(width, height);
+
+            destImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
+
+            using (var graphics = Graphics.FromImage(destImage))
+            {
+                graphics.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceCopy;
+                graphics.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
+                graphics.InterpolationMode = interm;
+                graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+                graphics.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
+
+                using (var wrapMode = new System.Drawing.Imaging.ImageAttributes())
+                {
+                    wrapMode.SetWrapMode(System.Drawing.Drawing2D.WrapMode.TileFlipXY);
+                    graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, wrapMode);
+                }
+            }
+
+            return destImage;
+        }
+
+        public static Bitmap CropImage(this Bitmap image, Rectangle croparea)
+        {
+            if ((croparea.Width <= 0) || (croparea.Width > image.Width))
+            {
+                croparea.X = 0;
+                croparea.Width = image.Width;
+            }
+            else if (croparea.Left + croparea.Width > image.Width)
+            {
+                croparea.X = image.Width - croparea.Width;
+            }
+
+            if ((croparea.Height <= 0) || (croparea.Height > image.Height))
+            {
+                croparea.Y = 0;
+                croparea.Height = image.Height;
+            }
+            else if (croparea.Top + croparea.Height > image.Height)
+            {
+                croparea.Y = image.Height - croparea.Height;
+            }
+
+            return image.Clone(croparea, System.Drawing.Imaging.PixelFormat.DontCare);
+        }
+
+        /// <summary>
+        /// Crop bitmap by area - percentages (0-100)
+        /// </summary>
+        /// <param name="image">Bitmap</param>
+        /// <param name="croparea">crop area in percentages</param>
+        /// <returns>new Bitmap</returns>
+        public static Bitmap CropImage(this Bitmap image, RectangleF croparea)
+        {
+            int left = (int)(image.Width * croparea.X / 100.0F);
+            int top = (int)(image.Height * croparea.Y / 100.0F);
+            int width = (int)(image.Width * croparea.Width / 100.0F);
+            int height = (int)(image.Height * croparea.Height / 100.0F);
+            left = Math.Max(0, left);
+            top = Math.Max(0, top);
+            width = Math.Min(width, image.Width - left);
+            height = Math.Min(height, image.Height - top);
+
+            return image.Clone(new Rectangle(left, top, width, height), System.Drawing.Imaging.PixelFormat.DontCare);
+        }
+    }
+
+    #endregion
+}

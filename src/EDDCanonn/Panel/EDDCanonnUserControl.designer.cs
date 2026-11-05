@@ -36,197 +36,6 @@ namespace EDDCanonnPanel
             base.Dispose(disposing);
         }
 
-
-        private void setTheme(string themeasjson)
-        {
-            JObject theme = themeasjson.JSONParse().Object();
-
-            Color form = FromJson(theme["form"]);
-
-            Color ButtonTextColor = FromJson(theme["button_text"]);
-            Color ButtonBackColor = FromJson(theme["button_back"]);
-            Color ButtonBorderColor = FromJson(theme["button_border"]);
-
-            Color TextBackColor = FromJson(theme["textbox_back"]);
-            Color TextBlockColor = FromJson(theme["textbox_fore"]);
-            Color TextBlockBorderColor = FromJson(theme["textbox_border"]);
-
-            Color TabcontrolBorder = FromJson(theme["tabcontrol_borderlines"]);
-            Color GridScrollButton = FromJson(theme["grid_scrollbutton"]);
-            Color GridBorderLines = FromJson(theme["grid_borderlines"]);
-            Color GridSliderBack = FromJson(theme["grid_sliderback"]);
-            Color GridScrollArrow = FromJson(theme["grid_scrollarrow"]);
-
-            Color TextBlockScrollButton = FromJson(theme["textbox_scrollbutton"]);
-            Color TextBlockSliderBack = FromJson(theme["textbox_sliderback"]);
-
-            Color CheckBox = FromJson(theme["checkbox"]);
-            Color CheckBoxTick = FromJson(theme["checkbox_tick"]);
-            Color c1 = GridScrollButton;
-            string buttonstyle = theme["buttonstyle"].Str();
-
-            const float mouseoverscaling = 1.3F;
-            const float mouseselectedscaling = 1.5F;
-
-            this.BackColor = form;
-
-            FlatStyle fs = buttonstyle.Equals("System") ? FlatStyle.System : FlatStyle.Popup;
-
-            // 
-            // extTabControlData
-            // 
-            extTabControlData.FlatStyle = fs;
-            extTabControlData.TabStyle = new TabStyleAngled();
-            extTabControlData.TabControlBorderColor = TabcontrolBorder;
-            extTabControlData.TabControlBorderBrightColor = TabcontrolBorder;
-            extTabControlData.TabNotSelectedBorderColor = TabcontrolBorder;
-            extTabControlData.TabNotSelectedColor = ButtonBackColor;
-            extTabControlData.TabSelectedColor = ButtonBackColor.Multiply(mouseselectedscaling);
-            extTabControlData.TabMouseOverColor = ButtonBackColor.Multiply(mouseoverscaling);
-            extTabControlData.TextSelectedColor = ButtonTextColor;
-            extTabControlData.TextNotSelectedColor = ButtonTextColor.Multiply(0.8F);
-            extTabControlData.SetStyle(fs, new TabStyleAngled());
-            // 
-            // buttonPrevNews
-            // 
-            buttonPrevNews.ForeColor = ButtonTextColor;
-            buttonPrevNews.ButtonColorScaling = buttonPrevNews.ButtonDisabledScaling = 0.5F;
-            buttonPrevNews.FlatAppearance.BorderColor = (buttonPrevNews.Image != null) ? form : ButtonBorderColor;
-            buttonPrevNews.FlatAppearance.BorderSize = 1;
-            buttonPrevNews.FlatAppearance.MouseOverBackColor = ButtonBackColor.Multiply(mouseoverscaling);
-            buttonPrevNews.FlatAppearance.MouseDownBackColor = ButtonBackColor.Multiply(mouseselectedscaling);
-            buttonPrevNews.FlatStyle = fs;
-            // 
-            // buttonNextNews
-            // 
-            buttonNextNews.ForeColor = ButtonTextColor;
-            buttonNextNews.ButtonColorScaling = buttonNextNews.ButtonDisabledScaling = 0.5F;
-            buttonNextNews.FlatAppearance.BorderColor = (buttonNextNews.Image != null) ? form : ButtonBorderColor;
-            buttonNextNews.FlatAppearance.BorderSize = 1;
-            buttonNextNews.FlatAppearance.MouseOverBackColor = ButtonBackColor.Multiply(mouseoverscaling);
-            buttonNextNews.FlatAppearance.MouseDownBackColor = ButtonBackColor.Multiply(mouseselectedscaling);
-            buttonNextNews.FlatStyle = fs;
-            // 
-            // buttonCreatePatrol
-            // 
-            buttonCreatePatrol.ForeColor = ButtonTextColor;
-            buttonCreatePatrol.ButtonColorScaling = buttonCreatePatrol.ButtonDisabledScaling = 0.5F;
-            buttonCreatePatrol.FlatAppearance.BorderColor = (buttonCreatePatrol.Image != null) ? form : ButtonBorderColor;
-            buttonCreatePatrol.FlatAppearance.BorderSize = 1;
-            buttonCreatePatrol.FlatAppearance.MouseOverBackColor = ButtonBackColor.Multiply(mouseoverscaling);
-            buttonCreatePatrol.FlatAppearance.MouseDownBackColor = ButtonBackColor.Multiply(mouseselectedscaling);
-            buttonCreatePatrol.FlatStyle = fs;
-            // 
-            // extScrollBarPatrol
-            // 
-            extScrollBarPatrol.BackColor = form;
-            extScrollBarPatrol.SliderColor = GridSliderBack;
-            extScrollBarPatrol.BorderColor = GridBorderLines;
-            extScrollBarPatrol.BackColor = form;
-            extScrollBarPatrol.SliderColor = GridSliderBack;
-            extScrollBarPatrol.BorderColor = extScrollBarPatrol.ThumbBorderColor =
-            extScrollBarPatrol.ArrowBorderColor = GridBorderLines;
-            extScrollBarPatrol.ArrowButtonColor = extScrollBarPatrol.ThumbButtonColor = c1;
-            extScrollBarPatrol.MouseOverButtonColor = c1.Multiply(mouseoverscaling);
-            extScrollBarPatrol.MousePressedButtonColor = c1.Multiply(mouseselectedscaling);
-            extScrollBarPatrol.ForeColor = GridScrollArrow;
-            extScrollBarPatrol.FlatStyle = fs;
-            // 
-            // extScrollBarData
-            // 
-            extScrollBarData.BackColor = form;
-            extScrollBarData.SliderColor = GridSliderBack;
-            extScrollBarData.BorderColor = GridBorderLines;
-            extScrollBarData.BackColor = form;
-            extScrollBarData.SliderColor = GridSliderBack;
-            extScrollBarData.BorderColor = extScrollBarData.ThumbBorderColor =
-            extScrollBarData.ArrowBorderColor = GridBorderLines;
-            extScrollBarData.ArrowButtonColor = extScrollBarData.ThumbButtonColor = c1;
-            extScrollBarData.MouseOverButtonColor = c1.Multiply(mouseoverscaling);
-            extScrollBarData.MousePressedButtonColor = c1.Multiply(mouseselectedscaling);
-            extScrollBarData.ForeColor = GridScrollArrow;
-            extScrollBarData.FlatStyle = fs;
-            // 
-            // extScrollBarBio
-            // 
-            extScrollBarBio.BackColor = form;
-            extScrollBarBio.SliderColor = GridSliderBack;
-            extScrollBarBio.BorderColor = GridBorderLines;
-            extScrollBarBio.BackColor = form;
-            extScrollBarBio.SliderColor = GridSliderBack;
-            extScrollBarBio.BorderColor = extScrollBarBio.ThumbBorderColor =
-            extScrollBarBio.ArrowBorderColor = GridBorderLines;
-            extScrollBarBio.ArrowButtonColor = extScrollBarBio.ThumbButtonColor = c1;
-            extScrollBarBio.MouseOverButtonColor = c1.Multiply(mouseoverscaling);
-            extScrollBarBio.MousePressedButtonColor = c1.Multiply(mouseselectedscaling);
-            extScrollBarBio.ForeColor = GridScrollArrow;
-            extScrollBarBio.FlatStyle = fs;
-            // 
-            // extScrollBarRing
-            // 
-            extScrollBarRing.BackColor = form;
-            extScrollBarRing.SliderColor = GridSliderBack;
-            extScrollBarRing.BorderColor = GridBorderLines;
-            extScrollBarRing.BackColor = form;
-            extScrollBarRing.SliderColor = GridSliderBack;
-            extScrollBarRing.BorderColor = extScrollBarRing.ThumbBorderColor =
-            extScrollBarRing.ArrowBorderColor = GridBorderLines;
-            extScrollBarRing.ArrowButtonColor = extScrollBarRing.ThumbButtonColor = c1;
-            extScrollBarRing.MouseOverButtonColor = c1.Multiply(mouseoverscaling);
-            extScrollBarRing.MousePressedButtonColor = c1.Multiply(mouseselectedscaling);
-            extScrollBarRing.ForeColor = GridScrollArrow;
-            extScrollBarRing.FlatStyle = fs;
-            // 
-            // extScrollBarGMO
-            // 
-            extScrollBarGMO.BackColor = form;
-            extScrollBarGMO.SliderColor = GridSliderBack;
-            extScrollBarGMO.BorderColor = GridBorderLines;
-            extScrollBarGMO.BackColor = form;
-            extScrollBarGMO.SliderColor = GridSliderBack;
-            extScrollBarGMO.BorderColor = extScrollBarGMO.ThumbBorderColor =
-            extScrollBarGMO.ArrowBorderColor = GridBorderLines;
-            extScrollBarGMO.ArrowButtonColor = extScrollBarGMO.ThumbButtonColor = c1;
-            extScrollBarGMO.MouseOverButtonColor = c1.Multiply(mouseoverscaling);
-            extScrollBarGMO.MousePressedButtonColor = c1.Multiply(mouseselectedscaling);
-            extScrollBarGMO.ForeColor = GridScrollArrow;
-            extScrollBarGMO.FlatStyle = fs;
-
-            // 
-            // extScrollBarGEO
-            // 
-            extScrollBarGeo.BackColor = form;
-            extScrollBarGeo.SliderColor = GridSliderBack;
-            extScrollBarGeo.BorderColor = GridBorderLines;
-            extScrollBarGeo.BackColor = form;
-            extScrollBarGeo.SliderColor = GridSliderBack;
-            extScrollBarGeo.BorderColor = extScrollBarGeo.ThumbBorderColor =
-            extScrollBarGeo.ArrowBorderColor = GridBorderLines;
-            extScrollBarGeo.ArrowButtonColor = extScrollBarGeo.ThumbButtonColor = c1;
-            extScrollBarGeo.MouseOverButtonColor = c1.Multiply(mouseoverscaling);
-            extScrollBarGeo.MousePressedButtonColor = c1.Multiply(mouseselectedscaling);
-            extScrollBarGeo.ForeColor = GridScrollArrow;
-            extScrollBarGeo.FlatStyle = fs;
-
-            ExtComboBoxRange.ForeColor = ButtonTextColor;
-            ExtComboBoxRange.BackColor = ExtComboBoxRange.DropDownBackgroundColor = ButtonBackColor;
-            ExtComboBoxRange.BorderColor = ButtonBorderColor;
-            ExtComboBoxRange.MouseOverBackgroundColor = ButtonBackColor.Multiply(mouseoverscaling);
-            ExtComboBoxRange.ScrollBarButtonColor = TextBlockScrollButton;
-            ExtComboBoxRange.ScrollBarColor = TextBlockSliderBack;
-            ExtComboBoxRange.FlatStyle = fs;
-            ExtComboBoxRange.Repaint();
-
-            ExtComboBoxPatrol.ForeColor = ButtonTextColor;
-            ExtComboBoxPatrol.BackColor = ExtComboBoxPatrol.DropDownBackgroundColor = ButtonBackColor;
-            ExtComboBoxPatrol.BorderColor = ButtonBorderColor;
-            ExtComboBoxPatrol.MouseOverBackgroundColor = ButtonBackColor.Multiply(mouseoverscaling);
-            ExtComboBoxPatrol.ScrollBarButtonColor = TextBlockScrollButton;
-            ExtComboBoxPatrol.ScrollBarColor = TextBlockSliderBack;
-            ExtComboBoxPatrol.FlatStyle = fs;
-            ExtComboBoxPatrol.Repaint();
-        }
-
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
@@ -249,14 +58,9 @@ namespace EDDCanonnPanel
             this.CopySystem = new System.Windows.Forms.ToolStripMenuItem();
             this.OpenUrl = new System.Windows.Forms.ToolStripMenuItem();
             this.tableLayoutPatrol = new System.Windows.Forms.TableLayoutPanel();
-            this.ExtComboBoxPatrol = new ExtendedControls.ExtComboBox();
-            this.ExtComboBoxRange = new ExtendedControls.ExtComboBox();
-            this.buttonCreatePatrol = new ExtendedControls.ExtButton();
             this.tableLayoutNews = new System.Windows.Forms.TableLayoutPanel();
             this.labelNews = new System.Windows.Forms.Label();
             this.textBoxNews = new System.Windows.Forms.TextBox();
-            this.buttonNextNews = new ExtendedControls.ExtButton();
-            this.buttonPrevNews = new ExtendedControls.ExtButton();
             this.labelNewsIndex = new System.Windows.Forms.Label();
             this.dataGridSignals = new System.Windows.Forms.DataGridView();
             this.b = new System.Windows.Forms.DataGridViewImageColumn();
@@ -277,6 +81,11 @@ namespace EDDCanonnPanel
             this.Distance = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Sysname = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.PatrolUrl = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.buttonNextNews = new ExtendedControls.ExtButton();
+            this.buttonPrevNews = new ExtendedControls.ExtButton();
+            this.ExtComboBoxPatrol = new ExtendedControls.ExtComboBox();
+            this.ExtComboBoxRange = new ExtendedControls.ExtComboBox();
+            this.buttonCreatePatrol = new ExtendedControls.ExtButton();
             this.extTabControlData = new ExtendedControls.ExtTabControl();
             this.tabData = new System.Windows.Forms.TabPage();
             this.extPanelDataGridViewScrollData = new ExtendedControls.ExtPanelDataGridViewScroll();
@@ -361,12 +170,12 @@ namespace EDDCanonnPanel
             this.textBoxSystem.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.textBoxSystem.Cursor = System.Windows.Forms.Cursors.Hand;
             this.textBoxSystem.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Underline, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.textBoxSystem.Location = new System.Drawing.Point(66, 4);
+            this.textBoxSystem.Location = new System.Drawing.Point(200, 4);
             this.textBoxSystem.Name = "textBoxSystem";
             this.textBoxSystem.ReadOnly = true;
             this.textBoxSystem.Size = new System.Drawing.Size(163, 20);
             this.textBoxSystem.TabIndex = 3;
-            this.textBoxSystem.Text = "########";
+            this.textBoxSystem.Text = "Waiting..";
             this.textBoxSystem.Click += new System.EventHandler(this.textBoxSystem_Click);
             // 
             // labelSysName
@@ -383,7 +192,7 @@ namespace EDDCanonnPanel
             // 
             this.labelSystemCount.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.labelSystemCount.AutoSize = true;
-            this.labelSystemCount.Location = new System.Drawing.Point(235, 1);
+            this.labelSystemCount.Location = new System.Drawing.Point(731, 1);
             this.labelSystemCount.Name = "labelSystemCount";
             this.labelSystemCount.Size = new System.Drawing.Size(35, 26);
             this.labelSystemCount.TabIndex = 6;
@@ -392,7 +201,7 @@ namespace EDDCanonnPanel
             // textBoxBodyCount
             // 
             this.textBoxBodyCount.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.textBoxBodyCount.Location = new System.Drawing.Point(279, 4);
+            this.textBoxBodyCount.Location = new System.Drawing.Point(775, 4);
             this.textBoxBodyCount.Name = "textBoxBodyCount";
             this.textBoxBodyCount.ReadOnly = true;
             this.textBoxBodyCount.Size = new System.Drawing.Size(82, 20);
@@ -410,11 +219,12 @@ namespace EDDCanonnPanel
             this.tableLayoutSystem.Controls.Add(this.labelSystemCount, 2, 0);
             this.tableLayoutSystem.Controls.Add(this.textBoxSystem, 1, 0);
             this.tableLayoutSystem.Controls.Add(this.labelSysName, 0, 0);
-            this.tableLayoutSystem.Location = new System.Drawing.Point(20, 3);
+            this.tableLayoutSystem.Dock = System.Windows.Forms.DockStyle.Top;
+            this.tableLayoutSystem.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutSystem.Name = "tableLayoutSystem";
             this.tableLayoutSystem.RowCount = 1;
             this.tableLayoutSystem.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 27F));
-            this.tableLayoutSystem.Size = new System.Drawing.Size(364, 28);
+            this.tableLayoutSystem.Size = new System.Drawing.Size(860, 28);
             this.tableLayoutSystem.TabIndex = 8;
             // 
             // contextMenuStrip1
@@ -448,70 +258,13 @@ namespace EDDCanonnPanel
             this.tableLayoutPatrol.Controls.Add(this.ExtComboBoxPatrol, 0, 0);
             this.tableLayoutPatrol.Controls.Add(this.ExtComboBoxRange, 1, 0);
             this.tableLayoutPatrol.Controls.Add(this.buttonCreatePatrol, 2, 0);
-            this.tableLayoutPatrol.Location = new System.Drawing.Point(20, 363);
+            this.tableLayoutPatrol.Dock = System.Windows.Forms.DockStyle.Top;
+            this.tableLayoutPatrol.Location = new System.Drawing.Point(0, 348);
             this.tableLayoutPatrol.Name = "tableLayoutPatrol";
             this.tableLayoutPatrol.RowCount = 1;
             this.tableLayoutPatrol.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPatrol.Size = new System.Drawing.Size(364, 28);
+            this.tableLayoutPatrol.Size = new System.Drawing.Size(860, 28);
             this.tableLayoutPatrol.TabIndex = 13;
-            // 
-            // ExtComboBoxPatrol
-            // 
-            this.ExtComboBoxPatrol.BorderColor = System.Drawing.Color.White;
-            this.ExtComboBoxPatrol.ButtonColorScaling = 0.5F;
-            this.ExtComboBoxPatrol.DataSource = null;
-            this.ExtComboBoxPatrol.DisableBackgroundDisabledShadingGradient = false;
-            this.ExtComboBoxPatrol.DisplayMember = "";
-            this.ExtComboBoxPatrol.DropDownBackgroundColor = System.Drawing.Color.Gray;
-            this.ExtComboBoxPatrol.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.ExtComboBoxPatrol.Location = new System.Drawing.Point(3, 3);
-            this.ExtComboBoxPatrol.MouseOverBackgroundColor = System.Drawing.Color.Silver;
-            this.ExtComboBoxPatrol.Name = "ExtComboBoxPatrol";
-            this.ExtComboBoxPatrol.ScrollBarButtonColor = System.Drawing.Color.LightGray;
-            this.ExtComboBoxPatrol.ScrollBarColor = System.Drawing.Color.LightGray;
-            this.ExtComboBoxPatrol.SelectedIndex = -1;
-            this.ExtComboBoxPatrol.SelectedItem = null;
-            this.ExtComboBoxPatrol.SelectedValue = null;
-            this.ExtComboBoxPatrol.Size = new System.Drawing.Size(122, 21);
-            this.ExtComboBoxPatrol.TabIndex = 18;
-            this.ExtComboBoxPatrol.Text = "Patrols";
-            this.ExtComboBoxPatrol.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.ExtComboBoxPatrol.ValueMember = "";
-            this.ExtComboBoxPatrol.SelectedIndexChanged += new System.EventHandler(this.toolStripPatrol_IndexChanged);
-            // 
-            // ExtComboBoxRange
-            // 
-            this.ExtComboBoxRange.BorderColor = System.Drawing.Color.White;
-            this.ExtComboBoxRange.ButtonColorScaling = 0.5F;
-            this.ExtComboBoxRange.DataSource = null;
-            this.ExtComboBoxRange.DisableBackgroundDisabledShadingGradient = false;
-            this.ExtComboBoxRange.DisplayMember = "";
-            this.ExtComboBoxRange.DropDownBackgroundColor = System.Drawing.Color.Gray;
-            this.ExtComboBoxRange.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.ExtComboBoxRange.Location = new System.Drawing.Point(150, 3);
-            this.ExtComboBoxRange.MouseOverBackgroundColor = System.Drawing.Color.Silver;
-            this.ExtComboBoxRange.Name = "ExtComboBoxRange";
-            this.ExtComboBoxRange.ScrollBarButtonColor = System.Drawing.Color.LightGray;
-            this.ExtComboBoxRange.ScrollBarColor = System.Drawing.Color.LightGray;
-            this.ExtComboBoxRange.SelectedIndex = -1;
-            this.ExtComboBoxRange.SelectedItem = null;
-            this.ExtComboBoxRange.SelectedValue = null;
-            this.ExtComboBoxRange.Size = new System.Drawing.Size(122, 21);
-            this.ExtComboBoxRange.TabIndex = 17;
-            this.ExtComboBoxRange.Text = "Ranges";
-            this.ExtComboBoxRange.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.ExtComboBoxRange.ValueMember = "";
-            this.ExtComboBoxRange.SelectedIndexChanged += new System.EventHandler(this.toolStripPatrol_IndexChanged);
-            // 
-            // buttonCreatePatrol
-            // 
-            this.buttonCreatePatrol.Enabled = false;
-            this.buttonCreatePatrol.Location = new System.Drawing.Point(289, 3);
-            this.buttonCreatePatrol.Name = "buttonCreatePatrol";
-            this.buttonCreatePatrol.Size = new System.Drawing.Size(71, 21);
-            this.buttonCreatePatrol.TabIndex = 16;
-            this.buttonCreatePatrol.Text = "Create";
-            this.buttonCreatePatrol.UseVisualStyleBackColor = true;
             // 
             // tableLayoutNews
             // 
@@ -524,12 +277,13 @@ namespace EDDCanonnPanel
             this.tableLayoutNews.Controls.Add(this.buttonNextNews, 2, 1);
             this.tableLayoutNews.Controls.Add(this.buttonPrevNews, 0, 1);
             this.tableLayoutNews.Controls.Add(this.labelNewsIndex, 2, 0);
-            this.tableLayoutNews.Location = new System.Drawing.Point(20, 294);
+            this.tableLayoutNews.Dock = System.Windows.Forms.DockStyle.Top;
+            this.tableLayoutNews.Location = new System.Drawing.Point(0, 282);
             this.tableLayoutNews.Name = "tableLayoutNews";
             this.tableLayoutNews.RowCount = 2;
             this.tableLayoutNews.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutNews.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 50F));
-            this.tableLayoutNews.Size = new System.Drawing.Size(364, 66);
+            this.tableLayoutNews.Size = new System.Drawing.Size(860, 66);
             this.tableLayoutNews.TabIndex = 14;
             // 
             // labelNews
@@ -553,37 +307,14 @@ namespace EDDCanonnPanel
             this.textBoxNews.ReadOnly = true;
             this.textBoxNews.Size = new System.Drawing.Size(260, 44);
             this.textBoxNews.TabIndex = 4;
+            this.textBoxNews.Text = "Waiting..";
             this.textBoxNews.Click += new System.EventHandler(this.textBoxNews_Click);
-            // 
-            // buttonNextNews
-            // 
-            this.buttonNextNews.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.buttonNextNews.AutoSize = true;
-            this.buttonNextNews.Location = new System.Drawing.Point(318, 29);
-            this.buttonNextNews.Name = "buttonNextNews";
-            this.buttonNextNews.Size = new System.Drawing.Size(43, 23);
-            this.buttonNextNews.TabIndex = 1;
-            this.buttonNextNews.Text = "Next";
-            this.buttonNextNews.UseVisualStyleBackColor = true;
-            this.buttonNextNews.Click += new System.EventHandler(this.buttonNextNews_Click);
-            // 
-            // buttonPrevNews
-            // 
-            this.buttonPrevNews.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.buttonPrevNews.AutoSize = true;
-            this.buttonPrevNews.Location = new System.Drawing.Point(3, 29);
-            this.buttonPrevNews.Name = "buttonPrevNews";
-            this.buttonPrevNews.Size = new System.Drawing.Size(41, 23);
-            this.buttonPrevNews.TabIndex = 0;
-            this.buttonPrevNews.Text = "Prev";
-            this.buttonPrevNews.UseVisualStyleBackColor = true;
-            this.buttonPrevNews.Click += new System.EventHandler(this.buttonPrevNews_Click);
             // 
             // labelNewsIndex
             // 
             this.labelNewsIndex.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.labelNewsIndex.AutoSize = true;
-            this.labelNewsIndex.Location = new System.Drawing.Point(316, 1);
+            this.labelNewsIndex.Location = new System.Drawing.Point(812, 1);
             this.labelNewsIndex.Name = "labelNewsIndex";
             this.labelNewsIndex.Size = new System.Drawing.Size(45, 13);
             this.labelNewsIndex.TabIndex = 16;
@@ -604,7 +335,8 @@ namespace EDDCanonnPanel
             this.d,
             this.e,
             this.f});
-            this.dataGridSignals.Location = new System.Drawing.Point(20, 582);
+            this.dataGridSignals.Dock = System.Windows.Forms.DockStyle.Top;
+            this.dataGridSignals.Location = new System.Drawing.Point(0, 555);
             this.dataGridSignals.Name = "dataGridSignals";
             this.dataGridSignals.ReadOnly = true;
             dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
@@ -614,7 +346,7 @@ namespace EDDCanonnPanel
             this.dataGridSignals.ShowCellToolTips = false;
             this.dataGridSignals.ShowEditingIcon = false;
             this.dataGridSignals.ShowRowErrors = false;
-            this.dataGridSignals.Size = new System.Drawing.Size(365, 25);
+            this.dataGridSignals.Size = new System.Drawing.Size(860, 94);
             this.dataGridSignals.TabIndex = 16;
             this.dataGridSignals.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.dataGridSignals_DataError);
             // 
@@ -677,7 +409,8 @@ namespace EDDCanonnPanel
             this.ColumnBioInfo1,
             this.ColumnBioInfo2,
             this.clickableBioInfo});
-            this.dataGridViewBioInfo.Location = new System.Drawing.Point(0, 0);
+            this.dataGridViewBioInfo.Dock = System.Windows.Forms.DockStyle.Top;
+            this.dataGridViewBioInfo.Location = new System.Drawing.Point(0, 649);
             this.dataGridViewBioInfo.Name = "dataGridViewBioInfo";
             this.dataGridViewBioInfo.ReadOnly = true;
             dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
@@ -687,7 +420,7 @@ namespace EDDCanonnPanel
             this.dataGridViewBioInfo.ShowCellToolTips = false;
             this.dataGridViewBioInfo.ShowEditingIcon = false;
             this.dataGridViewBioInfo.ShowRowErrors = false;
-            this.dataGridViewBioInfo.Size = new System.Drawing.Size(17, 53);
+            this.dataGridViewBioInfo.Size = new System.Drawing.Size(860, 107);
             this.dataGridViewBioInfo.TabIndex = 17;
             this.dataGridViewBioInfo.Visible = false;
             this.dataGridViewBioInfo.CellMouseDoubleClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dataGridViewBioInfo_CellMouseDoubleClick);
@@ -732,12 +465,15 @@ namespace EDDCanonnPanel
             // 
             // extPanelDataGridViewScrollPatrol
             // 
+            this.extPanelDataGridViewScrollPatrol.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.extPanelDataGridViewScrollPatrol.Controls.Add(this.extScrollBarPatrol);
             this.extPanelDataGridViewScrollPatrol.Controls.Add(this.dataGridPatrol);
+            this.extPanelDataGridViewScrollPatrol.Dock = System.Windows.Forms.DockStyle.Top;
             this.extPanelDataGridViewScrollPatrol.InternalMargin = new System.Windows.Forms.Padding(0);
-            this.extPanelDataGridViewScrollPatrol.Location = new System.Drawing.Point(20, 397);
+            this.extPanelDataGridViewScrollPatrol.Location = new System.Drawing.Point(0, 376);
             this.extPanelDataGridViewScrollPatrol.Name = "extPanelDataGridViewScrollPatrol";
-            this.extPanelDataGridViewScrollPatrol.Size = new System.Drawing.Size(365, 179);
+            this.extPanelDataGridViewScrollPatrol.ScrollBarWidth = 24;
+            this.extPanelDataGridViewScrollPatrol.Size = new System.Drawing.Size(860, 179);
             this.extPanelDataGridViewScrollPatrol.TabIndex = 15;
             this.extPanelDataGridViewScrollPatrol.VerticalScrollBarDockRight = true;
             // 
@@ -746,27 +482,32 @@ namespace EDDCanonnPanel
             this.extScrollBarPatrol.AlwaysHideScrollBar = false;
             this.extScrollBarPatrol.ArrowBorderColor = System.Drawing.Color.LightBlue;
             this.extScrollBarPatrol.ArrowButtonColor = System.Drawing.Color.LightGray;
-            this.extScrollBarPatrol.ArrowColorScaling = 0.5F;
+            this.extScrollBarPatrol.ArrowButtonColor2 = System.Drawing.Color.LightGray;
             this.extScrollBarPatrol.ArrowDownDrawAngle = 270F;
             this.extScrollBarPatrol.ArrowUpDrawAngle = 90F;
             this.extScrollBarPatrol.BorderColor = System.Drawing.Color.White;
             this.extScrollBarPatrol.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.extScrollBarPatrol.HideScrollBar = false;
             this.extScrollBarPatrol.LargeChange = 0;
-            this.extScrollBarPatrol.Location = new System.Drawing.Point(346, 0);
+            this.extScrollBarPatrol.Location = new System.Drawing.Point(834, 0);
             this.extScrollBarPatrol.Maximum = -1;
             this.extScrollBarPatrol.Minimum = 0;
             this.extScrollBarPatrol.MouseOverButtonColor = System.Drawing.Color.Green;
+            this.extScrollBarPatrol.MouseOverButtonColor2 = System.Drawing.Color.Green;
             this.extScrollBarPatrol.MousePressedButtonColor = System.Drawing.Color.Red;
+            this.extScrollBarPatrol.MousePressedButtonColor2 = System.Drawing.Color.Red;
             this.extScrollBarPatrol.Name = "extScrollBarPatrol";
-            this.extScrollBarPatrol.Size = new System.Drawing.Size(19, 179);
+            this.extScrollBarPatrol.Size = new System.Drawing.Size(24, 177);
+            this.extScrollBarPatrol.SkinnyStyle = ExtendedControls.ExtScrollBar.ScrollStyle.Normal;
             this.extScrollBarPatrol.SliderColor = System.Drawing.Color.DarkGray;
+            this.extScrollBarPatrol.SliderColor2 = System.Drawing.Color.DarkGray;
+            this.extScrollBarPatrol.SliderDrawAngle = 90F;
             this.extScrollBarPatrol.SmallChange = 1;
             this.extScrollBarPatrol.TabIndex = 13;
             this.extScrollBarPatrol.Text = "extScrollBarPatrol";
             this.extScrollBarPatrol.ThumbBorderColor = System.Drawing.Color.Yellow;
             this.extScrollBarPatrol.ThumbButtonColor = System.Drawing.Color.DarkBlue;
-            this.extScrollBarPatrol.ThumbColorScaling = 0.5F;
+            this.extScrollBarPatrol.ThumbButtonColor2 = System.Drawing.Color.DarkBlue;
             this.extScrollBarPatrol.ThumbDrawAngle = 0F;
             this.extScrollBarPatrol.Value = -1;
             this.extScrollBarPatrol.ValueLimited = -1;
@@ -798,7 +539,7 @@ namespace EDDCanonnPanel
             this.dataGridPatrol.ShowCellToolTips = false;
             this.dataGridPatrol.ShowEditingIcon = false;
             this.dataGridPatrol.ShowRowErrors = false;
-            this.dataGridPatrol.Size = new System.Drawing.Size(346, 179);
+            this.dataGridPatrol.Size = new System.Drawing.Size(834, 177);
             this.dataGridPatrol.TabIndex = 12;
             this.dataGridPatrol.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.dataGridPatrol_DataError);
             this.dataGridPatrol.MouseDown += new System.Windows.Forms.MouseEventHandler(this.DataGridPatrol_MouseDown);
@@ -849,6 +590,107 @@ namespace EDDCanonnPanel
             this.PatrolUrl.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
             this.PatrolUrl.Visible = false;
             // 
+            // buttonNextNews
+            // 
+            this.buttonNextNews.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.buttonNextNews.AutoSize = true;
+            this.buttonNextNews.BackColor2 = System.Drawing.Color.White;
+            this.buttonNextNews.ButtonDisabledScaling = 0.5F;
+            this.buttonNextNews.GradientDirection = 90F;
+            this.buttonNextNews.Location = new System.Drawing.Point(814, 29);
+            this.buttonNextNews.MouseOverScaling = 1.3F;
+            this.buttonNextNews.MouseSelectedScaling = 1.3F;
+            this.buttonNextNews.Name = "buttonNextNews";
+            this.buttonNextNews.Size = new System.Drawing.Size(43, 23);
+            this.buttonNextNews.TabIndex = 1;
+            this.buttonNextNews.Text = "Next";
+            this.buttonNextNews.UseVisualStyleBackColor = true;
+            this.buttonNextNews.Click += new System.EventHandler(this.buttonNextNews_Click);
+            // 
+            // buttonPrevNews
+            // 
+            this.buttonPrevNews.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.buttonPrevNews.AutoSize = true;
+            this.buttonPrevNews.BackColor2 = System.Drawing.Color.White;
+            this.buttonPrevNews.ButtonDisabledScaling = 0.5F;
+            this.buttonPrevNews.GradientDirection = 90F;
+            this.buttonPrevNews.Location = new System.Drawing.Point(3, 29);
+            this.buttonPrevNews.MouseOverScaling = 1.3F;
+            this.buttonPrevNews.MouseSelectedScaling = 1.3F;
+            this.buttonPrevNews.Name = "buttonPrevNews";
+            this.buttonPrevNews.Size = new System.Drawing.Size(41, 23);
+            this.buttonPrevNews.TabIndex = 0;
+            this.buttonPrevNews.Text = "Prev";
+            this.buttonPrevNews.UseVisualStyleBackColor = true;
+            this.buttonPrevNews.Click += new System.EventHandler(this.buttonPrevNews_Click);
+            // 
+            // ExtComboBoxPatrol
+            // 
+            this.ExtComboBoxPatrol.BackColor2 = System.Drawing.Color.Red;
+            this.ExtComboBoxPatrol.BorderColor = System.Drawing.Color.White;
+            this.ExtComboBoxPatrol.BorderSize = 1;
+            this.ExtComboBoxPatrol.ControlBackground = System.Drawing.SystemColors.Control;
+            this.ExtComboBoxPatrol.DataSource = null;
+            this.ExtComboBoxPatrol.DisableBackgroundDisabledShadingGradient = false;
+            this.ExtComboBoxPatrol.DisabledScaling = 0.5F;
+            this.ExtComboBoxPatrol.DisplayMember = "";
+            this.ExtComboBoxPatrol.DropDownMinimumItemWidth = -1;
+            this.ExtComboBoxPatrol.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.ExtComboBoxPatrol.GradientDirection = 90F;
+            this.ExtComboBoxPatrol.Location = new System.Drawing.Point(3, 3);
+            this.ExtComboBoxPatrol.MouseOverScalingColor = 1.3F;
+            this.ExtComboBoxPatrol.Name = "ExtComboBoxPatrol";
+            this.ExtComboBoxPatrol.SelectedIndex = -1;
+            this.ExtComboBoxPatrol.SelectedItem = null;
+            this.ExtComboBoxPatrol.SelectedValue = null;
+            this.ExtComboBoxPatrol.Size = new System.Drawing.Size(122, 21);
+            this.ExtComboBoxPatrol.TabIndex = 18;
+            this.ExtComboBoxPatrol.Text = "Patrols";
+            this.ExtComboBoxPatrol.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.ExtComboBoxPatrol.ValueMember = "";
+            this.ExtComboBoxPatrol.SelectedIndexChanged += new System.EventHandler(this.toolStripPatrol_IndexChanged);
+            // 
+            // ExtComboBoxRange
+            // 
+            this.ExtComboBoxRange.BackColor2 = System.Drawing.Color.Red;
+            this.ExtComboBoxRange.BorderColor = System.Drawing.Color.White;
+            this.ExtComboBoxRange.BorderSize = 1;
+            this.ExtComboBoxRange.ControlBackground = System.Drawing.SystemColors.Control;
+            this.ExtComboBoxRange.DataSource = null;
+            this.ExtComboBoxRange.DisableBackgroundDisabledShadingGradient = false;
+            this.ExtComboBoxRange.DisabledScaling = 0.5F;
+            this.ExtComboBoxRange.DisplayMember = "";
+            this.ExtComboBoxRange.DropDownMinimumItemWidth = -1;
+            this.ExtComboBoxRange.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.ExtComboBoxRange.GradientDirection = 90F;
+            this.ExtComboBoxRange.Location = new System.Drawing.Point(405, 3);
+            this.ExtComboBoxRange.MouseOverScalingColor = 1.3F;
+            this.ExtComboBoxRange.Name = "ExtComboBoxRange";
+            this.ExtComboBoxRange.SelectedIndex = -1;
+            this.ExtComboBoxRange.SelectedItem = null;
+            this.ExtComboBoxRange.SelectedValue = null;
+            this.ExtComboBoxRange.Size = new System.Drawing.Size(122, 21);
+            this.ExtComboBoxRange.TabIndex = 17;
+            this.ExtComboBoxRange.Text = "Ranges";
+            this.ExtComboBoxRange.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.ExtComboBoxRange.ValueMember = "";
+            this.ExtComboBoxRange.SelectedIndexChanged += new System.EventHandler(this.toolStripPatrol_IndexChanged);
+            // 
+            // buttonCreatePatrol
+            // 
+            this.buttonCreatePatrol.BackColor2 = System.Drawing.Color.White;
+            this.buttonCreatePatrol.ButtonDisabledScaling = 0.5F;
+            this.buttonCreatePatrol.Enabled = false;
+            this.buttonCreatePatrol.GradientDirection = 90F;
+            this.buttonCreatePatrol.Location = new System.Drawing.Point(785, 3);
+            this.buttonCreatePatrol.MouseOverScaling = 1.3F;
+            this.buttonCreatePatrol.MouseSelectedScaling = 1.3F;
+            this.buttonCreatePatrol.Name = "buttonCreatePatrol";
+            this.buttonCreatePatrol.Size = new System.Drawing.Size(71, 21);
+            this.buttonCreatePatrol.TabIndex = 16;
+            this.buttonCreatePatrol.Text = "Create";
+            this.buttonCreatePatrol.UseVisualStyleBackColor = true;
+            // 
             // extTabControlData
             // 
             this.extTabControlData.AllowDragReorder = false;
@@ -859,27 +701,38 @@ namespace EDDCanonnPanel
             this.extTabControlData.Controls.Add(this.tabSurvey);
             this.extTabControlData.Controls.Add(this.tabGmo);
             this.extTabControlData.Controls.Add(this.tabPageAbout);
+            this.extTabControlData.Dock = System.Windows.Forms.DockStyle.Top;
             this.extTabControlData.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.extTabControlData.Location = new System.Drawing.Point(20, 37);
+            this.extTabControlData.Location = new System.Drawing.Point(0, 28);
             this.extTabControlData.Margin = new System.Windows.Forms.Padding(0);
             this.extTabControlData.Multiline = true;
             this.extTabControlData.Name = "extTabControlData";
+            this.extTabControlData.PaintTransparentColor = System.Drawing.Color.Transparent;
             this.extTabControlData.SelectedIndex = 0;
             this.extTabControlData.ShowToolTips = true;
-            this.extTabControlData.Size = new System.Drawing.Size(364, 254);
-            this.extTabControlData.TabBackgroundColor = System.Drawing.Color.Transparent;
-            this.extTabControlData.TabColorScaling = 0.5F;
-            this.extTabControlData.TabControlBorderBrightColor = System.Drawing.Color.LightGray;
+            this.extTabControlData.Size = new System.Drawing.Size(860, 254);
+            this.extTabControlData.TabBackgroundGradientDirection = 0F;
             this.extTabControlData.TabControlBorderColor = System.Drawing.Color.DarkGray;
+            this.extTabControlData.TabControlBorderColor2 = System.Drawing.Color.DarkGray;
             this.extTabControlData.TabDisabledScaling = 0.5F;
+            this.extTabControlData.TabGradientDirection = 90F;
             this.extTabControlData.TabIndex = 11;
             this.extTabControlData.TabMouseOverColor = System.Drawing.Color.White;
+            this.extTabControlData.TabMouseOverColor2 = System.Drawing.Color.White;
             this.extTabControlData.TabNotSelectedBorderColor = System.Drawing.Color.Gray;
             this.extTabControlData.TabNotSelectedColor = System.Drawing.Color.Gray;
+            this.extTabControlData.TabNotSelectedColor2 = System.Drawing.Color.Gray;
             this.extTabControlData.TabSelectedColor = System.Drawing.Color.LightGray;
+            this.extTabControlData.TabSelectedColor2 = System.Drawing.Color.Gray;
             this.extTabControlData.TabStyle = tabStyleSquare1;
             this.extTabControlData.TextNotSelectedColor = System.Drawing.SystemColors.ControlText;
             this.extTabControlData.TextSelectedColor = System.Drawing.SystemColors.ControlText;
+            this.extTabControlData.ThemeColors = new System.Drawing.Color[] {
+        System.Drawing.SystemColors.Control,
+        System.Drawing.SystemColors.Control,
+        System.Drawing.SystemColors.Control,
+        System.Drawing.SystemColors.Control};
+            this.extTabControlData.ThemeColorSet = 1;
             // 
             // tabData
             // 
@@ -887,7 +740,7 @@ namespace EDDCanonnPanel
             this.tabData.Location = new System.Drawing.Point(4, 22);
             this.tabData.Name = "tabData";
             this.tabData.Padding = new System.Windows.Forms.Padding(3);
-            this.tabData.Size = new System.Drawing.Size(356, 228);
+            this.tabData.Size = new System.Drawing.Size(852, 228);
             this.tabData.TabIndex = 1;
             this.tabData.Text = "Overview";
             this.tabData.ToolTipText = "Summary of all system data.";
@@ -901,6 +754,7 @@ namespace EDDCanonnPanel
             this.extPanelDataGridViewScrollData.Location = new System.Drawing.Point(0, 0);
             this.extPanelDataGridViewScrollData.Margin = new System.Windows.Forms.Padding(0);
             this.extPanelDataGridViewScrollData.Name = "extPanelDataGridViewScrollData";
+            this.extPanelDataGridViewScrollData.ScrollBarWidth = 24;
             this.extPanelDataGridViewScrollData.Size = new System.Drawing.Size(358, 233);
             this.extPanelDataGridViewScrollData.TabIndex = 14;
             this.extPanelDataGridViewScrollData.VerticalScrollBarDockRight = true;
@@ -910,27 +764,32 @@ namespace EDDCanonnPanel
             this.extScrollBarData.AlwaysHideScrollBar = false;
             this.extScrollBarData.ArrowBorderColor = System.Drawing.Color.LightBlue;
             this.extScrollBarData.ArrowButtonColor = System.Drawing.Color.LightGray;
-            this.extScrollBarData.ArrowColorScaling = 0.5F;
+            this.extScrollBarData.ArrowButtonColor2 = System.Drawing.Color.LightGray;
             this.extScrollBarData.ArrowDownDrawAngle = 270F;
             this.extScrollBarData.ArrowUpDrawAngle = 90F;
             this.extScrollBarData.BorderColor = System.Drawing.Color.White;
             this.extScrollBarData.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.extScrollBarData.HideScrollBar = false;
             this.extScrollBarData.LargeChange = 0;
-            this.extScrollBarData.Location = new System.Drawing.Point(339, 0);
+            this.extScrollBarData.Location = new System.Drawing.Point(334, 0);
             this.extScrollBarData.Maximum = -1;
             this.extScrollBarData.Minimum = 0;
             this.extScrollBarData.MouseOverButtonColor = System.Drawing.Color.Green;
+            this.extScrollBarData.MouseOverButtonColor2 = System.Drawing.Color.Green;
             this.extScrollBarData.MousePressedButtonColor = System.Drawing.Color.Red;
+            this.extScrollBarData.MousePressedButtonColor2 = System.Drawing.Color.Red;
             this.extScrollBarData.Name = "extScrollBarData";
-            this.extScrollBarData.Size = new System.Drawing.Size(19, 233);
+            this.extScrollBarData.Size = new System.Drawing.Size(24, 233);
+            this.extScrollBarData.SkinnyStyle = ExtendedControls.ExtScrollBar.ScrollStyle.Normal;
             this.extScrollBarData.SliderColor = System.Drawing.Color.DarkGray;
+            this.extScrollBarData.SliderColor2 = System.Drawing.Color.DarkGray;
+            this.extScrollBarData.SliderDrawAngle = 90F;
             this.extScrollBarData.SmallChange = 1;
             this.extScrollBarData.TabIndex = 14;
             this.extScrollBarData.Text = "extScrollBar1";
             this.extScrollBarData.ThumbBorderColor = System.Drawing.Color.Yellow;
             this.extScrollBarData.ThumbButtonColor = System.Drawing.Color.DarkBlue;
-            this.extScrollBarData.ThumbColorScaling = 0.5F;
+            this.extScrollBarData.ThumbButtonColor2 = System.Drawing.Color.DarkBlue;
             this.extScrollBarData.ThumbDrawAngle = 0F;
             this.extScrollBarData.Value = -1;
             this.extScrollBarData.ValueLimited = -1;
@@ -957,7 +816,7 @@ namespace EDDCanonnPanel
             this.dataGridViewData.ShowCellToolTips = false;
             this.dataGridViewData.ShowEditingIcon = false;
             this.dataGridViewData.ShowRowErrors = false;
-            this.dataGridViewData.Size = new System.Drawing.Size(339, 233);
+            this.dataGridViewData.Size = new System.Drawing.Size(334, 233);
             this.dataGridViewData.TabIndex = 12;
             this.dataGridViewData.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.dataGridViewData_DataError);
             // 
@@ -998,6 +857,7 @@ namespace EDDCanonnPanel
             this.extPanelDataGridViewScrollRing.InternalMargin = new System.Windows.Forms.Padding(0);
             this.extPanelDataGridViewScrollRing.Location = new System.Drawing.Point(0, 0);
             this.extPanelDataGridViewScrollRing.Name = "extPanelDataGridViewScrollRing";
+            this.extPanelDataGridViewScrollRing.ScrollBarWidth = 24;
             this.extPanelDataGridViewScrollRing.Size = new System.Drawing.Size(358, 233);
             this.extPanelDataGridViewScrollRing.TabIndex = 15;
             this.extPanelDataGridViewScrollRing.VerticalScrollBarDockRight = true;
@@ -1007,27 +867,32 @@ namespace EDDCanonnPanel
             this.extScrollBarRing.AlwaysHideScrollBar = false;
             this.extScrollBarRing.ArrowBorderColor = System.Drawing.Color.LightBlue;
             this.extScrollBarRing.ArrowButtonColor = System.Drawing.Color.LightGray;
-            this.extScrollBarRing.ArrowColorScaling = 0.5F;
+            this.extScrollBarRing.ArrowButtonColor2 = System.Drawing.Color.LightGray;
             this.extScrollBarRing.ArrowDownDrawAngle = 270F;
             this.extScrollBarRing.ArrowUpDrawAngle = 90F;
             this.extScrollBarRing.BorderColor = System.Drawing.Color.White;
             this.extScrollBarRing.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.extScrollBarRing.HideScrollBar = false;
             this.extScrollBarRing.LargeChange = 0;
-            this.extScrollBarRing.Location = new System.Drawing.Point(339, 0);
+            this.extScrollBarRing.Location = new System.Drawing.Point(334, 0);
             this.extScrollBarRing.Maximum = -1;
             this.extScrollBarRing.Minimum = 0;
             this.extScrollBarRing.MouseOverButtonColor = System.Drawing.Color.Green;
+            this.extScrollBarRing.MouseOverButtonColor2 = System.Drawing.Color.Green;
             this.extScrollBarRing.MousePressedButtonColor = System.Drawing.Color.Red;
+            this.extScrollBarRing.MousePressedButtonColor2 = System.Drawing.Color.Red;
             this.extScrollBarRing.Name = "extScrollBarRing";
-            this.extScrollBarRing.Size = new System.Drawing.Size(19, 233);
+            this.extScrollBarRing.Size = new System.Drawing.Size(24, 233);
+            this.extScrollBarRing.SkinnyStyle = ExtendedControls.ExtScrollBar.ScrollStyle.Normal;
             this.extScrollBarRing.SliderColor = System.Drawing.Color.DarkGray;
+            this.extScrollBarRing.SliderColor2 = System.Drawing.Color.DarkGray;
+            this.extScrollBarRing.SliderDrawAngle = 90F;
             this.extScrollBarRing.SmallChange = 1;
             this.extScrollBarRing.TabIndex = 15;
             this.extScrollBarRing.Text = "extScrollBar1";
             this.extScrollBarRing.ThumbBorderColor = System.Drawing.Color.Yellow;
             this.extScrollBarRing.ThumbButtonColor = System.Drawing.Color.DarkBlue;
-            this.extScrollBarRing.ThumbColorScaling = 0.5F;
+            this.extScrollBarRing.ThumbButtonColor2 = System.Drawing.Color.DarkBlue;
             this.extScrollBarRing.ThumbDrawAngle = 0F;
             this.extScrollBarRing.Value = -1;
             this.extScrollBarRing.ValueLimited = -1;
@@ -1056,7 +921,7 @@ namespace EDDCanonnPanel
             this.dataGridViewRing.ShowCellToolTips = false;
             this.dataGridViewRing.ShowEditingIcon = false;
             this.dataGridViewRing.ShowRowErrors = false;
-            this.dataGridViewRing.Size = new System.Drawing.Size(339, 233);
+            this.dataGridViewRing.Size = new System.Drawing.Size(334, 233);
             this.dataGridViewRing.TabIndex = 14;
             this.dataGridViewRing.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.dataGridViewRing_DataError);
             // 
@@ -1120,6 +985,7 @@ namespace EDDCanonnPanel
             this.extPanelDataGridViewScrollBio.InternalMargin = new System.Windows.Forms.Padding(0);
             this.extPanelDataGridViewScrollBio.Location = new System.Drawing.Point(0, 0);
             this.extPanelDataGridViewScrollBio.Name = "extPanelDataGridViewScrollBio";
+            this.extPanelDataGridViewScrollBio.ScrollBarWidth = 24;
             this.extPanelDataGridViewScrollBio.Size = new System.Drawing.Size(358, 233);
             this.extPanelDataGridViewScrollBio.TabIndex = 15;
             this.extPanelDataGridViewScrollBio.VerticalScrollBarDockRight = true;
@@ -1129,27 +995,32 @@ namespace EDDCanonnPanel
             this.extScrollBarBio.AlwaysHideScrollBar = false;
             this.extScrollBarBio.ArrowBorderColor = System.Drawing.Color.LightBlue;
             this.extScrollBarBio.ArrowButtonColor = System.Drawing.Color.LightGray;
-            this.extScrollBarBio.ArrowColorScaling = 0.5F;
+            this.extScrollBarBio.ArrowButtonColor2 = System.Drawing.Color.LightGray;
             this.extScrollBarBio.ArrowDownDrawAngle = 270F;
             this.extScrollBarBio.ArrowUpDrawAngle = 90F;
             this.extScrollBarBio.BorderColor = System.Drawing.Color.White;
             this.extScrollBarBio.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.extScrollBarBio.HideScrollBar = false;
             this.extScrollBarBio.LargeChange = 0;
-            this.extScrollBarBio.Location = new System.Drawing.Point(339, 0);
+            this.extScrollBarBio.Location = new System.Drawing.Point(334, 0);
             this.extScrollBarBio.Maximum = -1;
             this.extScrollBarBio.Minimum = 0;
             this.extScrollBarBio.MouseOverButtonColor = System.Drawing.Color.Green;
+            this.extScrollBarBio.MouseOverButtonColor2 = System.Drawing.Color.Green;
             this.extScrollBarBio.MousePressedButtonColor = System.Drawing.Color.Red;
+            this.extScrollBarBio.MousePressedButtonColor2 = System.Drawing.Color.Red;
             this.extScrollBarBio.Name = "extScrollBarBio";
-            this.extScrollBarBio.Size = new System.Drawing.Size(19, 233);
+            this.extScrollBarBio.Size = new System.Drawing.Size(24, 233);
+            this.extScrollBarBio.SkinnyStyle = ExtendedControls.ExtScrollBar.ScrollStyle.Normal;
             this.extScrollBarBio.SliderColor = System.Drawing.Color.DarkGray;
+            this.extScrollBarBio.SliderColor2 = System.Drawing.Color.DarkGray;
+            this.extScrollBarBio.SliderDrawAngle = 90F;
             this.extScrollBarBio.SmallChange = 1;
             this.extScrollBarBio.TabIndex = 15;
             this.extScrollBarBio.Text = "extScrollBar1";
             this.extScrollBarBio.ThumbBorderColor = System.Drawing.Color.Yellow;
             this.extScrollBarBio.ThumbButtonColor = System.Drawing.Color.DarkBlue;
-            this.extScrollBarBio.ThumbColorScaling = 0.5F;
+            this.extScrollBarBio.ThumbButtonColor2 = System.Drawing.Color.DarkBlue;
             this.extScrollBarBio.ThumbDrawAngle = 0F;
             this.extScrollBarBio.Value = -1;
             this.extScrollBarBio.ValueLimited = -1;
@@ -1178,7 +1049,7 @@ namespace EDDCanonnPanel
             this.dataGridViewBio.ShowCellToolTips = false;
             this.dataGridViewBio.ShowEditingIcon = false;
             this.dataGridViewBio.ShowRowErrors = false;
-            this.dataGridViewBio.Size = new System.Drawing.Size(339, 233);
+            this.dataGridViewBio.Size = new System.Drawing.Size(334, 233);
             this.dataGridViewBio.TabIndex = 14;
             this.dataGridViewBio.CellMouseDoubleClick += new System.Windows.Forms.DataGridViewCellMouseEventHandler(this.dataGridViewBio_CellMouseDoubleClick);
             this.dataGridViewBio.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.dataGridViewBio_DataError);
@@ -1238,6 +1109,7 @@ namespace EDDCanonnPanel
             this.extPanelDataGridViewScrollGeo.InternalMargin = new System.Windows.Forms.Padding(0);
             this.extPanelDataGridViewScrollGeo.Location = new System.Drawing.Point(0, 0);
             this.extPanelDataGridViewScrollGeo.Name = "extPanelDataGridViewScrollGeo";
+            this.extPanelDataGridViewScrollGeo.ScrollBarWidth = 24;
             this.extPanelDataGridViewScrollGeo.Size = new System.Drawing.Size(358, 233);
             this.extPanelDataGridViewScrollGeo.TabIndex = 16;
             this.extPanelDataGridViewScrollGeo.VerticalScrollBarDockRight = true;
@@ -1247,27 +1119,32 @@ namespace EDDCanonnPanel
             this.extScrollBarGeo.AlwaysHideScrollBar = false;
             this.extScrollBarGeo.ArrowBorderColor = System.Drawing.Color.LightBlue;
             this.extScrollBarGeo.ArrowButtonColor = System.Drawing.Color.LightGray;
-            this.extScrollBarGeo.ArrowColorScaling = 0.5F;
+            this.extScrollBarGeo.ArrowButtonColor2 = System.Drawing.Color.LightGray;
             this.extScrollBarGeo.ArrowDownDrawAngle = 270F;
             this.extScrollBarGeo.ArrowUpDrawAngle = 90F;
             this.extScrollBarGeo.BorderColor = System.Drawing.Color.White;
             this.extScrollBarGeo.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.extScrollBarGeo.HideScrollBar = false;
             this.extScrollBarGeo.LargeChange = 0;
-            this.extScrollBarGeo.Location = new System.Drawing.Point(339, 0);
+            this.extScrollBarGeo.Location = new System.Drawing.Point(334, 0);
             this.extScrollBarGeo.Maximum = -1;
             this.extScrollBarGeo.Minimum = 0;
             this.extScrollBarGeo.MouseOverButtonColor = System.Drawing.Color.Green;
+            this.extScrollBarGeo.MouseOverButtonColor2 = System.Drawing.Color.Green;
             this.extScrollBarGeo.MousePressedButtonColor = System.Drawing.Color.Red;
+            this.extScrollBarGeo.MousePressedButtonColor2 = System.Drawing.Color.Red;
             this.extScrollBarGeo.Name = "extScrollBarGeo";
-            this.extScrollBarGeo.Size = new System.Drawing.Size(19, 233);
+            this.extScrollBarGeo.Size = new System.Drawing.Size(24, 233);
+            this.extScrollBarGeo.SkinnyStyle = ExtendedControls.ExtScrollBar.ScrollStyle.Normal;
             this.extScrollBarGeo.SliderColor = System.Drawing.Color.DarkGray;
+            this.extScrollBarGeo.SliderColor2 = System.Drawing.Color.DarkGray;
+            this.extScrollBarGeo.SliderDrawAngle = 90F;
             this.extScrollBarGeo.SmallChange = 1;
             this.extScrollBarGeo.TabIndex = 15;
             this.extScrollBarGeo.Text = "extScrollBar1";
             this.extScrollBarGeo.ThumbBorderColor = System.Drawing.Color.Yellow;
             this.extScrollBarGeo.ThumbButtonColor = System.Drawing.Color.DarkBlue;
-            this.extScrollBarGeo.ThumbColorScaling = 0.5F;
+            this.extScrollBarGeo.ThumbButtonColor2 = System.Drawing.Color.DarkBlue;
             this.extScrollBarGeo.ThumbDrawAngle = 0F;
             this.extScrollBarGeo.Value = -1;
             this.extScrollBarGeo.ValueLimited = -1;
@@ -1296,7 +1173,7 @@ namespace EDDCanonnPanel
             this.dataGridViewGeo.ShowCellToolTips = false;
             this.dataGridViewGeo.ShowEditingIcon = false;
             this.dataGridViewGeo.ShowRowErrors = false;
-            this.dataGridViewGeo.Size = new System.Drawing.Size(339, 233);
+            this.dataGridViewGeo.Size = new System.Drawing.Size(334, 233);
             this.dataGridViewGeo.TabIndex = 14;
             // 
             // dataGridViewTextBoxColumn3
@@ -1376,6 +1253,7 @@ namespace EDDCanonnPanel
             this.extPanelDataGridViewScrollGMO.InternalMargin = new System.Windows.Forms.Padding(0);
             this.extPanelDataGridViewScrollGMO.Location = new System.Drawing.Point(0, 0);
             this.extPanelDataGridViewScrollGMO.Name = "extPanelDataGridViewScrollGMO";
+            this.extPanelDataGridViewScrollGMO.ScrollBarWidth = 24;
             this.extPanelDataGridViewScrollGMO.Size = new System.Drawing.Size(358, 233);
             this.extPanelDataGridViewScrollGMO.TabIndex = 16;
             this.extPanelDataGridViewScrollGMO.VerticalScrollBarDockRight = true;
@@ -1385,27 +1263,32 @@ namespace EDDCanonnPanel
             this.extScrollBarGMO.AlwaysHideScrollBar = false;
             this.extScrollBarGMO.ArrowBorderColor = System.Drawing.Color.LightBlue;
             this.extScrollBarGMO.ArrowButtonColor = System.Drawing.Color.LightGray;
-            this.extScrollBarGMO.ArrowColorScaling = 0.5F;
+            this.extScrollBarGMO.ArrowButtonColor2 = System.Drawing.Color.LightGray;
             this.extScrollBarGMO.ArrowDownDrawAngle = 270F;
             this.extScrollBarGMO.ArrowUpDrawAngle = 90F;
             this.extScrollBarGMO.BorderColor = System.Drawing.Color.White;
             this.extScrollBarGMO.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.extScrollBarGMO.HideScrollBar = false;
             this.extScrollBarGMO.LargeChange = 0;
-            this.extScrollBarGMO.Location = new System.Drawing.Point(339, 0);
+            this.extScrollBarGMO.Location = new System.Drawing.Point(334, 0);
             this.extScrollBarGMO.Maximum = -1;
             this.extScrollBarGMO.Minimum = 0;
             this.extScrollBarGMO.MouseOverButtonColor = System.Drawing.Color.Green;
+            this.extScrollBarGMO.MouseOverButtonColor2 = System.Drawing.Color.Green;
             this.extScrollBarGMO.MousePressedButtonColor = System.Drawing.Color.Red;
+            this.extScrollBarGMO.MousePressedButtonColor2 = System.Drawing.Color.Red;
             this.extScrollBarGMO.Name = "extScrollBarGMO";
-            this.extScrollBarGMO.Size = new System.Drawing.Size(19, 233);
+            this.extScrollBarGMO.Size = new System.Drawing.Size(24, 233);
+            this.extScrollBarGMO.SkinnyStyle = ExtendedControls.ExtScrollBar.ScrollStyle.Normal;
             this.extScrollBarGMO.SliderColor = System.Drawing.Color.DarkGray;
+            this.extScrollBarGMO.SliderColor2 = System.Drawing.Color.DarkGray;
+            this.extScrollBarGMO.SliderDrawAngle = 90F;
             this.extScrollBarGMO.SmallChange = 1;
             this.extScrollBarGMO.TabIndex = 15;
             this.extScrollBarGMO.Text = "extScrollBar1";
             this.extScrollBarGMO.ThumbBorderColor = System.Drawing.Color.Yellow;
             this.extScrollBarGMO.ThumbButtonColor = System.Drawing.Color.DarkBlue;
-            this.extScrollBarGMO.ThumbColorScaling = 0.5F;
+            this.extScrollBarGMO.ThumbButtonColor2 = System.Drawing.Color.DarkBlue;
             this.extScrollBarGMO.ThumbDrawAngle = 0F;
             this.extScrollBarGMO.Value = -1;
             this.extScrollBarGMO.ValueLimited = -1;
@@ -1431,7 +1314,7 @@ namespace EDDCanonnPanel
             this.dataGridViewGMO.ShowCellToolTips = false;
             this.dataGridViewGMO.ShowEditingIcon = false;
             this.dataGridViewGMO.ShowRowErrors = false;
-            this.dataGridViewGMO.Size = new System.Drawing.Size(339, 233);
+            this.dataGridViewGMO.Size = new System.Drawing.Size(334, 233);
             this.dataGridViewGMO.TabIndex = 14;
             this.dataGridViewGMO.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.dataGridViewGMO_DataError);
             // 
@@ -1573,13 +1456,13 @@ namespace EDDCanonnPanel
             this.Controls.Add(this.dataGridViewBioInfo);
             this.Controls.Add(this.dataGridSignals);
             this.Controls.Add(this.extPanelDataGridViewScrollPatrol);
-            this.Controls.Add(this.tableLayoutNews);
             this.Controls.Add(this.tableLayoutPatrol);
+            this.Controls.Add(this.tableLayoutNews);
             this.Controls.Add(this.extTabControlData);
             this.Controls.Add(this.tableLayoutSystem);
             this.Enabled = false;
             this.Name = "EDDCanonnUserControl";
-            this.Size = new System.Drawing.Size(407, 612);
+            this.Size = new System.Drawing.Size(860, 770);
             this.Resize += new System.EventHandler(this.EDDCanonnUserControl_Resize);
             this.tableLayoutSystem.ResumeLayout(false);
             this.tableLayoutSystem.PerformLayout();

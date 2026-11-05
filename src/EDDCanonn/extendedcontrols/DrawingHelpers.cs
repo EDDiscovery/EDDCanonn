@@ -85,6 +85,10 @@ public static partial class DrawingHelpersStaticFunc
         return (r.Top + r.Bottom) / 2;
     }
 
+    public static int Area(this Rectangle r)
+    {
+        return r.Width * r.Height;
+    }
     static public GraphicsPath RectCutCorners(int x, int y, int width, int height, int roundnessleft, int roundnessright)
     {
         GraphicsPath gr = new GraphicsPath();
@@ -219,6 +223,53 @@ public static partial class DrawingHelpersStaticFunc
                         new float[] {0,0,0, 0, 1}};    // three translations of 0
 
             Disabled.SetColorMatrix(new ColorMatrix(disabledMatrix), ColorMatrixFlag.Default, ColorAdjustType.Bitmap);
+        }
+    }
+
+    // Helper to paint multi coloured backgrounds
+    static public void DrawMultiColouredRectangles(this Graphics gr, Rectangle area, Color[] themecolours, float direction)
+    {
+        if (area.Width > 0 && area.Height > 0)
+        {
+            using (LinearGradientBrush br = new LinearGradientBrush(area, themecolours[0], themecolours[1], direction))
+            {
+                if (themecolours.Length >= 4 && themecolours[3] != themecolours[2])
+                {
+                    br.InterpolationColors = new ColorBlend(4)
+                    {
+                        Colors = new Color[] { themecolours[0], themecolours[1], themecolours[2], themecolours[3] },
+                        Positions = new float[] { 0f, 0.33f, 0.66f, 1f }
+                    };
+                    //System.Diagnostics.Debug.WriteLine($"Paint MultiColoured Rectangles {area} with {br.InterpolationColors.Colors.Length}");
+                }
+                else if (themecolours.Length >= 3 && themecolours[2] != themecolours[1])
+                {
+                    br.InterpolationColors = new ColorBlend(3)
+                    {
+                        Colors = new Color[] { themecolours[0], themecolours[1], themecolours[2] },
+                        Positions = new float[] { 0f, 0.5f, 1f }
+                    };
+                    // System.Diagnostics.Debug.WriteLine($"Paint MultiColoured Rectangles {area} with {br.InterpolationColors.Colors.Length}");
+                }
+                else
+                {
+                    //   System.Diagnostics.Debug.WriteLine($"Paint MultiColoured Rectangles {area}");
+                }
+
+                gr.FillRectangle(br, area);
+            }
+        }
+    }
+
+
+    static public void DrawFilledRectangle(this Graphics gr, Rectangle area, Color colour)
+    {
+        if (area.Width > 0 && area.Height > 0)
+        {
+            using (SolidBrush br = new SolidBrush(colour))
+            {
+                gr.FillRectangle(br, area);
+            }
         }
     }
 

@@ -26,27 +26,28 @@ namespace ExtendedControls
         public event KeyPressEventHandler KeyPressed;
         public event KeyEventHandler OtherKeyPressed;
 
-        public List<string> Items { get { return listcontrol.Items; } set { listcontrol.Items = value; } }
-        public int[] ItemSeperators { get { return listcontrol.ItemSeperators; } set { listcontrol.ItemSeperators = value; } }     // set to array giving index of each separator
-        public List<Image> ImageItems { get { return listcontrol.ImageItems; } set { listcontrol.ImageItems = value; } }
-        public Color MouseOverBackgroundColor { get { return listcontrol.MouseOverBackgroundColor; } set { listcontrol.MouseOverBackgroundColor = value; } }
-        public int SelectedIndex { get { return listcontrol.SelectedIndex; } set { listcontrol.SelectedIndex = value; } }
-        public Color SelectionBackColor { get { return listcontrol.SelectionBackColor; } set { listcontrol.SelectionBackColor = value; this.BackColor = value; } }
-        public Color BorderColor { get { return listcontrol.BorderColor; } set { listcontrol.BorderColor = value; } }
-        public Color ScrollBarColor { get { return listcontrol.ScrollBarColor; } set { listcontrol.ScrollBarColor = value; } }
-        public Color ScrollBarButtonColor { get { return listcontrol.ScrollBarButtonColor; } set { listcontrol.ScrollBarButtonColor = value; } }
-        public FlatStyle FlatStyle { get { return listcontrol.FlatStyle; } set { listcontrol.FlatStyle = value; } }
-        public new Font Font { get { return base.Font; } set { base.Font = value; listcontrol.Font = value; } }
-        public bool FitToItemsHeight { get { return listcontrol.FitToItemsHeight; } set { listcontrol.FitToItemsHeight = value; } }
-        public float GradientColorScaling { get { return listcontrol.GradientColorScaling; } set { listcontrol.GradientColorScaling = value; } }
-        public bool FitImagesToItemHeight { get { return listcontrol.FitImagesToItemHeight; } set { listcontrol.FitImagesToItemHeight = value; } }                    // if set images need to fit within item height
-        public Color ItemSeperatorColor { get { return listcontrol.ItemSeperatorColor; } set { listcontrol.ItemSeperatorColor = value; } }
+        public ExtListBox ListBox { get; set; }         // accessible for themeing
+
+        public List<string> Items { get { return ListBox.Items; } set { ListBox.Items = value; } }
+        public int[] ItemSeperators { get { return ListBox.ItemSeperators; } set { ListBox.ItemSeperators = value; } }     // set to array giving index of each separator
+        public List<Image> ImageItems { get { return ListBox.ImageItems; } set { ListBox.ImageItems = value; } }
+        public Color SelectionBackColor { get { return ListBox.SelectionBackColor; } set { ListBox.SelectionBackColor = value; this.BackColor = value; } }
+        public Color SelectionBackColor2 { get { return ListBox.SelectionBackColor2; } set { ListBox.SelectionBackColor2 = value; } }
+        public Color BorderColor { get { return ListBox.BorderColor; } set { ListBox.BorderColor = value; } }
+        public Color MouseOverBackgroundColor { get { return ListBox.SelectionColor; } set { ListBox.SelectionColor = value; } }
+        public int SelectedIndex { get { return ListBox.SelectedIndex; } set { ListBox.SelectedIndex = value; } }
+        public Color ItemSeperatorColor { get { return ListBox.ItemSeperatorColor; } set { ListBox.ItemSeperatorColor = value; } }
+        public FlatStyle FlatStyle { get { return ListBox.FlatStyle; } set { ListBox.FlatStyle = value; } }
+        public new Font Font { get { return base.Font; } set { base.Font = value; ListBox.Font = value; } }
+        public bool FitToItemsHeight { get { return ListBox.FitToItemsHeight; } set { ListBox.FitToItemsHeight = value; } }
+        public bool FitImagesToItemHeight { get { return ListBox.FitImagesToItemHeight; } set { ListBox.FitImagesToItemHeight = value; } }                    // if set images need to fit within item height
+        public int MinimumItemWidth { get; set; } = -1;        // use before show, minimum width
 
         public Point SetLocation { get; set; } = new Point(int.MinValue, -1);     // force to this location.
         public void PositionBelow(Control c) { SetLocation = c.PointToScreen(new Point(0, c.Height)); }
         public void PositionBelow(Control c, int xoff, int yoff = 0) { SetLocation = c.PointToScreen(new Point(xoff, c.Height + yoff)); }
         public bool RightAlignedToLocation { get; set; } = false;
-        private bool CloseOnDeactivate { get; set; } = false;
+        public bool CloseOnDeactivate { get; set; } = false;
 
         public ExtListBoxForm(string name = "", bool closeondeact = true)
         {
@@ -54,18 +55,18 @@ namespace ExtendedControls
 
             this.FormBorderStyle = FormBorderStyle.None;
             this.ShowInTaskbar = false;
-            this.listcontrol = new ExtListBox();
-            this.Name = this.listcontrol.Name = name;
-            this.listcontrol.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            this.listcontrol.Dock = DockStyle.Fill;
-            this.listcontrol.Visible = true;
-            this.listcontrol.SelectedIndexChanged += listcontrol_SelectedIndexChanged;
-            this.listcontrol.KeyPressed += listcontrol_KeyPressed;
-            this.listcontrol.OtherKeyPressed += listcontrol_OtherKeyPressed;
-            this.listcontrol.Margin = new Padding(0);
-            this.listcontrol.FitToItemsHeight = false;
+            this.ListBox = new ExtListBox();
+            this.Name = this.ListBox.Name = name;
+            this.ListBox.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            this.ListBox.Dock = DockStyle.Fill;
+            this.ListBox.Visible = true;
+            this.ListBox.SelectedIndexChanged += listcontrol_SelectedIndexChanged;
+            this.ListBox.KeyPressed += listcontrol_KeyPressed;
+            this.ListBox.OtherKeyPressed += listcontrol_OtherKeyPressed;
+            this.ListBox.Margin = new Padding(0);
+            this.ListBox.FitToItemsHeight = false;
             this.Padding = new Padding(0);
-            this.Controls.Add(this.listcontrol);
+            this.Controls.Add(this.ListBox);
             this.Activated += new System.EventHandler(this.FormActivated);
         }
 
@@ -77,16 +78,14 @@ namespace ExtendedControls
             }
 
             int border = Bounds.Height - ClientRectangle.Height;        // any windows border..
-
-            int ih = (int)Font.GetHeight() + 2;
-            int hw = ih * Items.Count + 4 + border;
-
-            //  System.Diagnostics.Debug.WriteLine("Set LBF loc " + Location + " Font " + Font + " ih " + ih + " hw " + hw);
+            int ih = ListBox.CalcItemHeight();
+            int heightwanted = ih * Items.Count + 4 + border;
+            // System.Diagnostics.Debug.WriteLine("Set LBF loc " + Location + " Font " + Font + " ih " + ih + " hw " + heightwanted);
 
             using (Graphics g = this.CreateGraphics())
             {
-                Size max = listcontrol.MeasureItems(g);
-                this.PositionSizeWithinScreen(max.Width + 4 + listcontrol.ScrollBarWidth, hw, true, new Size(64, 64));    // keep it on the screen. 
+                Size max = ListBox.MeasureItems(g);
+                this.PositionSizeWithinScreen(Math.Max(max.Width, MinimumItemWidth) + 4 + ListBox.ScrollBar.Width, heightwanted, true, new Size(64, 64));    // keep it on the screen. 
             }
 
             //            System.Diagnostics.Debug.WriteLine(".. now " + Location + " " + Size + " Items " + Items.Count + " ih "  + ih + " hw" + hw);
@@ -94,7 +93,7 @@ namespace ExtendedControls
 
         public void KeyDownAction(KeyEventArgs e)
         {
-            listcontrol.KeyDownAction(e);
+            ListBox.KeyDownAction(e);
         }
 
 
@@ -127,8 +126,6 @@ namespace ExtendedControls
             if (CloseOnDeactivate)
                 this.Close();
         }
-
-        private ExtListBox listcontrol;
 
     }
 

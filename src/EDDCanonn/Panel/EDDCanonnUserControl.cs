@@ -1,6 +1,6 @@
 ﻿/******************************************************************************
  * 
- * Copyright © 2022-2022 EDDiscovery development team
+ * Copyright 2022-2026 EDDiscovery development team
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,40 +35,44 @@ using EDDCanonnPanel.Utility;
 using System.ComponentModel;
 using System.Reflection;
 using System.Globalization;
+using ExtendedControls;
 
 
 namespace EDDCanonnPanel
-    {
+{
     partial class EDDCanonnUserControl : UserControl, IEDDPanelExtension
-        {
+    {
 
         private readonly ActionDataHandler dataHandler;
         private EDDPanelCallbacks PanelCallBack;
         private EDDCallBacks DLLCallBack;
 
-
         public EDDCanonnUserControl()
-            {
+        {
             InitializeComponent();
             dataHandler = new ActionDataHandler();
             AutoScaleMode = AutoScaleMode.Inherit;
-            }
+        }
 
-        #region start
+        #region EDD Panel Interface
 
-        private void StartUp() //Triggered by panel Initialize.
-            {
+        public void Initialise(EDDPanelCallbacks callbacks, int displayid, string themeasjson, string configuration)
+        {
+            DLLCallBack = CanonnEDDClass.DLLCallBack;
+            PanelCallBack = callbacks;
+            ThemeChanged(themeasjson);
+
             NotifyMainFields("Start Up...");
             try
-                {
+            {
                 if (CanonnUtil.InstanceCount > 0)
-                    {
+                {
                     CanonnUtil.InstanceCount++;
                     //Abort if a Canonn Panel already exists.
                     Abort("Only one Canonn Panel instance can be active. " +
                     "Use the main instance or close all other instances and restart EDD.");
                     return;
-                    }
+                }
                 else
                     CanonnUtil.InstanceCount++;
 
@@ -79,20 +83,20 @@ namespace EDDCanonnPanel
                 InitializePatrols();
 
                 if (DLLCallBack.RequestHistory(1, false, out JournalEntry je) == true) //We check here if EDD has already loaded the history.
-                    {
+                {
                     DLLCallBack.RequestSpanshDump(RequestTag.OnStart, this, "", 0, true, false, null);
                     return;
-                    }
+                }
                 else
-                    {
+                {
                     dataHandler.StartTaskAsync(
                     (token) =>
                     {
                         while (!historyset) //We wait until the history has been loaded.
-                            {
+                        {
                             token.ThrowIfCancellationRequested(); //We abort here if a cancellation was requested.
                             Task.Delay(250, token).Wait();
-                            }
+                        }
                         SafeInvoke(() =>
                         {
                             DLLCallBack.RequestSpanshDump(RequestTag.OnStart, this, "", 0, true, false, null);
@@ -106,16 +110,190 @@ namespace EDDCanonnPanel
                     },
                         "Startup : History-Listener"
                     );
-                    }
                 }
+            }
             catch (Exception ex)
-                {
+            {
                 string error = $"EDDCanonn: Error during Startup: {ex}";
                 CanonnLogging.Instance.Log(error);
                 Abort(error);
-                }
             }
+        }
+
+        public bool SupportTransparency => false;
+        public bool DefaultTransparent => false;
+
+        public void SetTransparency(bool ison, Color curcol)
+        {
+            if (isAbort)
+                return;
+
+            this.BackColor = curcol;
+        }
+
+        public void TransparencyModeChanged(bool on)
+        {
+            if (isAbort)
+                return;
+        }
+
+        public void LoadLayout()
+        {
+            PanelCallBack.LoadGridLayout(dataGridPatrol);
+            PanelCallBack.LoadGridLayout(dataGridViewData);
+            PanelCallBack.LoadGridLayout(dataGridViewBio);
+            PanelCallBack.LoadGridLayout(dataGridViewRing);
+            PanelCallBack.LoadGridLayout(dataGridViewGMO);
+            PanelCallBack.LoadGridLayout(dataGridSignals);
+        }
+
+        public void InitialDisplay()
+        {
+            if (isAbort)
+                return;
+        }
+
+        void IEDDPanelExtension.CursorChanged(JournalEntry je)
+        {
+            if (isAbort)
+                return;
+        }
+
+        public void Closing()
+        {
+            CanonnUtil.InstanceCount--;
+            dataHandler.Closing();
+        }
+
+        public bool AllowClose()
+        {
+            return true;
+        }
+
+        public string HelpKeyOrAddress()
+        {
+            return LinkUtil.EDDCanonnGitHub;
+        }
+
+        public void ControlTextVisibleChange(bool on)
+        {
+            if (isAbort)
+                return;
+        }
+
         #endregion
+
+        #region EDD Event Interface
+
+        private bool historyset = false;
+        public void HistoryChange(int count, string commander, bool beta, bool legacy)
+        {
+            if (isAbort)
+                return;
+            if (!historyset)
+            {
+                historyset = true;
+                CanonnUtil.UserName = commander;
+            }
+        }
+
+        //If false, jornals are ignored. Only released after the 'OnStart' data result.
+        private bool _journalLock = false;
+        //If false, events are held back.
+        private bool _eventLock = false;
+        public void NewUnfilteredJournal(JournalEntry je)
+        {
+            if (isAbort || !_journalLock)
+                return;
+
+            dataHandler.StartTaskAsync(
+            (token) =>
+            {
+                JObject o = je.json.JSONParseObject();
+                string eventId = je.eventid;
+
+                if (eventId.Equals("FSDJump") || eventId.Equals("Location"))
+                {
+                    SafeBeginInvoke(() =>
+                    {
+                        _eventLock = false; // As long as we make a callback, we hold back the events (canonn events excluded).
+                        ResetSystemData();
+                        DLLCallBack.RequestSpanshDump(o, this, je.systemname, je.systemaddress, true, false, null);
+                    });
+
+                    // The callback may take some time. That's why we give the user some feedback in an early stage.
+                    NotifyField(textBoxSystem, je.systemname);
+                    NotifyField(textBoxBodyCount, "Fetch...");
+
+                    return;
+                }
+
+                while (!_eventLock) // Wait until a 'DataResult' has been completed.
+                {
+                    token.ThrowIfCancellationRequested();
+                    Task.Delay(250, token).Wait();
+                }
+
+                ProcessEvent(je);
+            },
+            ex =>
+            {
+                string error = $"EDDCanonn: Error processing JournalEntry: {ex}";
+                CanonnLogging.Instance.Log(error);
+            },
+            "NewUnfilteredJournal: " + je.eventid + " in system: " + je.systemname);
+        }
+
+        public void NewFilteredJournal(JournalEntry je)
+        {
+            if (isAbort)
+                return;
+        }
+
+        public void NewUIEvent(string jsonui)
+        {
+            if (isAbort)
+                return;
+        }
+
+        public void NewTarget(Tuple<string, double, double, double> target)
+        {
+            if (isAbort)
+                return;
+        }
+
+        #endregion
+
+        #region EDD Panel Interface Other callbacks
+
+        public void ThemeChanged(string themeasjson)
+        {
+            JObject theme = JObject.Parse(themeasjson);
+            Theme thm = Theme.FromJSON(theme);
+            thm.ApplyStd(this);
+        }
+
+        public void ScreenShotCaptured(string file, Size s)
+        {
+            if (isAbort)
+                return;
+        }
+
+        #endregion
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         #region Patrol
 
@@ -1982,169 +2160,13 @@ namespace EDDCanonnPanel
 
         #region IEDDPanelExtension
 
-        //If false, jornals are ignored. Only released after the 'OnStart' data result.
-        private bool _journalLock = false;
-        //If false, events are held back.
-        private bool _eventLock = false;
-        public void NewUnfilteredJournal(JournalEntry je)
-            {
-            if (isAbort || !_journalLock)
-                return;
-
-            dataHandler.StartTaskAsync(
-            (token) =>
-            {
-                JObject o = je.json.JSONParseObject();
-                string eventId = je.eventid;
-
-                if (eventId.Equals("FSDJump") || eventId.Equals("Location"))
-                    {
-                    SafeBeginInvoke(() =>
-                    {
-                        _eventLock = false; // As long as we make a callback, we hold back the events (canonn events excluded).
-                        ResetSystemData();
-                        DLLCallBack.RequestSpanshDump(o, this, je.systemname, je.systemaddress, true, false, null);
-                    });
-
-                    // The callback may take some time. That's why we give the user some feedback in an early stage.
-                    NotifyField(textBoxSystem, je.systemname);
-                    NotifyField(textBoxBodyCount, "Fetch...");
-
-                    return;
-                    }
-
-                while (!_eventLock) // Wait until a 'DataResult' has been completed.
-                    {
-                    token.ThrowIfCancellationRequested();
-                    Task.Delay(250, token).Wait();
-                    }
-
-                ProcessEvent(je);
-            },
-            ex =>
-            {
-                string error = $"EDDCanonn: Error processing JournalEntry: {ex}";
-                CanonnLogging.Instance.Log(error);
-            },
-            "NewUnfilteredJournal: " + je.eventid + " in system: " + je.systemname);
-            }
-
-        private bool historyset = false;
-        public void HistoryChange(int count, string commander, bool beta, bool legacy)
-            {
-            if (isAbort)
-                return;
-            if (!historyset)
-                {
-                historyset = true;
-                CanonnUtil.UserName = commander;
-                }
-            }
-
-        public void NewUIEvent(string jsonui)
-            {
-            if (isAbort)
-                return;
-            }
-
-        public bool SupportTransparency => false;
-
-        public bool DefaultTransparent => false;
-
-        public bool AllowClose()
-            {
-            return true;
-            }
-
-        public void Closing()
-            {
-            CanonnUtil.InstanceCount--;
-            dataHandler.Closing();
-            }
-
-        public void Initialise(EDDPanelCallbacks callbacks, int displayid, string themeasjson, string configuration)
-            {
-            DLLCallBack = CanonnEDDClass.DLLCallBack;
-            PanelCallBack = callbacks;
-            ThemeChanged(themeasjson);
-            StartUp();
-            }
 
         Color FromJson(JToken color)
             {
             return System.Drawing.ColorTranslator.FromHtml(color.Str("Yellow"));
             }
 
-        public void ThemeChanged(string themeasjson)
-            {
-            setTheme(themeasjson);
-            }
 
-        public void NewFilteredJournal(JournalEntry je)
-            {
-            if (isAbort)
-                return;
-            }
-
-        public void NewTarget(Tuple<string, double, double, double> target)
-            {
-            if (isAbort)
-                return;
-            }
-
-        public void InitialDisplay()
-            {
-            if (isAbort)
-                return;
-            }
-
-        public void LoadLayout()
-            {
-            PanelCallBack.LoadGridLayout(dataGridPatrol);
-            PanelCallBack.LoadGridLayout(dataGridViewData);
-            PanelCallBack.LoadGridLayout(dataGridViewBio);
-            PanelCallBack.LoadGridLayout(dataGridViewRing);
-            PanelCallBack.LoadGridLayout(dataGridViewGMO);
-            PanelCallBack.LoadGridLayout(dataGridSignals);
-            }
-
-        public void ScreenShotCaptured(string file, Size s)
-            {
-            if (isAbort)
-                return;
-            }
-
-        public void SetTransparency(bool ison, Color curcol)
-            {
-            if (isAbort)
-                return;
-
-            this.BackColor = curcol;
-
-            }
-
-        public void TransparencyModeChanged(bool on)
-            {
-            if (isAbort)
-                return;
-            }
-
-        void IEDDPanelExtension.CursorChanged(JournalEntry je)
-            {
-            if (isAbort)
-                return;
-            }
-
-        public void ControlTextVisibleChange(bool on)
-            {
-            if (isAbort)
-                return;
-            }
-
-        public string HelpKeyOrAddress()
-            {
-            return LinkUtil.EDDCanonnGitHub;
-            }
         #endregion
 
         #region Debug

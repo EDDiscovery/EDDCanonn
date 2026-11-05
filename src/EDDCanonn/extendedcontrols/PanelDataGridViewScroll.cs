@@ -1,5 +1,5 @@
 ﻿/*
- * Copyright 2016-2024 EDDiscovery development team
+ * Copyright 2016-2025 EDDiscovery development team
  *
  * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
  * file except in compliance with the License. You may obtain a copy of the License at
@@ -17,17 +17,16 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Windows.Forms;
 
-
 namespace ExtendedControls
 {
     // Must have a DGV and a VScroll added as children by the framework
-    public class ExtPanelDataGridViewScroll : Panel
+    public class ExtPanelDataGridViewScroll : Panel, IThemeable, ITranslatableControl
     {
         public bool VerticalScrollBarDockRight { get; set; } = true;        // true for dock right
         public Padding InternalMargin { get; set; }            // allows spacing around controls
         public DataGridView DGV { get { return dgv; } }         // return its dgv, after added
-
-        public int ScrollBarWidth { get { return Font.ScaleScrollbar(); } }       // if internal
+        public int ScrollBarWidth { get { return scrollbarwidth; } set { scrollbarwidth = value; Invalidate(); } }
+        public bool TranslateDoChildren => true;
 
         public void UpdateScroll()      // call if hide/unhide cells - no call back for this
         {
@@ -76,6 +75,7 @@ namespace ExtendedControls
             }
         }
 
+ 
         // outlining areas have been made, with visibility.. apply.  Presume all is visible, so only do invisible bits
         public void ApplyOutlining()
         {
@@ -321,6 +321,17 @@ namespace ExtendedControls
             }
         }
 
+        public bool Theme(Theme t, Font fnt)
+        {
+            int newwidth = t.ScrollBarWidth();  // theme sets the scroll bar width
+            if (newwidth != ScrollBarWidth)
+            {
+                ScrollBarWidth = newwidth;
+                PerformLayout();    // because we may have changed scroll bar width
+            }
+            return true;
+        }
+
         #endregion
 
         #region Variables
@@ -328,41 +339,8 @@ namespace ExtendedControls
         DataGridView dgv;
         ExtScrollBar vsc;
         ExtPanelDataGridViewScrollOutlining outlining;
+        private int scrollbarwidth = 24;
 
         #endregion
     }
-
-    public class ExtPanelDataGridViewScrollOutlining : Control
-    {
-        public class Outline
-        {
-            public int start;
-            public int end;
-            public bool expanded;
-
-            public Outline() { }
-            public Outline(int start, int end, bool expanded = true) { this.start = start; this.end = end; this.expanded = expanded; }
-        }
-
-        public System.Collections.IEnumerable OutlineSet() { return null; }
-        public void UpdateOutlines() { }
-
-        public void SetDGV(DataGridView dgv)    // called to set dgv
-        {
-        }
-
-        public void Clear()
-        { }
-
-        public void RowAdded(int row, int count)
-        { }
-        public void RowRemoved(int row, int count)      // called if we removed rows from DGV
-        { }
-
-        public void RowChangedState(int row) 
-        { }
-
-
-    }
-
 }

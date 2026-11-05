@@ -53,6 +53,7 @@
     <Compile Include="Diagnostics\CanonnLogging.cs" />
     <Compile Include="Base\Patrols.cs" />
     <Compile Include="Emitter\CanonnEmitter.cs" />
+    <Compile Include="ExtendedControls\BitMapHelpers.cs" />
     <Compile Include="ExtendedControls\Button.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -66,11 +67,18 @@
     <Compile Include="ExtendedControls\controlhelpers.cs" />
     <Compile Include="ExtendedControls\DataGridViewHelpers.cs" />
     <Compile Include="ExtendedControls\DrawingHelpers.cs" />
+    <Compile Include="ExtendedControls\DropDownTheme.cs" />
+    <Compile Include="ExtendedControls\ImageControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="ExtendedControls\ListBox.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="ExtendedControls\ListBoxForm.cs">
       <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ExtendedControls\OutliningDummy.cs">
+      <SubType>Component</SubType>
     </Compile>
     <Compile Include="ExtendedControls\PanelDataGridViewScroll.cs">
       <SubType>Component</SubType>
@@ -82,6 +90,7 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="ExtendedControls\TabStyleCustom.cs" />
+    <Compile Include="ExtendedControls\Theme.cs" />
     <Compile Include="ExtendedControls\Win32Constants.cs" />
     <Compile Include="Utility\Payload.cs" />
     <Compile Include="Base\SystemData.cs" />
