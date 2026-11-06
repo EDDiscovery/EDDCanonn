@@ -51,7 +51,7 @@ namespace EDDCanonnPanel
                 Debug.WriteLine("Panel registration failed: Incompatible version or AddPanel is null");
             }
 
-            new CanonnEmitter();
+            // TBD OFF new CanonnEmitter();
             return CanonnUtil.V.ToString(); 
         }
 

@@ -19,7 +19,7 @@ namespace TestHarness.Properties {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "18.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class Resources {
@@ -57,6 +57,97 @@ namespace TestHarness.Properties {
             }
             set {
                 resourceCulture = value;
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {
+        ///  &quot;system&quot;:
+        ///  {
+        ///    &quot;allegiance&quot;:&quot;Independent&quot;,
+        ///    &quot;bodies&quot;:
+        ///    [
+        ///      {
+        ///        &quot;absoluteMagnitude&quot;:6.402405,
+        ///        &quot;age&quot;:240,
+        ///        &quot;axialTilt&quot;:0.0,
+        ///        &quot;belts&quot;:
+        ///        [
+        ///          {
+        ///            &quot;innerRadius&quot;:1048900000.0,
+        ///            &quot;mass&quot;:110410000000000.0,
+        ///            &quot;name&quot;:&quot;Muang A Belt&quot;,
+        ///            &quot;outerRadius&quot;:2149700000.0,
+        ///            &quot;type&quot;:&quot;Rocky&quot;
+        ///          }
+        ///        ],
+        ///        &quot;bodyId&quot;:0,
+        ///        &quot;distanceToArrival&quot;:0.0,
+        ///        &quot;id64&quot;:4481966019282,
+        ///     [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string spanshv4__muang__4481966019282 {
+            get {
+                return ResourceManager.GetString("spanshv4__muang__4481966019282", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {
+        ///  &quot;system&quot;:
+        ///  {
+        ///    &quot;allegiance&quot;:&quot;Federation&quot;,
+        ///    &quot;bodies&quot;:
+        ///    [
+        ///      {
+        ///        &quot;argOfPeriapsis&quot;:218.563113,
+        ///        &quot;ascendingNode&quot;:-157.94558,
+        ///        &quot;bodyId&quot;:1,
+        ///        &quot;id64&quot;:36038264871790001,
+        ///        &quot;meanAnomaly&quot;:133.483882,
+        ///        &quot;name&quot;:&quot;Puppis Sector TO-R b4-4 barycentre 1&quot;,
+        ///        &quot;orbitalEccentricity&quot;:0.167843,
+        ///        &quot;orbitalInclination&quot;:-22.18501,
+        ///        &quot;orbitalPeriod&quot;:1371393.04920479,
+        ///        &quot;semiMajorAxis&quot;:49.4116370084225,
+        ///        &quot;stations&quot;:
+        ///        [
+        ///       [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string spanshv4__puppis_sector_to_r_b4_4__9467852826033 {
+            get {
+                return ResourceManager.GetString("spanshv4__puppis sector to-r b4-4__9467852826033", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {
+        ///  &quot;system&quot;:
+        ///  {
+        ///    &quot;allegiance&quot;:null,
+        ///    &quot;bodies&quot;:
+        ///    [
+        ///      {
+        ///        &quot;absoluteMagnitude&quot;:4.968613,
+        ///        &quot;age&quot;:712,
+        ///        &quot;axialTilt&quot;:0.0,
+        ///        &quot;belts&quot;:
+        ///        [
+        ///          {
+        ///            &quot;innerRadius&quot;:1190500000.0,
+        ///            &quot;mass&quot;:50075000000000.0,
+        ///            &quot;name&quot;:&quot;Pyranu QO-Z d13-28 A Belt&quot;,
+        ///            &quot;outerRadius&quot;:2341900000.0,
+        ///            &quot;type&quot;:&quot;Metal Rich&quot;
+        ///          },
+        ///          {
+        ///            &quot;innerRadius&quot;:138680000000.0,
+        ///            &quot;mass&quot;:9194400000000.0,
+        /// [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string spanshv4__pyranu_qo_z_d13_28__977516105979 {
+            get {
+                return ResourceManager.GetString("spanshv4__pyranu qo-z d13-28__977516105979", resourceCulture);
             }
         }
     }

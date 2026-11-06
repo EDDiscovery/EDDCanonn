@@ -30,15 +30,14 @@
         {
             this.buttonStart = new System.Windows.Forms.Button();
             this.buttonStop = new System.Windows.Forms.Button();
-            this.richTextBox1 = new System.Windows.Forms.RichTextBox();
             this.buttonNJE = new System.Windows.Forms.Button();
-            this.buttonAction = new System.Windows.Forms.Button();
             this.buttonRefresh = new System.Windows.Forms.Button();
             this.buttonConfigcs = new System.Windows.Forms.Button();
-            this.buttonAJE = new System.Windows.Forms.Button();
-            this.buttonUIEvent = new System.Windows.Forms.Button();
             this.buttonConfigwin = new System.Windows.Forms.Button();
             this.buttonUnfilteredJE = new System.Windows.Forms.Button();
+            this.richTextBox1 = new System.Windows.Forms.RichTextBox();
+            this.panelCanonn = new System.Windows.Forms.Panel();
+            this.EDDCannon = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // buttonStart
@@ -61,14 +60,6 @@
             this.buttonStop.UseVisualStyleBackColor = true;
             this.buttonStop.Click += new System.EventHandler(this.buttonStop_Click);
             // 
-            // richTextBox1
-            // 
-            this.richTextBox1.Location = new System.Drawing.Point(12, 127);
-            this.richTextBox1.Name = "richTextBox1";
-            this.richTextBox1.Size = new System.Drawing.Size(730, 419);
-            this.richTextBox1.TabIndex = 2;
-            this.richTextBox1.Text = "";
-            // 
             // buttonNJE
             // 
             this.buttonNJE.Location = new System.Drawing.Point(27, 57);
@@ -78,16 +69,6 @@
             this.buttonNJE.Text = "NJE";
             this.buttonNJE.UseVisualStyleBackColor = true;
             this.buttonNJE.Click += new System.EventHandler(this.buttonNJE_Click);
-            // 
-            // buttonAction
-            // 
-            this.buttonAction.Location = new System.Drawing.Point(222, 57);
-            this.buttonAction.Name = "buttonAction";
-            this.buttonAction.Size = new System.Drawing.Size(75, 23);
-            this.buttonAction.TabIndex = 1;
-            this.buttonAction.Text = "Action CMD";
-            this.buttonAction.UseVisualStyleBackColor = true;
-            this.buttonAction.Click += new System.EventHandler(this.buttonAction_Click);
             // 
             // buttonRefresh
             // 
@@ -109,26 +90,6 @@
             this.buttonConfigcs.UseVisualStyleBackColor = true;
             this.buttonConfigcs.Click += new System.EventHandler(this.buttonConfigcs_Click);
             // 
-            // buttonAJE
-            // 
-            this.buttonAJE.Location = new System.Drawing.Point(128, 57);
-            this.buttonAJE.Name = "buttonAJE";
-            this.buttonAJE.Size = new System.Drawing.Size(75, 23);
-            this.buttonAJE.TabIndex = 1;
-            this.buttonAJE.Text = "Action JE";
-            this.buttonAJE.UseVisualStyleBackColor = true;
-            this.buttonAJE.Click += new System.EventHandler(this.buttonAJE_Click);
-            // 
-            // buttonUIEvent
-            // 
-            this.buttonUIEvent.Location = new System.Drawing.Point(597, 57);
-            this.buttonUIEvent.Name = "buttonUIEvent";
-            this.buttonUIEvent.Size = new System.Drawing.Size(75, 23);
-            this.buttonUIEvent.TabIndex = 1;
-            this.buttonUIEvent.Text = "UIEvent";
-            this.buttonUIEvent.UseVisualStyleBackColor = true;
-            this.buttonUIEvent.Click += new System.EventHandler(this.buttonUIEvent_Click);
-            // 
             // buttonConfigwin
             // 
             this.buttonConfigwin.Location = new System.Drawing.Point(489, 57);
@@ -141,7 +102,7 @@
             // 
             // buttonUnfilteredJE
             // 
-            this.buttonUnfilteredJE.Location = new System.Drawing.Point(27, 86);
+            this.buttonUnfilteredJE.Location = new System.Drawing.Point(128, 57);
             this.buttonUnfilteredJE.Name = "buttonUnfilteredJE";
             this.buttonUnfilteredJE.Size = new System.Drawing.Size(75, 23);
             this.buttonUnfilteredJE.TabIndex = 1;
@@ -149,24 +110,55 @@
             this.buttonUnfilteredJE.UseVisualStyleBackColor = true;
             this.buttonUnfilteredJE.Click += new System.EventHandler(this.buttonUnfilteredJE_Click);
             // 
+            // richTextBox1
+            // 
+            this.richTextBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.richTextBox1.Location = new System.Drawing.Point(12, 127);
+            this.richTextBox1.Name = "richTextBox1";
+            this.richTextBox1.Size = new System.Drawing.Size(1356, 329);
+            this.richTextBox1.TabIndex = 2;
+            this.richTextBox1.Text = "";
+            // 
+            // panelCanonn
+            // 
+            this.panelCanonn.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.panelCanonn.Location = new System.Drawing.Point(13, 271);
+            this.panelCanonn.Name = "panelCanonn";
+            this.panelCanonn.Size = new System.Drawing.Size(1366, 712);
+            this.panelCanonn.TabIndex = 3;
+            // 
+            // EDDCannon
+            // 
+            this.EDDCannon.Location = new System.Drawing.Point(222, 15);
+            this.EDDCannon.Name = "EDDCannon";
+            this.EDDCannon.Size = new System.Drawing.Size(75, 23);
+            this.EDDCannon.TabIndex = 1;
+            this.EDDCannon.Text = "Panel";
+            this.EDDCannon.UseVisualStyleBackColor = true;
+            this.EDDCannon.Click += new System.EventHandler(this.EDDCannon_Click);
+            // 
             // TestHarness
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(769, 558);
+            this.ClientSize = new System.Drawing.Size(1406, 995);
+            this.Controls.Add(this.panelCanonn);
             this.Controls.Add(this.richTextBox1);
-            this.Controls.Add(this.buttonUIEvent);
             this.Controls.Add(this.buttonConfigwin);
             this.Controls.Add(this.buttonConfigcs);
-            this.Controls.Add(this.buttonAJE);
             this.Controls.Add(this.buttonRefresh);
-            this.Controls.Add(this.buttonAction);
             this.Controls.Add(this.buttonUnfilteredJE);
             this.Controls.Add(this.buttonNJE);
+            this.Controls.Add(this.EDDCannon);
             this.Controls.Add(this.buttonStop);
             this.Controls.Add(this.buttonStart);
             this.Name = "TestHarness";
-            this.Text = "Form1";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            this.Text = "Canonn Plugin";
             this.ResumeLayout(false);
 
         }
@@ -175,15 +167,14 @@
 
         private System.Windows.Forms.Button buttonStart;
         private System.Windows.Forms.Button buttonStop;
-        private System.Windows.Forms.RichTextBox richTextBox1;
         private System.Windows.Forms.Button buttonNJE;
-        private System.Windows.Forms.Button buttonAction;
         private System.Windows.Forms.Button buttonRefresh;
         private System.Windows.Forms.Button buttonConfigcs;
-        private System.Windows.Forms.Button buttonAJE;
-        private System.Windows.Forms.Button buttonUIEvent;
         private System.Windows.Forms.Button buttonConfigwin;
         private System.Windows.Forms.Button buttonUnfilteredJE;
+        private System.Windows.Forms.RichTextBox richTextBox1;
+        private System.Windows.Forms.Panel panelCanonn;
+        private System.Windows.Forms.Button EDDCannon;
     }
 }
 

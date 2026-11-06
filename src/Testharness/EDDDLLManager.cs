@@ -14,6 +14,7 @@
  * EDDiscovery is not affiliated with Frontier Developments plc.
  */
 
+#define USEDBOFF
 
 using System;
 using System.Collections.Generic;
@@ -27,14 +28,49 @@ namespace EliteDangerousCore.DLL
         public int Count { get { return DLLs.Count; } }
         public List<EDDDLLCaller> DLLs { get; private set; } = new List<EDDDLLCaller>();
 
+        private Dictionary<string, bool> DLLPermissions;
+
+        public EDDDLLManager()
+        {
+            DLLPermissions = new Dictionary<string, bool>();
+#if USEDB
+            var stringlist = DB.UserDatabase.Instance.GetSetting("DLLAllowed", "").Split(',');
+            foreach (var x in stringlist)
+            {
+                if (x.Length > 2 && (x.StartsWith("+") || x.StartsWith("-")))       // check before set in case broken save
+                    DLLPermissions[x.Substring(1)] = x[0] == '+';
+            }
+#endif
+        }
+
+        public void SetDLLPermission(string dll, bool on)
+        {
+            DLLPermissions[dll] = on;
+            Save();
+        }
+
+        public void RemoveDLLPermission(string dll)
+        {
+            DLLPermissions.Remove(dll);
+            Save();
+        }
+
+        public void RemoveAllDLLPermissions()
+        {
+            DLLPermissions.Clear();
+#if USEDB
+            DB.UserDatabase.Instance.PutSetting("DLLAllowed", "");
+#endif
+
+        }
+
         // search directory for *.dll, 
         // return loaded, failed, new dlls not in the allowed/disallowed list, disabled
-        // alloweddisallowed list is +allowed,-disallowed.. 
         // all Csharp assembly DLLs are loaded - only ones implementing *EDDClass class causes it to be added to the DLL list
         // only normal DLLs implementing EDDInitialise are kept loaded
 
         public Tuple<string, string, string, string> Load(string[] dlldirectories, bool[] disallowautomatically, string ourversion, string[] inoptions,
-                                EDDDLLInterfaces.EDDDLLIF.EDDCallBacks callbacks, ref string alloweddisallowed,
+                                EDDDLLInterfaces.EDDDLLIF.EDDCallBacks callbacks,
                                 Func<string, string> getconfig, Action<string, string> setconfig
                                 )
         {
@@ -55,31 +91,43 @@ namespace EliteDangerousCore.DLL
                     {
                         // note https://docs.microsoft.com/en-us/dotnet/api/system.io.directory.enumeratefiles?view=net-6.0 where if you use *.dll, it searches on framework for *.dll*
 
-                        FileInfo[] allFiles = Directory.EnumerateFiles(dlldirectory, "*.dll", SearchOption.TopDirectoryOnly).Where(x=>Path.GetExtension(x)==".dll") 
+                        FileInfo[] allFiles = Directory.EnumerateFiles(dlldirectory, "*.dll", SearchOption.TopDirectoryOnly).Where(x => Path.GetExtension(x) == ".dll")
                                             .Select(f => new FileInfo(f)).OrderBy(p => p.LastWriteTime).ToArray();
-
-                        string[] allowedfiles = alloweddisallowed.Split(',');
 
                         foreach (FileInfo f in allFiles)
                         {
                             EDDDLLCaller caller = new EDDDLLCaller();
 
-                            System.Diagnostics.Debug.WriteLine("Try to load " + f.FullName);
+                            System.Diagnostics.Trace.WriteLine("\r\nTry to load " + f.FullName);
 
                             string filename = System.IO.Path.GetFileNameWithoutExtension(f.FullName);
 
-                            bool isallowed = alloweddisallowed.Equals("All", StringComparison.InvariantCultureIgnoreCase) ||
-                                             allowedfiles.Contains("+" + f.FullName, StringComparer.InvariantCultureIgnoreCase) ||      // full name is now used
-                                             allowedfiles.Contains("+" + filename, StringComparer.InvariantCultureIgnoreCase);              // filename previously used
+                            bool? allowed = null;
+                            if (DLLPermissions.TryGetValue(f.FullName, out bool a))
+                                allowed = a;
 
-                            bool isdisallowed = allowedfiles.Contains("-" + f.FullName, StringComparer.InvariantCultureIgnoreCase) ||      // full name is now used
-                                                allowedfiles.Contains("-" + filename, StringComparer.InvariantCultureIgnoreCase);              // filename previously used
+                            if (allowed == null)
+                            {
+                                // not known..
 
-                            if (isdisallowed)     // disallowed
+                                bool alreadydone = newdlls.Contains(f.FullName) || disabled.Contains(f.FullName);
+
+                                if (!alreadydone)   // if not already in one of the lists
+                                {
+                                    if (disallowautomatically[i])   // if folder has a disallow automatically for DLLs found in it
+                                    {
+                                        DLLPermissions[f.FullName] = false;
+                                        disabled = disabled.AppendPrePad(f.FullName, ",");
+                                    }
+                                    else
+                                        newdlls = newdlls.AppendPrePad(f.FullName, ",");
+                                }
+                            }
+                            else if (allowed == false)     // if mentioned disallowed
                             {
                                 disabled = disabled.AppendPrePad(f.FullName, ",");
                             }
-                            else if (isallowed)    // if allowed..
+                            else
                             {
                                 if (caller.Load(f.FullName))        // if loaded okay
                                 {
@@ -102,30 +150,13 @@ namespace EliteDangerousCore.DLL
                                     }
                                 }
                             }
-                            else
-                            {
-                                bool innewdlls = newdlls.Contains(f.FullName);
-
-                                if (disallowautomatically[i])
-                                {
-                                    if (!innewdlls)     // Ealhstan special - if we are scanning the same folder multiple times, it may have already been added to newdlls
-                                    {
-                                        alloweddisallowed = alloweddisallowed.AppendPrePad("-" + f.FullName, ",");
-                                        disabled = disabled.AppendPrePad(f.FullName, ",");
-                                    }
-                                }
-                                else
-                                {
-                                    if (!innewdlls)      // Eahlstan special - don't add twice to the newdlls in case we are scanning the same folder twice
-                                    {
-                                        newdlls = newdlls.AppendPrePad(f.FullName, ",");
-                                    }
-                                }
-                            }
                         }
                     }
                 }
             }
+
+            // debug demo of external DLL panels can be placed here
+            //  callbacks.AddPanel.Invoke("EDDDDemo-Panel1-0.1.0", typeof(EliteDangerous.DLL.DemonstrationUserControl), "InternalDemo1", "InternalDemo1", "Demo installed panel", BaseUtils.Icons.IconSet.GetIcon("star") );
 
             return new Tuple<string, string, string, string>(loaded, failed, newdlls, disabled);
         }
@@ -163,11 +194,11 @@ namespace EliteDangerousCore.DLL
             }
         }
 
-        public void NewUnfilteredJournalEntry(EDDDLLInterfaces.EDDDLLIF.JournalEntry nje)
+        public void NewUnfilteredJournalEntry(EDDDLLInterfaces.EDDDLLIF.JournalEntry nje, bool stored)
         {
             foreach (EDDDLLCaller caller in DLLs)
             {
-                caller.NewUnfilteredJournalEntry(nje);
+                caller.NewUnfilteredJournalEntry(nje, stored);
             }
         }
 
@@ -178,6 +209,25 @@ namespace EliteDangerousCore.DLL
             {
                 caller.NewUIEvent(json);
             }
+        }
+
+        public EDDDLLCaller FindCSharpCallerByStackTrace()        // go down the stack , and see which DLL called 
+        {
+            System.Reflection.Assembly thisAssembly = System.Reflection.Assembly.GetExecutingAssembly();
+
+            System.Diagnostics.StackTrace stackTrace = new System.Diagnostics.StackTrace();
+            System.Diagnostics.StackFrame[] frames = stackTrace.GetFrames();
+
+            foreach (var stackFrame in frames)
+            {
+                var ownerAssembly = stackFrame.GetMethod().DeclaringType.Assembly;
+                var dll = DLLs.Find(x => x.Assembly == ownerAssembly);
+
+                if (dll != null)
+                    return dll;
+            }
+
+            return null;
         }
 
         public EDDDLLCaller FindCaller(string name)
@@ -234,6 +284,14 @@ namespace EliteDangerousCore.DLL
                 return new Tuple<bool, string, string>(true, caller.Name, r.Mid(1));
             else
                 return new Tuple<bool, string, string>(false, caller.Name, r.Mid(1));
+        }
+
+        private void Save()
+        {
+#if USEDB
+            var x = string.Join(",", DLLPermissions.Select(kvp => (kvp.Value ? "+" : "-") + kvp.Key));
+            DB.UserDatabase.Instance.PutSetting("DLLAllowed", string.Join(",", x));
+#endif
         }
 
     }
