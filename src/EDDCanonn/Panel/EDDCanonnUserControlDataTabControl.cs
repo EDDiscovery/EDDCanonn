@@ -251,8 +251,7 @@ namespace EDDCanonnPanel
             };
 
             //Filter only bodies that have biological signals.
-            IEnumerable<Base.Body> validBodies = system.Bodys.Values
-                .Where(body => body?.ScanData?.Signals?.Any() == true);
+            var validBodies = system.Bodys.Values.Where(body => body?.ScanData?.Signals?.Any() == true).ToList();
 
             foreach (Base.Body body in validBodies)
             {

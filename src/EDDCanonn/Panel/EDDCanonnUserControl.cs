@@ -83,15 +83,19 @@ namespace EDDCanonnPanel
                 InitializeCodex();
                 InitializePatrols();
 
-                if (DLLCallBack.RequestHistory(1, false, out JournalEntry je) == true) //We check here if EDD has already loaded the history.
+                // callback to see if history is ready, if it does, do the spansh request on the current system
+
+                if (DLLCallBack.RequestHistory(1, false, out JournalEntry je) == true) 
                 {
+                    CanonnUtil.UserName = je.cmdrname;
                     DLLCallBack.RequestSpanshDump(RequestTag.OnStart, this, "", 0, true, false, null);
                     return;
                 }
                 else
                 {
-                    dataHandler.StartTaskAsync(
-                    (token) =>
+                    // else set up a wait task until we see the history is set via the 
+
+                    dataHandler.StartTaskAsync( (token) =>
                     {
                         while (!historyset) //We wait until the history has been loaded.
                         {

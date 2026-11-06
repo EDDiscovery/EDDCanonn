@@ -130,5 +130,11 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\EDDCanonn\EDDCanonnPanel.csproj">
+      <Project>{4cfd7517-ed23-4b4d-94bd-5de7bf75f0e3}</Project>
+      <Name>EDDCanonnPanel</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

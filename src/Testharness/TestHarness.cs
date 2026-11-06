@@ -35,6 +35,7 @@ namespace CHash
         {
             base.OnShown(e);
             buttonStart_Click(null, null);
+            EDDCannon_Click(null, null);
         }
 
     
@@ -206,6 +207,8 @@ namespace CHash
                 var callbacks = new EDDDLLInterfaces.EDDDLLIF.EDDPanelCallbacks();
                 callbacks.ver = 1;
                 pe.Initialise(callbacks, 0, theme, "");
+
+                buttonEDDCanonn.Enabled = false;
 
             }
         }

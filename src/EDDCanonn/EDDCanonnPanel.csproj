@@ -49,7 +49,6 @@
   <ItemGroup>
     <Compile Include="Base\ActionDataHandler.cs" />
     <Compile Include="Base\Codex.cs" />
-    <Compile Include="Base\SystemPoi.cs" />
     <Compile Include="Diagnostics\CanonnLogging.cs" />
     <Compile Include="Base\Patrols.cs" />
     <Compile Include="Emitter\CanonnEmitter.cs" />
@@ -119,7 +118,7 @@
     <Compile Include="Utility\Payload.cs" />
     <Compile Include="Base\SystemData.cs" />
     <Compile Include="Diagnostics\WhiteListTest.cs" />
-    <Compile Include="Base\WhitelistData.cs" />
+    <Compile Include="Emitter\WhitelistData.cs" />
     <Compile Include="Utility\CanonnUtil.cs" />
     <Compile Include="CanonnEDDClass.cs" />
     <Compile Include="Panel\EDDCanonnUserControl.cs">

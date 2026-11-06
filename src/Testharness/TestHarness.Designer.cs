@@ -37,7 +37,7 @@
             this.buttonUnfilteredJE = new System.Windows.Forms.Button();
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
             this.panelCanonn = new System.Windows.Forms.Panel();
-            this.EDDCannon = new System.Windows.Forms.Button();
+            this.buttonEDDCanonn = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // buttonStart
@@ -133,13 +133,13 @@
             // 
             // EDDCannon
             // 
-            this.EDDCannon.Location = new System.Drawing.Point(222, 15);
-            this.EDDCannon.Name = "EDDCannon";
-            this.EDDCannon.Size = new System.Drawing.Size(75, 23);
-            this.EDDCannon.TabIndex = 1;
-            this.EDDCannon.Text = "Panel";
-            this.EDDCannon.UseVisualStyleBackColor = true;
-            this.EDDCannon.Click += new System.EventHandler(this.EDDCannon_Click);
+            this.buttonEDDCanonn.Location = new System.Drawing.Point(222, 15);
+            this.buttonEDDCanonn.Name = "EDDCannon";
+            this.buttonEDDCanonn.Size = new System.Drawing.Size(75, 23);
+            this.buttonEDDCanonn.TabIndex = 1;
+            this.buttonEDDCanonn.Text = "Panel";
+            this.buttonEDDCanonn.UseVisualStyleBackColor = true;
+            this.buttonEDDCanonn.Click += new System.EventHandler(this.EDDCannon_Click);
             // 
             // TestHarness
             // 
@@ -153,7 +153,7 @@
             this.Controls.Add(this.buttonRefresh);
             this.Controls.Add(this.buttonUnfilteredJE);
             this.Controls.Add(this.buttonNJE);
-            this.Controls.Add(this.EDDCannon);
+            this.Controls.Add(this.buttonEDDCanonn);
             this.Controls.Add(this.buttonStop);
             this.Controls.Add(this.buttonStart);
             this.Name = "TestHarness";
@@ -174,7 +174,7 @@
         private System.Windows.Forms.Button buttonUnfilteredJE;
         private System.Windows.Forms.RichTextBox richTextBox1;
         private System.Windows.Forms.Panel panelCanonn;
-        private System.Windows.Forms.Button EDDCannon;
+        private System.Windows.Forms.Button buttonEDDCanonn;
     }
 }
 

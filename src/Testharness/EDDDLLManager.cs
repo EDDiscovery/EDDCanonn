@@ -145,7 +145,7 @@ namespace EliteDangerousCore.DLL
                                     }
                                     else
                                     {
-                                        string errstr = caller.Version.HasChars() ? (": " + caller.Version.Substring(1)) : "";
+                                        string errstr = caller.Version.Length>0 ? (": " + caller.Version.Substring(1)) : "";
                                         failed = failed.AppendPrePad(f.FullName + errstr, ","); // long name for failure
                                     }
                                 }

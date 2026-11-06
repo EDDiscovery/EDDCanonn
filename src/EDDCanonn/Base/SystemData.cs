@@ -23,6 +23,8 @@ using QuickJSON;
 
 namespace EDDCanonnPanel.Base
 {
+    // Spansh data is decoded back into this class in EDDCanoonUserControlSpanshData
+
     public class SystemData
     {
        
@@ -181,6 +183,7 @@ namespace EDDCanonnPanel.Base
 
     }
 
+    [System.Diagnostics.DebuggerDisplay("Body {BodyID} {BodyName} {NodeType} {IsMapped}")]
     public class Body
     {
         public Body() { }
@@ -200,6 +203,7 @@ namespace EDDCanonnPanel.Base
         public ScanData ScanData { get; set; } = null;
     }
 
+    [System.Diagnostics.DebuggerDisplay("Body {BodyID} {Rings.Count} {Signals.Count} {Organics.Count}")]
     public class ScanData
     {
 
@@ -228,5 +232,42 @@ namespace EDDCanonnPanel.Base
         public List<JObject> Genuses { get; set; } = null;
         public List<SystemPoi> SystemPois { get; set; } = null;
     }
+
+    public class SystemPoi
+    {
+        public SystemPoi(string body, string name, int entryID, string hudCategory, int indexID, string lat, string lon, bool scanned)
+        {
+            Body = body;
+            Name = name;
+            EntryID = entryID;
+            HudCategory = hudCategory;
+            IndexID = indexID;
+            Lat = lat;
+            Lon = lon;
+            Scanned = scanned;
+        }
+
+        public SystemPoi(SystemPoi original)
+        {
+            Body = original.Body;
+            Name = original.Name;
+            EntryID = original.EntryID;
+            HudCategory = original.HudCategory;
+            IndexID = original.IndexID;
+            Lat = original.Lat;
+            Lon = original.Lon;
+            Scanned = original.Scanned;
+        }
+
+        public string Body { get; set; }
+        public string Name { get; set; }
+        public int EntryID { get; set; }
+        public string HudCategory { get; set; }
+        public int IndexID { get; set; }
+        public string Lat { get; set; }
+        public string Lon { get; set; }
+        public bool Scanned { get; set; }
+    }
+
 
 }

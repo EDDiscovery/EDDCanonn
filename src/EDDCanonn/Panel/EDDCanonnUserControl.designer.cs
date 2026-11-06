@@ -110,8 +110,6 @@ namespace EDDCanonnPanel
             this.dataGridViewTextBoxColumn4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewImageColumn2 = new System.Windows.Forms.DataGridViewImageColumn();
             this.dataGridViewTextBoxColumn5 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.tabSurvey = new System.Windows.Forms.TabPage();
-            this.labelSurvey = new System.Windows.Forms.Label();
             this.tabGmo = new System.Windows.Forms.TabPage();
             this.extPanelDataGridViewScrollGMO = new ExtendedControls.ExtPanelDataGridViewScroll();
             this.extScrollBarGMO = new ExtendedControls.ExtScrollBar();
@@ -147,7 +145,6 @@ namespace EDDCanonnPanel
             this.tabGeo.SuspendLayout();
             this.extPanelDataGridViewScrollGeo.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewGeo)).BeginInit();
-            this.tabSurvey.SuspendLayout();
             this.tabGmo.SuspendLayout();
             this.extPanelDataGridViewScrollGMO.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewGMO)).BeginInit();
@@ -614,7 +611,6 @@ namespace EDDCanonnPanel
             this.extTabControlData.Controls.Add(this.tabRing);
             this.extTabControlData.Controls.Add(this.tabBio);
             this.extTabControlData.Controls.Add(this.tabGeo);
-            this.extTabControlData.Controls.Add(this.tabSurvey);
             this.extTabControlData.Controls.Add(this.tabGmo);
             this.extTabControlData.Controls.Add(this.tabPageAbout);
             this.extTabControlData.Dock = System.Windows.Forms.DockStyle.Top;
@@ -1130,28 +1126,6 @@ namespace EDDCanonnPanel
             this.dataGridViewTextBoxColumn5.ReadOnly = true;
             this.dataGridViewTextBoxColumn5.Visible = false;
             // 
-            // tabSurvey
-            // 
-            this.tabSurvey.Controls.Add(this.labelSurvey);
-            this.tabSurvey.Location = new System.Drawing.Point(4, 22);
-            this.tabSurvey.Name = "tabSurvey";
-            this.tabSurvey.Padding = new System.Windows.Forms.Padding(3);
-            this.tabSurvey.Size = new System.Drawing.Size(852, 228);
-            this.tabSurvey.TabIndex = 4;
-            this.tabSurvey.Text = "Survey";
-            this.tabSurvey.ToolTipText = "Confirm your surveys.";
-            this.tabSurvey.UseVisualStyleBackColor = true;
-            // 
-            // labelSurvey
-            // 
-            this.labelSurvey.AutoSize = true;
-            this.labelSurvey.Location = new System.Drawing.Point(134, 3);
-            this.labelSurvey.Name = "labelSurvey";
-            this.labelSurvey.Size = new System.Drawing.Size(91, 13);
-            this.labelSurvey.TabIndex = 0;
-            this.labelSurvey.Text = "Work in Progress.";
-            this.labelSurvey.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
             // tabGmo
             // 
             this.tabGmo.Controls.Add(this.extPanelDataGridViewScrollGMO);
@@ -1264,10 +1238,10 @@ namespace EDDCanonnPanel
             this.tableLayoutAbout.Controls.Add(this.labelDev, 0, 1);
             this.tableLayoutAbout.Controls.Add(this.linkLabelEDDCanonn, 0, 0);
             this.tableLayoutAbout.Controls.Add(this.labelSpecial, 0, 4);
-            this.tableLayoutAbout.Controls.Add(this.labelTest, 0, 3);
             this.tableLayoutAbout.Controls.Add(this.label1, 0, 2);
             this.tableLayoutAbout.Controls.Add(this.pictureBoxEDD, 1, 0);
             this.tableLayoutAbout.Controls.Add(this.LSY, 2, 4);
+            this.tableLayoutAbout.Controls.Add(this.labelTest, 0, 3);
             this.tableLayoutAbout.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutAbout.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutAbout.Name = "tableLayoutAbout";
@@ -1299,7 +1273,7 @@ namespace EDDCanonnPanel
             this.labelDev.Name = "labelDev";
             this.labelDev.Size = new System.Drawing.Size(171, 26);
             this.labelDev.TabIndex = 3;
-            this.labelDev.Text = "Developed by EDDiscovery Team.\r\n######################";
+            this.labelDev.Text = "Developed by EDDiscovery Team.\r\nOriginal Coding by FlynnDynamic";
             // 
             // linkLabelEDDCanonn
             // 
@@ -1327,7 +1301,8 @@ namespace EDDCanonnPanel
             // labelTest
             // 
             this.labelTest.AutoSize = true;
-            this.labelTest.Location = new System.Drawing.Point(3, 107);
+            this.labelTest.Location = new System.Drawing.Point(3, 112);
+            this.labelTest.Margin = new System.Windows.Forms.Padding(3, 5, 3, 0);
             this.labelTest.Name = "labelTest";
             this.labelTest.Size = new System.Drawing.Size(288, 13);
             this.labelTest.TabIndex = 4;
@@ -1338,11 +1313,11 @@ namespace EDDCanonnPanel
             // 
             this.label1.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(3, 77);
+            this.label1.Location = new System.Drawing.Point(3, 83);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(57, 26);
+            this.label1.Size = new System.Drawing.Size(57, 13);
             this.label1.TabIndex = 7;
-            this.label1.Text = "Tested by:\r\n#######";
+            this.label1.Text = "Tested by:";
             this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // pictureBoxEDD
@@ -1402,8 +1377,6 @@ namespace EDDCanonnPanel
             this.tabGeo.ResumeLayout(false);
             this.extPanelDataGridViewScrollGeo.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewGeo)).EndInit();
-            this.tabSurvey.ResumeLayout(false);
-            this.tabSurvey.PerformLayout();
             this.tabGmo.ResumeLayout(false);
             this.extPanelDataGridViewScrollGMO.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dataGridViewGMO)).EndInit();
@@ -1455,8 +1428,6 @@ namespace EDDCanonnPanel
         private ExtPanelDataGridViewScroll extPanelDataGridViewScrollGMO;
         private ExtScrollBar extScrollBarGMO;
         private DataGridView dataGridViewGMO;
-        private TabPage tabSurvey;
-        private Label labelSurvey;
         private TabPage tabBio;
         private ExtPanelDataGridViewScroll extPanelDataGridViewScrollBio;
         private ExtScrollBar extScrollBarBio;

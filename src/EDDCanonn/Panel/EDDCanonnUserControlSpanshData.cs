@@ -49,9 +49,11 @@ namespace EDDCanonnPanel
                 ProcessCanonnSystemPoi(systemData.Name);
 
                 if (systemData.BodyCount == -1 && systemData.Bodys?.Count > 0)
+                {
                     DataGridNotifications[NType.spanshIncorrect] = CanonnUtil.CreateDataGridViewRow(dataGridViewData, new object[] {
                             NTypeDescription(NType.spanshIncorrect),
                             Properties.Resources.spansh });
+                }
             }
             catch (Exception ex)
             {
